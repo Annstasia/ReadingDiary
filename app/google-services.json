@@ -1,0 +1,40 @@
+{
+  "project_info": {
+    "project_number": "296123143994",
+    "firebase_url": "https://readingdiary-ffe16.firebaseio.com",
+    "project_id": "readingdiary-ffe16",
+    "storage_bucket": "readingdiary-ffe16.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:296123143994:android:9f544363ef2be1baa22203",
+        "android_client_info": {
+          "package_name": "com.example.readingdiary"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "296123143994-63h1rl1haq13gsqs3ipnduj0v2ujsh9o.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDXjXwah5Uu_ZFksQgFqXdbF1UrgFy0wHU"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "296123143994-63h1rl1haq13gsqs3ipnduj0v2ujsh9o.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

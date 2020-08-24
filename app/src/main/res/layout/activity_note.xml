@@ -1,0 +1,216 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:theme="@style/AppTheme"
+    tools:context=".Activities.NoteActivity"
+    >
+
+    <com.google.android.material.appbar.AppBarLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:theme="@style/AppTheme.AppBarOverlay"
+        android:id="@+id/appBarEdit1">
+
+        <androidx.appcompat.widget.Toolbar
+            android:id="@+id/toolbar"
+            android:layout_width="match_parent"
+            android:layout_height="?attr/actionBarSize"
+            android:background="?attr/colorPrimary"
+            app:popupTheme="@style/AppTheme.PopupOverlay" />
+
+    </com.google.android.material.appbar.AppBarLayout>
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_below="@+id/appBarEdit1">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical"
+            android:paddingBottom="50pt">
+
+
+            <ImageView
+                android:id="@+id/coverImage"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:foregroundGravity="right" />
+
+            <TextView
+                android:id="@+id/titleNoteActivity"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:ems="10"
+                android:textSize="10pt"
+                android:textColor="@color/colorText"
+                android:layout_margin="5pt"/>
+
+
+            <TextView
+                android:id="@+id/authorNoteActivity"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:ems="10"
+                android:textSize="10pt"
+                android:textColor="@color/colorText"
+                android:layout_margin="5pt"/>
+
+
+
+
+
+            <RatingBar
+                android:id="@+id/ratingBar"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_margin="8dp"
+                android:numStars="5"
+                style="@style/RatingBar"/>
+
+
+
+
+
+            <TextView
+                android:id="@+id/genre"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:ems="10"
+                android:textSize="10pt"
+                android:textColor="@color/colorText"
+                android:layout_margin="5pt"/>
+
+
+
+            <TextView
+                android:id="@+id/time"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:ems="10"
+                android:textSize="10pt"
+                android:textColor="@color/colorText"
+                android:layout_margin="5pt"/>
+
+
+
+            <TextView
+                android:id="@+id/place"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:ems="10"
+                android:textSize="10pt"
+                android:textColor="@color/colorText"
+                android:layout_margin="5pt"/>
+
+<androidx.cardview.widget.CardView
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:layout_marginVertical="10pt"
+    android:layout_marginHorizontal="5pt">            <TextView
+                android:id="@+id/shortComment"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:ems="10"
+                android:textSize="10pt"
+    android:layout_margin="5pt"
+                android:textColor="@color/colorText" />
+</androidx.cardview.widget.CardView>
+
+
+            <TextView
+                android:id="@+id/textView11"
+                android:layout_width="110dp"
+                android:layout_height="wrap_content"
+                android:layout_gravity="right"
+                android:layout_marginTop="20dp"
+                android:text="Опубликовать  "
+                android:textSize="16dp"
+                android:visibility="invisible"
+                app:autoSizeTextType="uniform" />
+
+            <ImageButton
+                android:id="@+id/bUpload"
+                android:layout_width="55dp"
+                android:layout_height="55dp"
+                android:layout_gravity="right"
+                android:layout_marginTop="10dp"
+                android:background="#3F51B5"
+                android:insetLeft="4dp"
+                android:insetTop="6dp"
+                android:insetRight="4dp"
+                android:insetBottom="6dp"
+                android:visibility="invisible"
+                app:srcCompat="@android:drawable/ic_menu_upload" />
+
+
+        </LinearLayout>
+    </ScrollView>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentStart="false"
+        android:layout_alignParentBottom="true"
+        android:orientation="horizontal"
+        >
+
+        <Button
+            android:id="@+id/galeryButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Галерея"
+            android:textAllCaps="false"
+            android:textSize="8dp"
+            android:layout_margin="1dp"/>
+
+        <Space
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1" />
+
+        <Button
+            android:id="@+id/descriptionButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Описание"
+            android:textAllCaps="false"
+            android:textSize="8dp"
+            android:layout_margin="1dp"/>
+
+        <Space
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1" />
+
+        <Button
+            android:id="@+id/comentsButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Отзыв"
+            android:textAllCaps="false"
+            android:textSize="8dp"
+            android:layout_margin="1dp"/>
+
+        <Space
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1" />
+
+        <Button
+            android:id="@+id/quoteButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Цитаты"
+            android:textAllCaps="false"
+            android:textSize="8dp"
+            android:layout_margin="1dp"/>
+
+    </LinearLayout>
+
+</RelativeLayout>
