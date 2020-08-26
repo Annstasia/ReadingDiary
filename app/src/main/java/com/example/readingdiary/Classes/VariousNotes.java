@@ -1,11 +1,12 @@
 package com.example.readingdiary.Classes;
 
-public class VariousNotes {
+public class VariousNotes implements VariousNotesInterface, Comparable<VariousNotesInterface> {
     private String text;
     private String path;
     private long time;
     private boolean changed;
     private boolean needsUpdate;
+    int itemType = 0;
     public VariousNotes(String text, String path, long time, boolean changed, boolean needsUpdate){
         this.text = text;
         this.path = path;
@@ -37,7 +38,7 @@ public class VariousNotes {
     public void setPath(String path) {
         this.path = path;
     }
-
+    @Override
     public long getTime() {
         return time;
     }
@@ -52,5 +53,15 @@ public class VariousNotes {
 
     public void setChanged(boolean changed) {
         this.changed = changed;
+    }
+
+    @Override
+    public int getItemType() {
+        return itemType;
+    }
+
+    @Override
+    public int compareTo(VariousNotesInterface o) {
+        return (int)(o.getTime() - this.time);
     }
 }

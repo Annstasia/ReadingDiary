@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    app:cardBackgroundColor="@color/cardview_light_background"
+    app:cardCornerRadius="10dp"
+    android:layout_margin="5dp"
+    android:id="@+id/variousCardView">
+    <RelativeLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content">
+
+        <com.google.android.material.floatingactionbutton.FloatingActionButton
+            android:id="@+id/playAudioButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentLeft="true"
+            android:layout_centerVertical="true"
+            android:layout_margin="5dp"
+            android:clickable="true"
+            app:srcCompat="@drawable/ic_action_play_light" />
+
+        <TextView
+            android:id="@+id/variousTextView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_above="@id/musicSeekBar"
+            android:layout_toRightOf="@+id/playAudioButton"
+            android:padding="30dp"
+            android:text="text"
+            android:textColor="#000000"
+            android:textSize="13dp" />
+
+        <CheckBox
+            android:id="@+id/variousCheckBox"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/variousTextView"
+            android:layout_alignParentEnd="true" />
+
+        <SeekBar
+            android:id="@+id/musicSeekBar"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_toRightOf="@+id/playAudioButton"
+            android:layout_centerVertical="true"
+            android:layout_margin="5dp"
+            />
+    </RelativeLayout>
+
+
+</androidx.cardview.widget.CardView>

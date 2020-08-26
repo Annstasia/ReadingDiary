@@ -14,21 +14,27 @@ import androidx.cardview.widget.CardView;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.readingdiary.Classes.VariousNotes;
+import com.example.readingdiary.Classes.VariousNotesAudio;
+import com.example.readingdiary.Classes.VariousNotesInterface;
 import com.example.readingdiary.R;
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
 import java.util.List;
 
 
 public class VariousViewAdapter extends RecyclerView.Adapter<VariousViewAdapter.ViewHolder>{
 
-    private List<VariousNotes> buttons;
+    private List<VariousNotesInterface> buttons;
     private boolean actionMode;
     private VariousViewAdapter.OnItemClickListener mListener;
+    private final int TYPE_TEXT_ITEM = 0;
+    private final int TYPE_AUDIO_ITEM = 1;
     public interface OnItemClickListener{
         void onItemClick(int position);
         void onItemLongClick(int position);
         void onCheckClick(int position);
         void onUncheckClick(int position);
+        void onPlayButtonPressed(int position);
     }
 
 
@@ -37,14 +43,19 @@ public class VariousViewAdapter extends RecyclerView.Adapter<VariousViewAdapter.
         mListener = listener;
     }
 
-    public VariousViewAdapter(List<VariousNotes> buttons) {
+    public VariousViewAdapter(List<VariousNotesInterface> buttons) {
         this.buttons = buttons; this.actionMode = false;
     }
 
     @Override
     public ViewHolder onCreateViewHolder(ViewGroup viewGroup, int viewType) {
         View v;
-        v = LayoutInflater.from(viewGroup.getContext()).inflate(R.layout.various_view_item, viewGroup, false);
+        if (viewType == TYPE_TEXT_ITEM){
+            v = LayoutInflater.from(viewGroup.getContext()).inflate(R.layout.various_view_item, viewGroup, false);
+        }
+        else{
+            v = LayoutInflater.from(viewGroup.getContext()).inflate(R.layout.various_audio_view_item, viewGroup, false);
+        }
         ViewHolder vh = new ViewHolder(v);
 //        v.setOnClickListener(this);
         return vh;
@@ -58,12 +69,34 @@ public class VariousViewAdapter extends RecyclerView.Adapter<VariousViewAdapter.
         else{
             viewHolder.checkBox.setVisibility(View.VISIBLE);
         }
-        viewHolder.textView.setText(buttons.get(i).getText());
+        if (buttons.get(i).getItemType()==0)
+        {
+            viewHolder.textView.setText(((VariousNotes)buttons.get(i)).getText());
+        }
+        else{
+            if (((VariousNotesAudio)buttons.get(i)).isPlaying()){
+                viewHolder.playAudioButton.setImageResource(R.drawable.ic_action_pause_light);
+            }
+            else{
+                viewHolder.playAudioButton.setImageResource(R.drawable.ic_action_play_light);
+            }
+            viewHolder.textView.setText(buttons.get(i).getTime()+"");
+        }
+
     }
 
     @Override
     public int getItemCount() {
         return buttons.size();
+    }
+
+    @Override
+    public int getItemViewType(int position) {
+        // определяем какой тип в текущей позиции
+        int type = buttons.get(position).getItemType();
+        if (type == 0) return TYPE_TEXT_ITEM;
+        else return TYPE_AUDIO_ITEM;
+
     }
 
 
@@ -86,12 +119,13 @@ public class VariousViewAdapter extends RecyclerView.Adapter<VariousViewAdapter.
         private TextView textView;
         private CardView cardView;
         private CheckBox checkBox;
+        private FloatingActionButton playAudioButton;
         public ViewHolder(View itemView) {
             super(itemView);
             textView = (TextView) itemView.findViewById(R.id.variousTextView);
             cardView = (CardView) itemView.findViewById(R.id.variousCardView);
             checkBox = (CheckBox) itemView.findViewById(R.id.variousCheckBox);
-
+            playAudioButton = (FloatingActionButton) itemView.findViewById(R.id.playAudioButton);
 
             cardView.setOnLongClickListener(new View.OnLongClickListener() {
                 @Override
@@ -119,6 +153,19 @@ public class VariousViewAdapter extends RecyclerView.Adapter<VariousViewAdapter.
                 }
 
             });
+            if (playAudioButton != null){
+                playAudioButton.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        if (mListener != null){
+                            mListener.onPlayButtonPressed(getAdapterPosition());
+
+//                            playAudioButton.setImageResource(R.drawable.ic_action_pause_light);
+                        }
+                    }
+                });
+            }
+
 
 
             itemView.setOnClickListener(new View.OnClickListener() {
