@@ -6,7 +6,7 @@
     app:cardBackgroundColor="@color/cardview_light_background"
     app:cardCornerRadius="10dp"
     android:layout_margin="5dp"
-    android:id="@+id/variousCardView">
+    android:id="@+id/variousAudioCardView">
     <RelativeLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content">
@@ -23,14 +23,16 @@
 
         <TextView
             android:id="@+id/variousTextView"
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_above="@id/musicSeekBar"
-            android:layout_toRightOf="@+id/playAudioButton"
-            android:padding="30dp"
-            android:text="text"
+            android:layout_toLeftOf="@id/textTotalDuration"
+            android:layout_toRightOf="@+id/textCurrentTime"
+            android:textAlignment="center"
+            android:text="date"
             android:textColor="#000000"
-            android:textSize="13dp" />
+            android:textSize="18dp"
+            android:layout_margin="5dp" />
 
         <CheckBox
             android:id="@+id/variousCheckBox"
@@ -38,15 +40,34 @@
             android:layout_height="wrap_content"
             android:layout_below="@id/variousTextView"
             android:layout_alignParentEnd="true" />
-
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/textCurrentTime"
+            android:text="0:00"
+            android:textColor="#212121"
+            android:textSize="18dp"
+            android:textStyle="bold"
+            android:layout_margin="5dp"
+            android:layout_toRightOf="@+id/playAudioButton"/>
         <SeekBar
             android:id="@+id/musicSeekBar"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_toRightOf="@+id/playAudioButton"
-            android:layout_centerVertical="true"
+            android:layout_below="@+id/textCurrentTime"
             android:layout_margin="5dp"
             />
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/textTotalDuration"
+            android:text="0:00"
+            android:textColor="#212121"
+            android:textSize="18dp"
+            android:textStyle="bold"
+            android:layout_margin="5dp"
+            android:layout_alignParentRight="true"/>
     </RelativeLayout>
 
 

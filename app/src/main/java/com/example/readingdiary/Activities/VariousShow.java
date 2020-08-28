@@ -6,12 +6,15 @@ import android.content.SharedPreferences;
 import android.media.MediaPlayer;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Handler;
 import android.provider.MediaStore;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.MotionEvent;
 import android.view.View;
 import android.widget.Button;
+import android.widget.SeekBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -103,7 +106,10 @@ public class VariousShow extends AppCompatActivity implements SettingsDialogFrag
     MainActivity mein = new MainActivity();
     MediaPlayer activeMediaPlayer;
     VariousNotesAudio audioItem;
-
+    private TextView textCurrentTime, textTotalDuration;
+    private SeekBar playerSeekBar;
+    private Handler handler = new Handler();
+    private FloatingActionButton playAudioButton;
     @Override
     protected void onCreate(Bundle savedInstanceState)
     {
@@ -241,7 +247,7 @@ public class VariousShow extends AppCompatActivity implements SettingsDialogFrag
             viewAdapter.setActionMode(false);
             deleteVariousTextNotes();
             deleteVariousAudioNotes();
-            viewAdapter.notifyDataSetChanged();
+//            viewAdapter.notifyDataSetChanged();
             toolbar.getMenu().clear();
             getSupportActionBar().setDisplayHomeAsUpEnabled(false);
             if (type.equals(getResources().getString(R.string.commentDir))) counterText.setText("Отзыв");
@@ -341,10 +347,13 @@ public class VariousShow extends AppCompatActivity implements SettingsDialogFrag
         String[] deletePaths = new String[selectedTextNotes.size()];
         for (int i = 0; i < deletePaths.length; i++)
         {
-            variousNotes.remove(selectedTextNotes.get(i));
+            int pos = variousNotes.indexOf(selectedTextNotes.get(i));
+            variousNotes.remove(pos);
+            viewAdapter.notifyItemRemoved(pos);
             deletePaths[i] = selectedTextNotes.get(i).getPath();
             variousNotesNames.remove((Long)Long.parseLong(deletePaths[i]));
             variousNotePaths.update(deletePaths[i], FieldValue.delete());
+
         }
         selectedTextNotes.clear();
         WriteBatch writeBatch = FirebaseFirestore.getInstance().batch();
@@ -358,7 +367,9 @@ public class VariousShow extends AppCompatActivity implements SettingsDialogFrag
     private void deleteVariousAudioNotes(){
         Long[] deletePaths = new Long[selectedAudioNotes.size()];
         for (int i = 0; i< deletePaths.length; i++){
-            variousNotes.remove(selectedAudioNotes.get(i));
+            int pos = variousNotes.indexOf(selectedAudioNotes.get(i));
+            variousNotes.remove(pos);
+            viewAdapter.notifyItemRemoved(pos);
             deletePaths[i] = selectedAudioNotes.get(i).getTime();
             variousNotesNames.remove(deletePaths[i]);
             variousNoteAudioPaths.update(deletePaths[i]+"", FieldValue.delete());
@@ -380,110 +391,194 @@ public class VariousShow extends AppCompatActivity implements SettingsDialogFrag
     {
         viewAdapter = new VariousViewAdapter(variousNotes);
         LinearLayoutManager layoutManager = new LinearLayoutManager(this);
-        RecyclerView.ItemAnimator itemAnimator = new DefaultItemAnimator();
+        final RecyclerView.ItemAnimator itemAnimator = new DefaultItemAnimator();
         recyclerView.setLayoutManager(layoutManager);
         recyclerView.setItemAnimator(itemAnimator);
         recyclerView.setAdapter(viewAdapter);
         if (editAccess)
         {
-            viewAdapter.setOnItemClickListener(new VariousViewAdapter.OnItemClickListener()
-            {
+            viewAdapter.setOnItemClickListener(new VariousViewAdapter.OnItemClickListener() {
+
+                       @Override
+                       public void onItemClick(int position) {
+                           if (variousNotes.get(position).getItemType() == 0) {
+                               Intent intent = new Intent(VariousShow.this, VariousNotebook.class);
+                               intent.putExtra("id", id);
+                               intent.putExtra("type", type);
+                               intent.putExtra("path", ((VariousNotes) variousNotes.get(position)).getPath());
+                               intent.putExtra("position", position + "");
+                               startActivityForResult(intent, ADD_VIEW_RESULT_CODE);
+                           }
+
+                       }
+
+                       @Override
+                       public void onItemLongClick(int position) {
+                           viewAdapter.setActionMode(true);
+                           action_mode = true;
+                           counterText.setText(count + " элементов выбрано");
+                           toolbar.getMenu().clear();
+                           toolbar.inflateMenu(R.menu.menu_long_click);
+                           viewAdapter.notifyDataSetChanged();
+                           getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+                       }
+
+                       @Override
+                       public void onCheckClick(int position) {
+                           if (variousNotes.get(position).getItemType() == 0) {
+                               selectedTextNotes.add((VariousNotes) variousNotes.get(position));
+                           } else {
+                               selectedAudioNotes.add((VariousNotesAudio) variousNotes.get(position));
+                           }
+                           count++;
+                           counterText.setText(count + " элементов выбрано");
+                           // Toast.makeText(getApplicationContext(), selectedNotes.size() + " items selected", Toast.LENGTH_LONG).show();
+                       }
+
+                       @Override
+                       public void onUncheckClick(int position) {
+                           if (variousNotes.get(position).getItemType() == 0) {
+                               selectedTextNotes.remove((VariousNotes) variousNotes.get(position));
+                           } else {
+                               selectedAudioNotes.remove((VariousNotesAudio) variousNotes.get(position));
+                           }
+                           count--;
+                           counterText.setText(count + " элементов выбрано");
+                       }
 
                 @Override
-                public void onItemClick(int position)
-                {
-                    if (variousNotes.get(position).getItemType()==0){
-                        Intent intent = new Intent(VariousShow.this, VariousNotebook.class);
-                        intent.putExtra("id", id);
-                        intent.putExtra("type", type);
-                        intent.putExtra("path", ((VariousNotes)variousNotes.get(position)).getPath());
-                        intent.putExtra("position", position + "");
-                        startActivityForResult(intent, ADD_VIEW_RESULT_CODE);
-                    }
-
-                }
-
-                @Override
-                public void onItemLongClick(int position)
-                {
-                    viewAdapter.setActionMode(true);
-                    action_mode = true;
-                    counterText.setText(count + " элементов выбрано");
-                    toolbar.getMenu().clear();
-                    toolbar.inflateMenu(R.menu.menu_long_click);
-                    viewAdapter.notifyDataSetChanged();
-                    getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-                }
-
-                @Override
-                public void onCheckClick(int position)
-                {
-                    if (variousNotes.get(position).getItemType()==0){
-                        selectedTextNotes.add((VariousNotes)variousNotes.get(position));
-                    }
-                    else{
-                        selectedAudioNotes.add((VariousNotesAudio)variousNotes.get(position));
-                    }
-                    count++;
-                    counterText.setText(count + " элементов выбрано");
-                    // Toast.makeText(getApplicationContext(), selectedNotes.size() + " items selected", Toast.LENGTH_LONG).show();
-                }
-
-                @Override
-                public void onUncheckClick(int position)
-                {
-                    if (variousNotes.get(position).getItemType()==0){
-                        selectedTextNotes.remove((VariousNotes)variousNotes.get(position));
-                    }
-                    else{
-                        selectedAudioNotes.remove((VariousNotesAudio)variousNotes.get(position));
-                    }
-                    count--;
-                    counterText.setText(count + " элементов выбрано");
-                }
-
-                @Override
-                public void onPlayButtonPressed(final int position) {
+                public void onPlayButtonPressed(final int position, View itemView) {
+                    Log.d("qwerty169", "hi");
                     if (variousNotes.get(position).getItemType() == 1) {
+                        // Останавливаем предыдущую запись, если та играет
                         if (audioItem != null && audioItem != (VariousNotesAudio) variousNotes.get(position)) {
                             audioItem.setPlaying(false);
+                            activeMediaPlayer.reset();
+                            playAudioButton.setImageResource(R.drawable.ic_action_play_light);
+                            playerSeekBar.setProgress(0);
+                            playerSeekBar.setEnabled(false);
+                            textCurrentTime.setText("0:00");
+                            textTotalDuration.setText("0:00");
                         }
+                        // Если началась новая запись
                         if (audioItem != (VariousNotesAudio) variousNotes.get(position)) {
                             audioItem = (VariousNotesAudio) variousNotes.get(position);
                             audioItem.changePlaying();
-                            viewAdapter.notifyDataSetChanged();
+                            playAudioButton = itemView.findViewById(R.id.playAudioButton);
+                            textCurrentTime = itemView.findViewById(R.id.textCurrentTime);
+                            textTotalDuration = itemView.findViewById(R.id.textTotalDuration);
+                            playerSeekBar = itemView.findViewById(R.id.musicSeekBar);
+                            playerSeekBar.setMax(100);
+                            playerSeekBar.setProgress(0);
+                            playerSeekBar.setEnabled(true);
+                            if (activeMediaPlayer == null) {
+                                activeMediaPlayer = new MediaPlayer();
+                            }
+//                            playerSeekBar.setEnabled(true);
+
+                            playerSeekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+                                @Override
+                                public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+                                    if (fromUser){
+                                        int playPosition = (activeMediaPlayer.getDuration() / 100) * progress;
+                                        activeMediaPlayer.seekTo(playPosition);
+                                        textCurrentTime.setText(milliSecondsToTimer(activeMediaPlayer.getCurrentPosition()));
+                                    }
+
+                                }
+
+                                @Override
+
+                                public void onStartTrackingTouch(SeekBar seekBar) {
+
+                                }
+
+                                @Override
+                                public void onStopTrackingTouch(SeekBar seekBar) {
+
+                                }
+                            });
+//                            playerSeekBar.setOnTouchListener(new View.OnTouchListener() {
+//                                @Override
+//                                public boolean onTouch(View v, MotionEvent event) {
+//
+//                                    SeekBar seekBar = (SeekBar) v;
+//                                    Log.d("qwerty144", "hi " + seekBar.getProgress() + " " + playerSeekBar.getProgress());
+//                                    int playPosition = (activeMediaPlayer.getDuration() / 100) * seekBar.getProgress();
+//                                    activeMediaPlayer.seekTo(playPosition);
+//                                    textCurrentTime.setText(milliSecondsToTimer(activeMediaPlayer.getCurrentPosition()));
+//                                    return false;
+//                                }
+//                            });
+
+
+
+                            activeMediaPlayer.setOnBufferingUpdateListener(new MediaPlayer.OnBufferingUpdateListener() {
+                                @Override
+                                public void onBufferingUpdate(MediaPlayer mp, int percent) {
+                                    playerSeekBar.setSecondaryProgress(percent);
+                                }
+                            });
+
+
+                            activeMediaPlayer.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
+                                @Override
+                                public void onCompletion(MediaPlayer mp) {
+                                    playerSeekBar.setProgress(0);
+                                    playerSeekBar.setEnabled(false);
+                                    playAudioButton.setImageResource(R.drawable.ic_action_play_light);
+                                    textCurrentTime.setText("0:00");
+                                    textTotalDuration.setText("0:00");
+                                    mp.reset();
+                                }
+                            });
+
+
+//                            viewAdapter.notifyDataSetChanged();
                             if (audioItem.isPlaying()) {
-                                try {
+//                                try {
                                     if (activeMediaPlayer == null) {
                                         activeMediaPlayer = new MediaPlayer();
                                     }
-                                    activeMediaPlayer.reset();
-                                    activeMediaPlayer.setDataSource(audioItem.getUri().toString());
-                                    activeMediaPlayer.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
-                                        @Override
-                                        public void onPrepared(MediaPlayer mp) {
-                                            mp.start();
-                                        }
-                                    });
-                                    activeMediaPlayer.prepare();
-                                    activeMediaPlayer.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
-                                        @Override
-                                        public void onCompletion(MediaPlayer mp) {
-                                            audioItem.changePlaying();
-                                            viewAdapter.notifyItemChanged(position);
-                                        }
-                                    });
-                                } catch (IOException e) {
-                                    Log.e("onPlayButtonIOexception", e.toString());
-                                }
+                                    playAudioButton.setImageResource(R.drawable.ic_action_pause_light);
+                                    prepareMediaPlayer(audioItem.getUri().toString());
+
+                                    activeMediaPlayer.start();
+                                    updateSeekBar();
+
+
+
+//                                    activeMediaPlayer.setDataSource(audioItem.getUri().toString());
+//                                    activeMediaPlayer.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
+//                                        @Override
+//                                        public void onPrepared(MediaPlayer mp) {
+//                                            mp.start();
+//                                        }
+//                                    });
+//                                    activeMediaPlayer.prepare();
+//                                    activeMediaPlayer.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
+//                                        @Override
+//                                        public void onCompletion(MediaPlayer mp) {
+//                                            audioItem.changePlaying();
+//                                            viewAdapter.notifyItemChanged(position);
+//                                        }
+//                                    });
+//                                }
+//                                catch (IOException e) {
+//                                    Log.e("onPlayButtonIOexception", e.toString());
+//                                }
                             }
                         }
                         else {
                             audioItem.changePlaying();
-                            viewAdapter.notifyItemChanged(position);
+//                            viewAdapter.notifyItemChanged(position);
                             if (audioItem.isPlaying()) {
+                                playAudioButton.setImageResource(R.drawable.ic_action_pause_light);
                                 activeMediaPlayer.start();
+                                updateSeekBar();
                             } else {
+                                handler.removeCallbacks(updater);
+                                playAudioButton.setImageResource(R.drawable.ic_action_play_light);
                                 activeMediaPlayer.pause();
                             }
                         }
@@ -491,6 +586,50 @@ public class VariousShow extends AppCompatActivity implements SettingsDialogFrag
                 }
             });
         }
+    }
+
+    private void prepareMediaPlayer(String uri){
+        try{
+            activeMediaPlayer.setDataSource(uri);
+            activeMediaPlayer.prepare();
+            textTotalDuration.setText(milliSecondsToTimer(activeMediaPlayer.getDuration()));
+        }
+        catch (Exception e){
+            Toast.makeText(this, e.getMessage(), Toast.LENGTH_LONG).show();
+        }
+    }
+
+    private Runnable updater = new Runnable() {
+        @Override
+        public void run() {
+            updateSeekBar();
+            long currentDuration = activeMediaPlayer.getCurrentPosition();
+            textCurrentTime.setText(milliSecondsToTimer(currentDuration));
+        }
+    };
+
+    private void updateSeekBar(){
+        if (activeMediaPlayer.isPlaying()){
+            playerSeekBar.setProgress((int) (((float) activeMediaPlayer.getCurrentPosition() / activeMediaPlayer.getDuration()) * 100));
+            handler.postDelayed(updater, 2000);
+        }
+    }
+
+    private String milliSecondsToTimer(long milliSeconds){
+        String timerString = "";
+        String secondsString;
+        int hours = (int)(milliSeconds / (1000 * 60 * 60));
+        int minuts = (int)((milliSeconds % (1000 * 60 * 60)) / (1000 * 60));
+        int seconds = (int) ((milliSeconds % (1000 * 60)) / 1000);
+        if (hours > 0){
+            timerString = hours + ":";
+        }
+        secondsString = seconds+"";
+        if (seconds < 10){
+            secondsString = "0" + seconds;
+        }
+        timerString = timerString + minuts + ":" + secondsString;
+        return timerString;
     }
 
     private void setButtons()
@@ -655,4 +794,15 @@ public class VariousShow extends AppCompatActivity implements SettingsDialogFrag
 
     }
 
+    @Override
+    protected void onDestroy() {
+        if (activeMediaPlayer != null){
+            if (activeMediaPlayer.isPlaying()){
+                handler.removeCallbacks(updater);
+            }
+            activeMediaPlayer.reset();
+            activeMediaPlayer = null;
+        }
+        super.onDestroy();
+    }
 }
