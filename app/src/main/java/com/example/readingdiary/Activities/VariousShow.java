@@ -3,18 +3,12 @@ package com.example.readingdiary.Activities;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.media.MediaPlayer;
-import android.net.Uri;
 import android.os.Bundle;
-import android.os.Handler;
-import android.provider.MediaStore;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.MotionEvent;
 import android.view.View;
 import android.widget.Button;
-import android.widget.SeekBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -29,20 +23,15 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.readingdiary.Classes.DeleteFilesClass;
 import com.example.readingdiary.Classes.DeleteUser;
-import com.example.readingdiary.Classes.VariousNoteComparator;
 import com.example.readingdiary.Classes.VariousNotes;
-import com.example.readingdiary.Classes.VariousNotesAudio;
-import com.example.readingdiary.Classes.VariousNotesInterface;
 import com.example.readingdiary.Fragments.AddShortNameFragment;
 import com.example.readingdiary.Fragments.SettingsDialogFragment;
 import com.example.readingdiary.R;
 import com.example.readingdiary.adapters.VariousViewAdapter;
 import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.android.material.appbar.MaterialToolbar;
-import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentReference;
@@ -51,24 +40,16 @@ import com.google.firebase.firestore.EventListener;
 import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.FirebaseFirestoreException;
-import com.google.firebase.firestore.SetOptions;
 import com.google.firebase.firestore.WriteBatch;
-import com.google.firebase.storage.FirebaseStorage;
-import com.google.firebase.storage.StorageReference;
-import com.google.firebase.storage.UploadTask;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.FileReader;
-import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 
 public class VariousShow extends AppCompatActivity implements SettingsDialogFragment.SettingsDialogListener
 {
@@ -77,39 +58,29 @@ public class VariousShow extends AppCompatActivity implements SettingsDialogFrag
     SharedPreferences sharedPreferences;
     private String id;
     private String type;
-    private String audioType;
     VariousViewAdapter viewAdapter;
     RecyclerView recyclerView;
-    ArrayList<VariousNotesInterface> variousNotes;
+    ArrayList<VariousNotes> variousNotes;
     ArrayList<Long> variousNotesNames;
 
     private final int ADD_VIEW_RESULT_CODE = 666;
-    private final int ADD_AUDIO_RESULT_CODE = 777;
     File fileDir1;
     MaterialToolbar toolbar;
     TextView counterText;
     int count=0;
 
     boolean action_mode=false;
-    ArrayList<VariousNotes> selectedTextNotes = new ArrayList<>();
-    ArrayList<VariousNotesAudio> selectedAudioNotes = new ArrayList<>();
+    ArrayList<VariousNotes> selectedNotes = new ArrayList<>();
 
     private DocumentReference variousNotePaths;
-    private DocumentReference variousNoteAudioPaths;
     private CollectionReference variousNoteStorage;
-    private StorageReference storageReference;
 
     String user;
     private String idUser;
     Button addVariousItem;
     boolean editAccess;
     MainActivity mein = new MainActivity();
-    MediaPlayer activeMediaPlayer;
-    VariousNotesAudio audioItem;
-    private TextView textCurrentTime, textTotalDuration;
-    private SeekBar playerSeekBar;
-    private Handler handler = new Handler();
-    private FloatingActionButton playAudioButton;
+
     @Override
     protected void onCreate(Bundle savedInstanceState)
     {
@@ -129,7 +100,6 @@ public class VariousShow extends AppCompatActivity implements SettingsDialogFrag
         Bundle args = getIntent().getExtras();
         id = args.get("id").toString();
         type = args.get("type").toString();
-        audioType = type+"Audio";
         if (args.get("owner")!= null){
             user = args.get("owner").toString();
             editAccess = false;
@@ -141,13 +111,10 @@ public class VariousShow extends AppCompatActivity implements SettingsDialogFrag
 
         variousNoteStorage = FirebaseFirestore.getInstance().collection("VariousNotes").document(user).collection(id);
         variousNotePaths = variousNoteStorage.document(type);
-        variousNoteAudioPaths = variousNoteStorage.document(audioType);
         variousNotes = new ArrayList<>();
         variousNotesNames = new ArrayList<>();
-        storageReference = FirebaseStorage.getInstance().getReference(user).child(id).child(type);
 
-        openNotes(variousNotePaths);
-        openNotes(variousNoteAudioPaths);
+        openNotes();
         findViews();
         toolbar.getMenu().clear();
         toolbar.setTitle("");
@@ -167,10 +134,10 @@ public class VariousShow extends AppCompatActivity implements SettingsDialogFrag
         {
             addVariousItem.setVisibility(View.INVISIBLE);
             //recyclerView.setClickable(false);
-        }
-    }
 
-//    private int binarySearch
+        }
+
+    }
 
     @Override
     public void onChangeThemeClick(boolean isChecked) {
@@ -245,9 +212,8 @@ public class VariousShow extends AppCompatActivity implements SettingsDialogFrag
         {
             action_mode=false;
             viewAdapter.setActionMode(false);
-            deleteVariousTextNotes();
-            deleteVariousAudioNotes();
-//            viewAdapter.notifyDataSetChanged();
+            deleteVariousNotes();
+            viewAdapter.notifyDataSetChanged();
             toolbar.getMenu().clear();
             getSupportActionBar().setDisplayHomeAsUpEnabled(false);
             if (type.equals(getResources().getString(R.string.commentDir))) counterText.setText("Отзыв");
@@ -273,7 +239,6 @@ public class VariousShow extends AppCompatActivity implements SettingsDialogFrag
         {
             if (requestCode == ADD_VIEW_RESULT_CODE && resultCode == RESULT_OK)
             {
-                Log.d("qwerty151", "hi");
                 Bundle args = data.getExtras();
                 if (args.get("time") != null)
                 {
@@ -292,20 +257,10 @@ public class VariousShow extends AppCompatActivity implements SettingsDialogFrag
                 else if (args.get("updatePath") != null)
                 {
                     int position = Integer.parseInt(args.get("position").toString());
-                    ((VariousNotes)variousNotes.get(position)).setNeedsUpdate(true);
+                    variousNotes.get(position).setNeedsUpdate(true);
 
                 }
 
-            }
-
-            else if (requestCode == ADD_AUDIO_RESULT_CODE && resultCode == RESULT_OK && data != null){
-                Log.d("qwerty151", "upload");
-                uploadAudio(data.getData());
-            }
-
-            Log.d("qwerty151", (requestCode == ADD_AUDIO_RESULT_CODE) + " " + (resultCode == RESULT_OK) + " " + (data != null));
-            if (data == null){
-                Log.d("qwerty151", "null");
             }
         }
         catch (Exception e)
@@ -315,69 +270,26 @@ public class VariousShow extends AppCompatActivity implements SettingsDialogFrag
 
     }
 
-    private void uploadAudio(final Uri audio){
-
-        final long time = System.currentTimeMillis();
-        Map<String, Boolean> map = new HashMap<>();
-        map.put(time+"", false);
-        variousNoteAudioPaths.set(map, SetOptions.merge())
-                .addOnSuccessListener(new OnSuccessListener<Void>() {
-                    @Override
-                    public void onSuccess(Void aVoid) {
-                        storageReference.child(time+"").putFile(audio).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
-                            @Override
-                            public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
-                                Toast.makeText(getApplicationContext(), "success", Toast.LENGTH_LONG).show();
-                                variousNoteAudioPaths.update(time+"", true);
-                            }
-                        }).addOnFailureListener(new OnFailureListener() {
-                            @Override
-                            public void onFailure(@NonNull Exception e) {
-                                Log.e("qwerty151", e.toString());
-                            }
-                        });
-
-                    }
-                });
-
-    }
-
-    private void deleteVariousTextNotes()
+    private void deleteVariousNotes()
     {
-        String[] deletePaths = new String[selectedTextNotes.size()];
+        String[] deletePaths = new String[selectedNotes.size()];
         for (int i = 0; i < deletePaths.length; i++)
         {
-            int pos = variousNotes.indexOf(selectedTextNotes.get(i));
-            variousNotes.remove(pos);
-            viewAdapter.notifyItemRemoved(pos);
-            deletePaths[i] = selectedTextNotes.get(i).getPath();
+            variousNotes.remove(selectedNotes.get(i));
+            deletePaths[i] = selectedNotes.get(i).getPath();
             variousNotesNames.remove((Long)Long.parseLong(deletePaths[i]));
             variousNotePaths.update(deletePaths[i], FieldValue.delete());
-
         }
-        selectedTextNotes.clear();
+        selectedNotes.clear();
         WriteBatch writeBatch = FirebaseFirestore.getInstance().batch();
         for (int i = 0; i < deletePaths.length; i++)
         {
             writeBatch.delete(variousNoteStorage.document(deletePaths[i]));
+//            variousNotes.remove(selectedNotes.get(i));
+//            deleteArr[i] = new File(selectedNotes.get(i).getPath());
         }
         writeBatch.commit();
-    }
 
-    private void deleteVariousAudioNotes(){
-        Long[] deletePaths = new Long[selectedAudioNotes.size()];
-        for (int i = 0; i< deletePaths.length; i++){
-            int pos = variousNotes.indexOf(selectedAudioNotes.get(i));
-            variousNotes.remove(pos);
-            viewAdapter.notifyItemRemoved(pos);
-            deletePaths[i] = selectedAudioNotes.get(i).getTime();
-            variousNotesNames.remove(deletePaths[i]);
-            variousNoteAudioPaths.update(deletePaths[i]+"", FieldValue.delete());
-        }
-        selectedAudioNotes.clear();
-        for (int i = 0; i < deletePaths.length; i++){
-            storageReference.child(deletePaths[i]+"").delete();
-        }
     }
 
     private void findViews()
@@ -391,245 +303,61 @@ public class VariousShow extends AppCompatActivity implements SettingsDialogFrag
     {
         viewAdapter = new VariousViewAdapter(variousNotes);
         LinearLayoutManager layoutManager = new LinearLayoutManager(this);
-        final RecyclerView.ItemAnimator itemAnimator = new DefaultItemAnimator();
+        RecyclerView.ItemAnimator itemAnimator = new DefaultItemAnimator();
         recyclerView.setLayoutManager(layoutManager);
         recyclerView.setItemAnimator(itemAnimator);
         recyclerView.setAdapter(viewAdapter);
         if (editAccess)
         {
-            viewAdapter.setOnItemClickListener(new VariousViewAdapter.OnItemClickListener() {
-
-                       @Override
-                       public void onItemClick(int position) {
-                           if (variousNotes.get(position).getItemType() == 0) {
-                               Intent intent = new Intent(VariousShow.this, VariousNotebook.class);
-                               intent.putExtra("id", id);
-                               intent.putExtra("type", type);
-                               intent.putExtra("path", ((VariousNotes) variousNotes.get(position)).getPath());
-                               intent.putExtra("position", position + "");
-                               startActivityForResult(intent, ADD_VIEW_RESULT_CODE);
-                           }
-
-                       }
-
-                       @Override
-                       public void onItemLongClick(int position) {
-                           viewAdapter.setActionMode(true);
-                           action_mode = true;
-                           counterText.setText(count + " элементов выбрано");
-                           toolbar.getMenu().clear();
-                           toolbar.inflateMenu(R.menu.menu_long_click);
-                           viewAdapter.notifyDataSetChanged();
-                           getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-                       }
-
-                       @Override
-                       public void onCheckClick(int position) {
-                           if (variousNotes.get(position).getItemType() == 0) {
-                               selectedTextNotes.add((VariousNotes) variousNotes.get(position));
-                           } else {
-                               selectedAudioNotes.add((VariousNotesAudio) variousNotes.get(position));
-                           }
-                           count++;
-                           counterText.setText(count + " элементов выбрано");
-                           // Toast.makeText(getApplicationContext(), selectedNotes.size() + " items selected", Toast.LENGTH_LONG).show();
-                       }
-
-                       @Override
-                       public void onUncheckClick(int position) {
-                           if (variousNotes.get(position).getItemType() == 0) {
-                               selectedTextNotes.remove((VariousNotes) variousNotes.get(position));
-                           } else {
-                               selectedAudioNotes.remove((VariousNotesAudio) variousNotes.get(position));
-                           }
-                           count--;
-                           counterText.setText(count + " элементов выбрано");
-                       }
+            viewAdapter.setOnItemClickListener(new VariousViewAdapter.OnItemClickListener()
+            {
 
                 @Override
-                public void onPlayButtonPressed(final int position, View itemView) {
-                    Log.d("qwerty169", "hi");
-                    if (variousNotes.get(position).getItemType() == 1) {
-                        // Останавливаем предыдущую запись, если та играет
-                        if (audioItem != null && audioItem != (VariousNotesAudio) variousNotes.get(position)) {
-                            audioItem.setPlaying(false);
-                            activeMediaPlayer.reset();
-                            playAudioButton.setImageResource(R.drawable.ic_action_play_light);
-                            playerSeekBar.setProgress(0);
-                            playerSeekBar.setEnabled(false);
-                            textCurrentTime.setText("0:00");
-                            textTotalDuration.setText("0:00");
-                        }
-                        // Если началась новая запись
-                        if (audioItem != (VariousNotesAudio) variousNotes.get(position)) {
-                            audioItem = (VariousNotesAudio) variousNotes.get(position);
-                            audioItem.changePlaying();
-                            playAudioButton = itemView.findViewById(R.id.playAudioButton);
-                            textCurrentTime = itemView.findViewById(R.id.textCurrentTime);
-                            textTotalDuration = itemView.findViewById(R.id.textTotalDuration);
-                            playerSeekBar = itemView.findViewById(R.id.musicSeekBar);
-                            playerSeekBar.setMax(100);
-                            playerSeekBar.setProgress(0);
-                            playerSeekBar.setEnabled(true);
-                            if (activeMediaPlayer == null) {
-                                activeMediaPlayer = new MediaPlayer();
-                            }
-//                            playerSeekBar.setEnabled(true);
+                public void onItemClick(int position)
+                {
 
-                            playerSeekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
-                                @Override
-                                public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-                                    if (fromUser){
-                                        int playPosition = (activeMediaPlayer.getDuration() / 100) * progress;
-                                        activeMediaPlayer.seekTo(playPosition);
-                                        textCurrentTime.setText(milliSecondsToTimer(activeMediaPlayer.getCurrentPosition()));
-                                    }
-
-                                }
-
-                                @Override
-
-                                public void onStartTrackingTouch(SeekBar seekBar) {
-
-                                }
-
-                                @Override
-                                public void onStopTrackingTouch(SeekBar seekBar) {
-
-                                }
-                            });
-//                            playerSeekBar.setOnTouchListener(new View.OnTouchListener() {
-//                                @Override
-//                                public boolean onTouch(View v, MotionEvent event) {
-//
-//                                    SeekBar seekBar = (SeekBar) v;
-//                                    Log.d("qwerty144", "hi " + seekBar.getProgress() + " " + playerSeekBar.getProgress());
-//                                    int playPosition = (activeMediaPlayer.getDuration() / 100) * seekBar.getProgress();
-//                                    activeMediaPlayer.seekTo(playPosition);
-//                                    textCurrentTime.setText(milliSecondsToTimer(activeMediaPlayer.getCurrentPosition()));
-//                                    return false;
-//                                }
-//                            });
-
-
-
-                            activeMediaPlayer.setOnBufferingUpdateListener(new MediaPlayer.OnBufferingUpdateListener() {
-                                @Override
-                                public void onBufferingUpdate(MediaPlayer mp, int percent) {
-                                    playerSeekBar.setSecondaryProgress(percent);
-                                }
-                            });
-
-
-                            activeMediaPlayer.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
-                                @Override
-                                public void onCompletion(MediaPlayer mp) {
-                                    playerSeekBar.setProgress(0);
-                                    playerSeekBar.setEnabled(false);
-                                    playAudioButton.setImageResource(R.drawable.ic_action_play_light);
-                                    textCurrentTime.setText("0:00");
-                                    textTotalDuration.setText("0:00");
-                                    mp.reset();
-                                }
-                            });
-
-
-//                            viewAdapter.notifyDataSetChanged();
-                            if (audioItem.isPlaying()) {
-//                                try {
-                                    if (activeMediaPlayer == null) {
-                                        activeMediaPlayer = new MediaPlayer();
-                                    }
-                                    playAudioButton.setImageResource(R.drawable.ic_action_pause_light);
-                                    prepareMediaPlayer(audioItem.getUri().toString());
-
-                                    activeMediaPlayer.start();
-                                    updateSeekBar();
-
-
-
-//                                    activeMediaPlayer.setDataSource(audioItem.getUri().toString());
-//                                    activeMediaPlayer.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
-//                                        @Override
-//                                        public void onPrepared(MediaPlayer mp) {
-//                                            mp.start();
-//                                        }
-//                                    });
-//                                    activeMediaPlayer.prepare();
-//                                    activeMediaPlayer.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
-//                                        @Override
-//                                        public void onCompletion(MediaPlayer mp) {
-//                                            audioItem.changePlaying();
-//                                            viewAdapter.notifyItemChanged(position);
-//                                        }
-//                                    });
-//                                }
-//                                catch (IOException e) {
-//                                    Log.e("onPlayButtonIOexception", e.toString());
-//                                }
-                            }
-                        }
-                        else {
-                            audioItem.changePlaying();
-//                            viewAdapter.notifyItemChanged(position);
-                            if (audioItem.isPlaying()) {
-                                playAudioButton.setImageResource(R.drawable.ic_action_pause_light);
-                                activeMediaPlayer.start();
-                                updateSeekBar();
-                            } else {
-                                handler.removeCallbacks(updater);
-                                playAudioButton.setImageResource(R.drawable.ic_action_play_light);
-                                activeMediaPlayer.pause();
-                            }
-                        }
-                    }
+                    Intent intent = new Intent(VariousShow.this, VariousNotebook.class);
+                    intent.putExtra("id", id);
+                    intent.putExtra("type", type);
+                    intent.putExtra("path", variousNotes.get(position).getPath());
+                    intent.putExtra("position", position + "");
+                    startActivityForResult(intent, ADD_VIEW_RESULT_CODE);
                 }
+
+                @Override
+                public void onItemLongClick(int position)
+                {
+                    viewAdapter.setActionMode(true);
+                    action_mode = true;
+                    counterText.setText(count + " элементов выбрано");
+                    toolbar.getMenu().clear();
+                    toolbar.inflateMenu(R.menu.menu_long_click);
+                    viewAdapter.notifyDataSetChanged();
+                    getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+                }
+
+                @Override
+                public void onCheckClick(int position)
+                {
+                    selectedNotes.add(variousNotes.get(position));
+                    count++;
+                    counterText.setText(count + " элементов выбрано");
+                    // Toast.makeText(getApplicationContext(), selectedNotes.size() + " items selected", Toast.LENGTH_LONG).show();
+                }
+
+                @Override
+                public void onUncheckClick(int position)
+                {
+                    selectedNotes.remove(variousNotes.get(position));
+                    count--;
+                    counterText.setText(count + " элементов выбрано");
+
+                    // Toast.makeText(getApplicationContext(), selectedNotes.size() + " items selected", Toast.LENGTH_LONG).show();
+
+                }
+
             });
         }
-    }
-
-    private void prepareMediaPlayer(String uri){
-        try{
-            activeMediaPlayer.setDataSource(uri);
-            activeMediaPlayer.prepare();
-            textTotalDuration.setText(milliSecondsToTimer(activeMediaPlayer.getDuration()));
-        }
-        catch (Exception e){
-            Toast.makeText(this, e.getMessage(), Toast.LENGTH_LONG).show();
-        }
-    }
-
-    private Runnable updater = new Runnable() {
-        @Override
-        public void run() {
-            updateSeekBar();
-            long currentDuration = activeMediaPlayer.getCurrentPosition();
-            textCurrentTime.setText(milliSecondsToTimer(currentDuration));
-        }
-    };
-
-    private void updateSeekBar(){
-        if (activeMediaPlayer.isPlaying()){
-            playerSeekBar.setProgress((int) (((float) activeMediaPlayer.getCurrentPosition() / activeMediaPlayer.getDuration()) * 100));
-            handler.postDelayed(updater, 2000);
-        }
-    }
-
-    private String milliSecondsToTimer(long milliSeconds){
-        String timerString = "";
-        String secondsString;
-        int hours = (int)(milliSeconds / (1000 * 60 * 60));
-        int minuts = (int)((milliSeconds % (1000 * 60 * 60)) / (1000 * 60));
-        int seconds = (int) ((milliSeconds % (1000 * 60)) / 1000);
-        if (hours > 0){
-            timerString = hours + ":";
-        }
-        secondsString = seconds+"";
-        if (seconds < 10){
-            secondsString = "0" + seconds;
-        }
-        timerString = timerString + minuts + ":" + secondsString;
-        return timerString;
     }
 
     private void setButtons()
@@ -651,40 +379,16 @@ public class VariousShow extends AppCompatActivity implements SettingsDialogFrag
                 }
             });
         }
-
-        FloatingActionButton addAudioButton = (FloatingActionButton) findViewById(R.id.addAudioButton);
-        addAudioButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent audioPickIntent = new Intent(MediaStore.Audio.Media.RECORD_SOUND_ACTION);
-                startActivityForResult(audioPickIntent, ADD_AUDIO_RESULT_CODE);
-            }
-        });
 //         addVariousItem = (Button) findViewById(R.id.addVariousItem);
 
     }
 
 
-    public int binarySearch(ArrayList<Long> arrayList, long key){
-        int left = -1, right = arrayList.size(), middle;
-        while (left + 1 < right){
-            middle = (left + right) / 2;
-            if (key < arrayList.get(middle)){
-                left = middle;
-            }
-            else{
-                right = middle;
-            }
-        }
-        return right;
-    }
-
-    private void openNotes(final DocumentReference variousPath)
+    private void openNotes()
     {
         try
         {
-            int count;
-            variousPath.addSnapshotListener(new EventListener<DocumentSnapshot>()
+            variousNotePaths.addSnapshotListener(new EventListener<DocumentSnapshot>()
             {
                 @Override
                 public void onEvent(@javax.annotation.Nullable DocumentSnapshot documentSnapshot, @javax.annotation.Nullable FirebaseFirestoreException e)
@@ -700,70 +404,30 @@ public class VariousShow extends AppCompatActivity implements SettingsDialogFrag
                         HashMap<String, Boolean> hashMap = (HashMap) documentSnapshot.getData();
                         if (hashMap != null)
                         {
-//                            count = hashMap.size();
-                            for (final String key : hashMap.keySet())
-                            {
 
+                            for (String key : hashMap.keySet())
+                            {
                                 final Long l = Long.parseLong(key);
                                 if (!variousNotesNames.contains(l) && hashMap.get(key) == true)
                                 {
-                                    if (variousPath == variousNotePaths){
-                                        variousNoteStorage.document(key).get()
-                                                .addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>()
-                                                {
-                                                    @Override
-                                                    public void onSuccess(DocumentSnapshot documentSnapshot) {
-                                                        if (documentSnapshot != null && documentSnapshot.get("text") != null)
-                                                        {
-                                                            int putIndex = binarySearch(variousNotesNames, l);
-                                                            variousNotes.add(putIndex, new VariousNotes(documentSnapshot.get("text").toString(), l + "",
-                                                                    l, false, false));
-                                                            variousNotesNames.add(putIndex, l);
-//                                                            variousNotes.add(new VariousNotes(documentSnapshot.get("text").toString(), l + "",
-//                                                                    l, false, false));
-                                                            viewAdapter.notifyItemInserted(putIndex);
-//                                                            variousNotesNames.add(l);
-//                                                            if (count==null){
-//                                                                count=0;
-//                                                            }
-//                                                            count--;
-//                                                            if (count==0){
-//                                                                Collections.sort(variousNotes, new VariousNoteComparator());
-//                                                                Collections.sort(variousNotesNames);
-////                                                                variousNotes.sort();
-//                                                            }
-                                                        }
+                                    variousNoteStorage.document(key).get()
+                                            .addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>()
+                                            {
+                                                @Override
+                                                public void onSuccess(DocumentSnapshot documentSnapshot) {
+                                                    if (documentSnapshot != null && documentSnapshot.get("text") != null)
+                                                    {
+                                                        variousNotes.add(new VariousNotes(documentSnapshot.get("text").toString(), l + "",
+                                                                l, false, false));
+                                                        viewAdapter.notifyItemInserted(variousNotes.size());
+                                                        variousNotesNames.add(l);
                                                     }
 
-                                                });
-                                    }
-                                    else if (variousPath == variousNoteAudioPaths){
-                                        storageReference.child(key).getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
-                                            @Override
-                                            public void onSuccess(Uri uri) {
-                                                if (uri != null){
-                                                    int putIndex = binarySearch(variousNotesNames, l);
-                                                    variousNotes.add(putIndex, new VariousNotesAudio(l, uri));
-                                                    variousNotesNames.add(putIndex, l);
-                                                    viewAdapter.notifyItemInserted(putIndex);
-
-//                                                    if (count==null){
-//                                                        count=0;
-//                                                    }
-//                                                    count--;
-//                                                    if (count==0){
-//                                                        Collections.sort(variousNotes, new VariousNoteComparator());
-//                                                        Collections.sort(variousNotesNames);
-////                                                                variousNotes.sort();
-//                                                    }
                                                 }
-                                            }
-                                        });
-                                    }
-
+                                            });
                                 }
-                                else if (variousPath == variousNotePaths && hashMap.get(key) == true && variousNotesNames.contains(l) &&
-                                        ((VariousNotes)variousNotes.get(variousNotesNames.indexOf(l))).isNeedsUpdate())
+                                else if (hashMap.get(key) == true && variousNotesNames.contains(l) &&
+                                        variousNotes.get(variousNotesNames.indexOf(l)).isNeedsUpdate())
                                 {
                                     variousNoteStorage.document(key).get()
                                             .addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>()
@@ -785,7 +449,6 @@ public class VariousShow extends AppCompatActivity implements SettingsDialogFrag
                     }
                 }
             });
-
         }
         catch (Exception e)
         {
@@ -794,15 +457,4 @@ public class VariousShow extends AppCompatActivity implements SettingsDialogFrag
 
     }
 
-    @Override
-    protected void onDestroy() {
-        if (activeMediaPlayer != null){
-            if (activeMediaPlayer.isPlaying()){
-                handler.removeCallbacks(updater);
-            }
-            activeMediaPlayer.reset();
-            activeMediaPlayer = null;
-        }
-        super.onDestroy();
-    }
 }
