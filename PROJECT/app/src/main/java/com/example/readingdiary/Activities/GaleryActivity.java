@@ -226,7 +226,7 @@ public class GaleryActivity extends AppCompatActivity implements SettingsDialogF
                 if (!editAccess){
                     intent.putExtra("owner", user);
                 }
-                intent.putExtra("position", position);
+                intent.putExtra("position", names.get(position));
                 startActivityForResult(intent, FULL_GALERY_CODE);
             }
         });

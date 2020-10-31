@@ -110,6 +110,7 @@ public class VariousShow extends AppCompatActivity implements SettingsDialogFrag
     private SeekBar playerSeekBar;
     private Handler handler = new Handler();
     private FloatingActionButton playAudioButton;
+    private String title;
     @Override
     protected void onCreate(Bundle savedInstanceState)
     {
@@ -151,9 +152,11 @@ public class VariousShow extends AppCompatActivity implements SettingsDialogFrag
         findViews();
         toolbar.getMenu().clear();
         toolbar.setTitle("");
-        if (type.equals(getResources().getString(R.string.commentDir))) counterText.setText("Отзыв");
-        else if (type.equals(getResources().getString(R.string.descriptionDir))) counterText.setText("Описание");
-        else if (type.equals(getResources().getString(R.string.quoteDir))) counterText.setText("Цитаты");
+
+        if (type.equals(getResources().getString(R.string.commentDir))) title = "Отзыв";
+        else if (type.equals(getResources().getString(R.string.descriptionDir))) title = "Описание";
+        else if (type.equals(getResources().getString(R.string.quoteDir))) title = "Цитаты";
+        counterText.setText(title);
 
 //        counterText.setText(type);
         setSupportActionBar(toolbar);
@@ -253,6 +256,18 @@ public class VariousShow extends AppCompatActivity implements SettingsDialogFrag
             if (type.equals(getResources().getString(R.string.commentDir))) counterText.setText("Отзыв");
             else if (type.equals(getResources().getString(R.string.descriptionDir))) counterText.setText("Описание");
             else if (type.equals(getResources().getString(R.string.quoteDir))) counterText.setText("Цитаты");
+            count=0;
+        }
+
+        if (item.getItemId() == android.R.id.home){
+            action_mode=false;
+            viewAdapter.setActionMode(false);
+            viewAdapter.notifyDataSetChanged();
+            toolbar.getMenu().clear();
+            toolbar.inflateMenu(R.menu.base_menu);
+            getSupportActionBar().setDisplayHomeAsUpEnabled(false);
+//            menuType = 0;
+            counterText.setText(title);
             count=0;
         }
         return super.onOptionsItemSelected(item);
@@ -450,6 +465,10 @@ public class VariousShow extends AppCompatActivity implements SettingsDialogFrag
                 public void onPlayButtonPressed(final int position, View itemView) {
                     Log.d("qwerty169", "hi");
                     if (variousNotes.get(position).getItemType() == 1) {
+                        Log.d("qwertyAudio", (audioItem == null) + " ");
+                        if (audioItem != null){
+                            Log.d("qwertyAudio", (audioItem == null) + " " + (audioItem == (VariousNotesAudio) variousNotes.get(position)));
+                        }
                         // Останавливаем предыдущую запись, если та играет
                         if (audioItem != null && audioItem != (VariousNotesAudio) variousNotes.get(position)) {
                             audioItem.setPlaying(false);
@@ -461,7 +480,8 @@ public class VariousShow extends AppCompatActivity implements SettingsDialogFrag
                             textTotalDuration.setText("0:00");
                         }
                         // Если началась новая запись
-                        if (audioItem != (VariousNotesAudio) variousNotes.get(position)) {
+                        if (audioItem == null || audioItem != (VariousNotesAudio) variousNotes.get(position)) {
+                            Log.d("qwertyAudio", "hello");
                             audioItem = (VariousNotesAudio) variousNotes.get(position);
                             audioItem.changePlaying();
                             playAudioButton = itemView.findViewById(R.id.playAudioButton);
@@ -474,8 +494,6 @@ public class VariousShow extends AppCompatActivity implements SettingsDialogFrag
                             if (activeMediaPlayer == null) {
                                 activeMediaPlayer = new MediaPlayer();
                             }
-//                            playerSeekBar.setEnabled(true);
-
                             playerSeekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
                                 @Override
                                 public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
@@ -498,29 +516,12 @@ public class VariousShow extends AppCompatActivity implements SettingsDialogFrag
 
                                 }
                             });
-//                            playerSeekBar.setOnTouchListener(new View.OnTouchListener() {
-//                                @Override
-//                                public boolean onTouch(View v, MotionEvent event) {
-//
-//                                    SeekBar seekBar = (SeekBar) v;
-//                                    Log.d("qwerty144", "hi " + seekBar.getProgress() + " " + playerSeekBar.getProgress());
-//                                    int playPosition = (activeMediaPlayer.getDuration() / 100) * seekBar.getProgress();
-//                                    activeMediaPlayer.seekTo(playPosition);
-//                                    textCurrentTime.setText(milliSecondsToTimer(activeMediaPlayer.getCurrentPosition()));
-//                                    return false;
-//                                }
-//                            });
-
-
-
                             activeMediaPlayer.setOnBufferingUpdateListener(new MediaPlayer.OnBufferingUpdateListener() {
                                 @Override
                                 public void onBufferingUpdate(MediaPlayer mp, int percent) {
                                     playerSeekBar.setSecondaryProgress(percent);
                                 }
                             });
-
-
                             activeMediaPlayer.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
                                 @Override
                                 public void onCompletion(MediaPlayer mp) {
@@ -529,49 +530,27 @@ public class VariousShow extends AppCompatActivity implements SettingsDialogFrag
                                     playAudioButton.setImageResource(R.drawable.ic_action_play_light);
                                     textCurrentTime.setText("0:00");
                                     textTotalDuration.setText("0:00");
+                                    Log.d("qwertyAudio", "complite");
+                                    if (audioItem != null){
+                                        audioItem.changePlaying();
+                                        audioItem = null;
+                                    }
+
                                     mp.reset();
                                 }
                             });
-
-
-//                            viewAdapter.notifyDataSetChanged();
                             if (audioItem.isPlaying()) {
-//                                try {
                                     if (activeMediaPlayer == null) {
                                         activeMediaPlayer = new MediaPlayer();
                                     }
                                     playAudioButton.setImageResource(R.drawable.ic_action_pause_light);
                                     prepareMediaPlayer(audioItem.getUri().toString());
-
                                     activeMediaPlayer.start();
                                     updateSeekBar();
-
-
-
-//                                    activeMediaPlayer.setDataSource(audioItem.getUri().toString());
-//                                    activeMediaPlayer.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
-//                                        @Override
-//                                        public void onPrepared(MediaPlayer mp) {
-//                                            mp.start();
-//                                        }
-//                                    });
-//                                    activeMediaPlayer.prepare();
-//                                    activeMediaPlayer.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
-//                                        @Override
-//                                        public void onCompletion(MediaPlayer mp) {
-//                                            audioItem.changePlaying();
-//                                            viewAdapter.notifyItemChanged(position);
-//                                        }
-//                                    });
-//                                }
-//                                catch (IOException e) {
-//                                    Log.e("onPlayButtonIOexception", e.toString());
-//                                }
                             }
                         }
-                        else {
+                        else if (audioItem != null && audioItem == (VariousNotesAudio) variousNotes.get(position)) {
                             audioItem.changePlaying();
-//                            viewAdapter.notifyItemChanged(position);
                             if (audioItem.isPlaying()) {
                                 playAudioButton.setImageResource(R.drawable.ic_action_pause_light);
                                 activeMediaPlayer.start();
@@ -611,7 +590,7 @@ public class VariousShow extends AppCompatActivity implements SettingsDialogFrag
     private void updateSeekBar(){
         if (activeMediaPlayer.isPlaying()){
             playerSeekBar.setProgress((int) (((float) activeMediaPlayer.getCurrentPosition() / activeMediaPlayer.getDuration()) * 100));
-            handler.postDelayed(updater, 2000);
+            handler.postDelayed(updater, 1000);
         }
     }
 

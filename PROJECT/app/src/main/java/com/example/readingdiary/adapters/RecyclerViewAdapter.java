@@ -40,7 +40,7 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
         void onItemLongClick(int position);
         void onCheckClick(int position);
         void onUncheckClick(int position);
-        void onPrivacyChanged(int position);
+//        void onPrivacyChanged(int position);
     }
 
     public void setOnItemClickListener(OnItemClickListener listener){
@@ -248,20 +248,20 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
                 });
             }
 
-            if (privacyButton != null){
-                privacyButton.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        if (mListener != null){
-                            int position = getAdapterPosition();
-                            if (position != RecyclerView.NO_POSITION){
-                                mListener.onPrivacyChanged(position);
-                            }
-//                            privacyButton.setImageDrawable();
-                        }
-                    }
-                });
-            }
+//            if (privacyButton != null){
+//                privacyButton.setOnClickListener(new View.OnClickListener() {
+//                    @Override
+//                    public void onClick(View v) {
+//                        if (mListener != null){
+//                            int position = getAdapterPosition();
+//                            if (position != RecyclerView.NO_POSITION){
+////                                mListener.onPrivacyChanged(position);
+//                            }
+////                            privacyButton.setImageDrawable();
+//                        }
+//                    }
+//                });
+//            }
 
             itemView.setOnClickListener(new View.OnClickListener() {
                 @Override

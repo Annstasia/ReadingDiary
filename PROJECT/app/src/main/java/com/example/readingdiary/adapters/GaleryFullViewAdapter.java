@@ -15,14 +15,15 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 
 import androidx.recyclerview.widget.RecyclerView;
+import androidx.viewpager.widget.PagerAdapter;
 
 import com.example.readingdiary.Classes.ImageClass;
 import com.example.readingdiary.R;
 import com.squareup.picasso.Picasso;
 
 import java.util.List;
-
-// Адаптер поолнога показа изображений
+//
+//// Адаптер поолнога показа изображений
 public class GaleryFullViewAdapter extends RecyclerView.Adapter<GaleryFullViewAdapter.ViewHolder>{
 
     private List<ImageClass> buttons;
@@ -89,12 +90,15 @@ public class GaleryFullViewAdapter extends RecyclerView.Adapter<GaleryFullViewAd
     @Override
     public void onAttachedToRecyclerView(RecyclerView recyclerView) {
         super.onAttachedToRecyclerView(recyclerView);
+
     }
 
     public void clearAdapter() {
         buttons.clear();
         notifyDataSetChanged();
     }
+
+
 
     class ViewHolder extends RecyclerView.ViewHolder {
         private ImageView imageView;
@@ -122,3 +126,59 @@ public class GaleryFullViewAdapter extends RecyclerView.Adapter<GaleryFullViewAd
 
 
 
+
+//
+//public class GaleryFullViewAdapter extends PagerAdapter{
+//    private Context context;
+//    private List<ImageClass> images;
+//
+//    public GaleryFullViewAdapter(List<ImageClass> images, Context context){
+//        this.images = images;
+//        this.context = context;
+//
+//    }
+//
+//    @Override
+//    public boolean isViewFromObject(View view, Object object) {
+//        return view == object;
+//    }
+//
+//
+//    @Override
+//    public int getCount() {
+//        return images.size();
+//    }
+//
+//    @Override
+//    public Object instantiateItem(ViewGroup container, int position) {
+////        Bitmap source = buttons.get(i).getBitmap();
+////            viewHolder.imageView.setImageBitmap(source);
+////        Log.d("qwerty0123", position + " ");
+////        Log.d("qwerty0123", images.get(position).getBitmap()==null);
+//
+//        ImageView imageView = new ImageView(context);
+//        imageView.setScaleType(ImageView.ScaleType.CENTER_CROP);
+//        if (images.get(position).getType()==0){
+//            Bitmap source = images.get(position).getBitmap();
+//            imageView.setImageBitmap(source);
+//        }
+//        else{
+//            Picasso.get()
+//                    .load(images.get(position).getUri())
+//                    .into(imageView);
+//        }
+////        imageView.setImageBitmap(images.get(position).getBitmap());
+//        container.addView(imageView, 0);
+//        return imageView;
+//    }
+//
+//    @Override
+//    public void destroyItem(ViewGroup container, int position, Object object) {
+//        container.removeView((ImageView) object);
+//    }
+//
+//
+//
+//
+//
+//}

@@ -2,6 +2,7 @@ package com.example.readingdiary.Activities;
 
 import android.content.ContentValues;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.database.Cursor;
@@ -42,6 +43,7 @@ import com.example.readingdiary.Classes.DeleteUser;
 import com.example.readingdiary.Classes.SaveImage;
 //import com.example.readingdiary.Fragments.ChooseDataDialogFragment;
 import com.example.readingdiary.Fragments.AddShortNameFragment;
+import com.example.readingdiary.Fragments.ChooseGenreFragment;
 import com.example.readingdiary.Fragments.CreateWithoutNoteDialogFragment;
 import com.example.readingdiary.Fragments.DeleteDialogFragment;
 import com.example.readingdiary.Fragments.DeleteTitleAndAuthorDialogFragment;
@@ -52,7 +54,9 @@ import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
+import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
+import com.google.android.material.textview.MaterialTextView;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
@@ -67,9 +71,11 @@ import com.squareup.picasso.Picasso;
 
 import java.security.Key;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.TreeMap;
 
 public class EditNoteActivity extends AppCompatActivity implements DeleteDialogFragment.DeleteDialogListener,
         CreateWithoutNoteDialogFragment.CreateWithoutNoteDialogListener,
@@ -81,7 +87,7 @@ private String TAG_DARK = "dark_theme";
     EditText titleView;
     EditText authorView;
     RatingBar ratingView;
-    EditText genreView;
+    TextView genreView;
     EditText timeView;
     EditText placeView;
     EditText shortCommentView;
@@ -108,7 +114,7 @@ private String TAG_DARK = "dark_theme";
     CheckBox privacyView;
     boolean isPrivate;
     MainActivity mein = new MainActivity();
-
+    TreeMap<String, Object> chosenGenres;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         sharedPreferences = this.getSharedPreferences(TAG_DARK, Context.MODE_PRIVATE);
@@ -164,6 +170,7 @@ private String TAG_DARK = "dark_theme";
         getMenuInflater().inflate(R.menu.base_menu, menu);
         return true;
     }
+
 
 //    @Override
 //    public boolean dispatchTouchEvent(MotionEvent event) {
@@ -306,7 +313,7 @@ private String TAG_DARK = "dark_theme";
         titleView = (EditText) findViewById(R.id.editTitleNoteActivity);
         authorView = (EditText) findViewById(R.id.editAuthorNoteActivity);
         ratingView = (RatingBar) findViewById(R.id.editRatingBar);
-        genreView = (EditText) findViewById(R.id.editGenre);
+        genreView = (TextView) findViewById(R.id.editGenre);
         timeView = (EditText) findViewById(R.id.editTime);
         placeView = (EditText) findViewById(R.id.editPlace);
         shortCommentView = (EditText) findViewById(R.id.editShortComment);
@@ -323,7 +330,8 @@ private String TAG_DARK = "dark_theme";
         if (!beforeChanging[3].equals("")){
             this.ratingView.setRating(Float.parseFloat(beforeChanging[3]));
         }
-        this.genreView.setText(beforeChanging[4]);
+        showChosenGenres(chosenGenres);
+//        this.genreView.setText(beforeChanging[4]);
         this.timeView.setText(beforeChanging[5]);
         this.placeView.setText(beforeChanging[6]);
         this.shortCommentView.setText(beforeChanging[7]);
@@ -364,6 +372,13 @@ private String TAG_DARK = "dark_theme";
             }
         });
 
+        genreView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                chooseGenres();
+            }
+        });
+
         Button bAddObl = (Button) findViewById(R.id.bAddObl);
         bAddObl.setOnClickListener(new View.OnClickListener()
         {
@@ -393,6 +408,63 @@ private String TAG_DARK = "dark_theme";
         });
     }
 
+    private void chooseGenres(){
+        final EditNoteActivity activity = EditNoteActivity.this;
+        if (chosenGenres == null){
+            db.collection("genres").document(user).get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
+                @Override
+                public void onComplete(@NonNull Task<DocumentSnapshot> task) {
+                    if (task.isSuccessful() && task.getResult() != null && task.getResult().getData() != null){
+                        TreeMap<String, Object> chosenGenres;
+                        chosenGenres = new TreeMap<>();
+                        chosenGenres.putAll(task.getResult().getData());
+//                        chosenGenres = (TreeMap)task.getResult().getData();
+                        if (chosenGenres == null){
+                            chosenGenres = new TreeMap<String, Object>();
+                        }
+                        ChooseGenreFragment dialog = new ChooseGenreFragment(activity, chosenGenres);
+                        dialog.show(getSupportFragmentManager(), "genreDialog");
+                    }
+                    else{
+                        TreeMap<String, Object> chosenGenres = new TreeMap<>();
+                        ChooseGenreFragment dialog = new ChooseGenreFragment(activity, chosenGenres);
+                        dialog.show(getSupportFragmentManager(), "genreDialog");
+                    }
+
+                }
+            });
+        }
+        else{
+            ChooseGenreFragment dialog = new ChooseGenreFragment(activity, chosenGenres);
+            dialog.show(getSupportFragmentManager(), "genreDialog");
+        }
+
+
+
+//        ChooseGenreFragment dialog = new ChooseGenreFragment(genres);
+//        dialog.show(getSupportFragmentManager(), "genreDialog");
+    }
+
+    public void changeGenres(TreeMap<String, Object> genres){
+        chosenGenres = genres;
+        showChosenGenres(chosenGenres);
+//        String genresString = "";
+//        for (String genre : genres.keySet()){
+//            if ((boolean)genres.get(genre)){
+//                if (genresString==""){
+//                    genresString += genre;
+//                }
+//                else{
+//                    genresString += ",  " + genre;
+//                }
+//
+//            }
+//        }
+//        genreView.setText(genresString);
+//        Log.d("Qwerty010121", arrayList + " " + arrayList.size());
+
+    }
+
     private void openDeletDialog(){
         DeleteDialogFragment dialog = new DeleteDialogFragment();
         dialog.show(getSupportFragmentManager(), "deleteDialog");
@@ -415,6 +487,11 @@ private String TAG_DARK = "dark_theme";
                                     map.get("genre").toString(), map.get("time").toString(),
                                     map.get("place").toString(), map.get("short_comment").toString(),
                                     map.get("imagePath").toString(), map.get("timeAdd").toString()};
+                            chosenGenres = new TreeMap<>();
+                            chosenGenres.putAll((Map<String, Object>)map.get("genre"));
+//                            showChosenGenres(chosenGenres);
+//                            chosenGenres = (TreeMap<String, Object>) map.get("genre");
+                            Log.d("Qwerty001", chosenGenres.toString());
                             setViews();
                         }
                         else{
@@ -423,6 +500,33 @@ private String TAG_DARK = "dark_theme";
 
                     }
                 });
+    }
+
+
+    private void showChosenGenres(TreeMap<String, Object> chosenGenres){
+        if (chosenGenres == null){
+            return;
+        }
+        String genresString = "";
+        for (String genre : chosenGenres.keySet()){
+            if ((boolean)chosenGenres.get(genre)){
+                if (genresString==""){
+                    genresString += genre;
+                }
+                else{
+                    genresString += ",  " + genre;
+                }
+
+            }
+        }
+        genreView.setText(genresString);
+    }
+
+
+    public void addGenre(String newGenre){
+        Map<String, Object> map = new HashMap<>();
+        map.put(newGenre, false);
+        db.collection("genres").document(user).set(map, SetOptions.merge());
     }
 
 
@@ -436,7 +540,7 @@ private String TAG_DARK = "dark_theme";
 
         if (authorView.length()>50){Toast.makeText(EditNoteActivity.this,"Введено слишком большое имя автора ",Toast.LENGTH_SHORT).show(); return false;}
         else if (titleView.length()>50){Toast.makeText(EditNoteActivity.this,"Ведено слишком большое название книги ",Toast.LENGTH_SHORT).show();return false;}
-        else if (genreView.length()>50){ Toast.makeText(EditNoteActivity.this,"Введено слишком большое название жанра ",Toast.LENGTH_SHORT).show();return false;}
+//        else if (genreView.length()>50){ Toast.makeText(EditNoteActivity.this,"Введено слишком большое название жанра ",Toast.LENGTH_SHORT).show();return false;}
         else if (timeView.length()>50){Toast.makeText(EditNoteActivity.this,"Введен слишком большой текст для периода прочтения",Toast.LENGTH_SHORT).show();return false;}
         else if (placeView.length()>50){Toast.makeText(EditNoteActivity.this,"Введено слишком большое название места прочтения",Toast.LENGTH_SHORT).show();return false;}
         else if (shortCommentView.length()>50){Toast.makeText(EditNoteActivity.this,"Введен слишком большой краткий комментарий",Toast.LENGTH_SHORT).show();return false;}
@@ -450,7 +554,10 @@ private String TAG_DARK = "dark_theme";
         note.put("title", titleView.getText().toString());
         note.put("imagePath", imagePath);
         note.put("rating", String.valueOf(ratingView.getRating()));
-        note.put("genre", genreView.getText().toString());
+        if (chosenGenres == null){
+            chosenGenres = new TreeMap<>();
+        }
+        note.put("genre", chosenGenres);
         note.put("time", timeView.getText().toString());
         note.put("place", placeView.getText().toString());
         note.put("short_comment", shortCommentView.getText().toString());

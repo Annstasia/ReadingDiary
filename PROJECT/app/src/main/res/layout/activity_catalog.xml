@@ -8,17 +8,13 @@
         tools:context=".Activities.CatalogActivity"
     android:theme="@style/AppTheme"
         >
-        <include
-            android:id="@+id/appbarCatalog"
-            layout="@layout/long_click_toolbar">
-        </include>
 
         <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/buttonViewCatalog"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_below="@id/appbarCatalog"
             android:background="#ffffff"
+
         />
 
 

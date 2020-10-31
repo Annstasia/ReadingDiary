@@ -45,6 +45,8 @@ import com.google.firebase.storage.FirebaseStorage;
 import com.squareup.picasso.Picasso;
 
 import java.util.HashMap;
+import java.util.Map;
+import java.util.TreeMap;
 
 public class NoteActivity extends AppCompatActivity implements SettingsDialogFragment.SettingsDialogListener {
     // класс отвечает за активность с каталогами
@@ -260,7 +262,7 @@ public class NoteActivity extends AppCompatActivity implements SettingsDialogFra
 
     }
 
-    private void setViews(String path, String author, String title, String rating, String genre,
+    private void setViews(String path, String author, String title, String rating, TreeMap<String, Object> chosenGenres,
                           String time, String place, String shortComment){
         this.path = path;
         this.authorView.setText(author);
@@ -279,9 +281,22 @@ public class NoteActivity extends AppCompatActivity implements SettingsDialogFra
             this.ratingView.setVisibility(View.GONE);
         }
 
-        this.genreView.setText(genre);
-        if (title.equals("")){
-            this.titleView.setVisibility(View.GONE);
+        String genresString = "";
+        for (String genre : chosenGenres.keySet()){
+            if ((boolean)chosenGenres.get(genre)){
+                if (genresString==""){
+                    genresString += genre;
+                }
+                else{
+                    genresString += ",  " + genre;
+                }
+
+            }
+        }
+//        genreView.setText(genresString);
+        this.genreView.setText(genresString);
+        if (genresString.equals("")){
+            this.genreView.setVisibility(View.GONE);
         }
         this.timeView.setText(time);
         if (time.equals("")){
@@ -425,10 +440,15 @@ public class NoteActivity extends AppCompatActivity implements SettingsDialogFra
                         final HashMap<String, Object> map = (HashMap<String, Object>) documentSnapshot.getData();
                         imagePath = "";
                         if (map != null){
+                            TreeMap<String, Object> chosenGenres = new TreeMap<>();
+                            if (map.get("genre")!= null){
+                                chosenGenres.putAll((Map<String, Object>)map.get("genre"));
+                            }
+
                             setViews(
                                     map.get("path").toString(), map.get("author").toString(),
                                     map.get("title").toString(), map.get("rating").toString(),
-                                    map.get("genre").toString(), map.get("time").toString(),
+                                    chosenGenres, map.get("time").toString(),
                                     map.get("place").toString(), map.get("short_comment").toString()
                             );
                             Log.d("qwerty71", "mapNotNull");
@@ -446,7 +466,11 @@ public class NoteActivity extends AppCompatActivity implements SettingsDialogFra
                                             Log.d("qwerty71", "event" + (documentSnapshot==null));
                                             HashMap<String, Boolean> imagesLinks= (HashMap) documentSnapshot.getData();
                                             Log.d("qwerty71", "imageLinks " + (imagesLinks==null));
-                                            if (imagesLinks != null && imagesLinks.get(map.get("imagePath")) == true){
+                                            Log.d("qwerty71", "imagePath" + (map.get("imagePath") == null));
+                                            Log.d("qwerty71", "imagePathLinks" + (imagesLinks.get(map.get("imagePath").toString()) == null));
+
+
+                                            if (imagesLinks != null && imagesLinks.get(map.get("imagePath").toString()) != null && imagesLinks.get(map.get("imagePath").toString()) == true){
                                                 Log.d("qwerty71", "imagePath: " + map.get("imagePath").toString());
                                                 FirebaseStorage.getInstance().getReference(user).child(id0).child("Images").child(map.get("imagePath").toString()).getDownloadUrl()
                                                         .addOnSuccessListener(new OnSuccessListener<Uri>() {
@@ -458,7 +482,7 @@ public class NoteActivity extends AppCompatActivity implements SettingsDialogFra
                                                             }
                                                         });
                                             }
-                                            else if (imagesLinks != null && imagesLinks.get(map.get("imagePath")) == false){
+                                            else if (imagesLinks != null && imagesLinks.get(map.get("imagePath").toString()) != null && imagesLinks.get(map.get("imagePath").toString()) == false){
                                                 setDefaultImage();
                                             }
                                         }

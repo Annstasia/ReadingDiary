@@ -23,7 +23,6 @@ public class multispinner extends Spinner implements
     public multispinner(Context context)
     {
         super(context);
-//        listener = (multispinnerListener) context;
     }
 
     public void setType(int checkType){
@@ -135,7 +134,7 @@ public class multispinner extends Spinner implements
     }
     public void clearChecked(){
         for (int i = 0; i < checked.length; i++){
-            checked[i] = true;
+            checked[i] = false;
         }
         listener.onItemsChecked(checked, checkType);
     }

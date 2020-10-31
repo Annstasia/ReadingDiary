@@ -25,6 +25,7 @@ import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
 import androidx.recyclerview.widget.DefaultItemAnimator;
 import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.PagerSnapHelper;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.readingdiary.Classes.DeleteUser;
@@ -58,11 +59,12 @@ import javax.annotation.Nullable;
 
 public class GaleryFullViewActivity extends AppCompatActivity implements DeleteDialogFragment.DeleteDialogListener,
         SetCoverDialogFragment.SetCoverDialogListener, SettingsDialogFragment.SettingsDialogListener {
-// класс отвечает за активность с каталогами
-private String TAG_DARK = "dark_theme";
-        SharedPreferences sharedPreferences;
+    // класс отвечает за активность с каталогами
+    private String TAG_DARK = "dark_theme";
+    SharedPreferences sharedPreferences;
     private RecyclerView galeryFullView;;
     int position;
+    long positionName;
     private GaleryFullViewAdapter adapter;
     private List<ImageClass> images;
     private List<Long> names;
@@ -105,26 +107,59 @@ private String TAG_DARK = "dark_theme";
         }
         imagePathsDoc = FirebaseFirestore.getInstance().collection("Common").document(user).collection(id).document("Images");
         imageStorage = FirebaseStorage.getInstance().getReference(user).child(id).child("Images");
-        position = Integer.parseInt(args.get("position").toString());
+//        position = Integer.parseInt(args.get("position").toString());
+        positionName = Long.parseLong(args.get("position").toString());
+        position = 0;
         images = new ArrayList<>();
         names = new ArrayList<>();
         Button deleteButton = (Button) findViewById(R.id.deleteFullImageButton);
         Button coverButton = (Button) findViewById(R.id.setAsCoverButton);
         galeryFullView = (RecyclerView) findViewById(R.id.galery_full_recycle_view);
-
-
+        final PagerSnapHelper pagerSnapHelper = new PagerSnapHelper();
+        pagerSnapHelper.attachToRecyclerView(galeryFullView);
         // добавляем адаптер
         adapter = new GaleryFullViewAdapter(images, getApplicationContext());
-        LinearLayoutManager layoutManager = new LinearLayoutManager(this, RecyclerView.HORIZONTAL, false);
-        layoutManager.scrollToPosition(position);
+        final LinearLayoutManager layoutManager = new LinearLayoutManager(this, RecyclerView.HORIZONTAL, false);
         RecyclerView.ItemAnimator itemAnimator = new DefaultItemAnimator();
         galeryFullView.setAdapter(adapter);
         galeryFullView.setLayoutManager(layoutManager);
-
         galeryFullView.setItemAnimator(itemAnimator);
-        final LinearLayout buttonsLayout = (LinearLayout) findViewById(R.id.full_view_button_layout);
+//        scrollToPosition(position);
+//        galeryFullView.scrollToPosition(position);
+//        galeryFullView.post(new Runnable() {
+//            @Override
+//            public void run() {
+//                View view = layoutManager.findViewByPosition(position);
+//                Log.d("qwerty786876", (view==null) + "");
+//                if (view == null) {
+////                Log.e(WingPickerView.class.getSimpleName(), "Cant find target View for initial Snap");
+//                    return;
+//                }
+//
+//                int[] snapDistance = pagerSnapHelper.calculateDistanceToFinalSnap(layoutManager, view);
+//                if (snapDistance[0] != 0 || snapDistance[1] != 0) {
+//                    galeryFullView.scrollBy(snapDistance[0], snapDistance[1]);
+//                }
+//                Log.d("qwerty786876", snapDistance[0] + " " + snapDistance[1]);
+//            }
+//        });
+//        galeryFullView.post(()->{
+//            View view = layoutManager.findViewByPosition(position);
+//            if (view == null) {
+////                Log.e(WingPickerView.class.getSimpleName(), "Cant find target View for initial Snap");
+//                return;
+//            }
+//
+//            int[] snapDistance = pagerSnapHelper.calculateDistanceToFinalSnap(layoutManager, view);
+//            if (snapDistance[0] != 0 || snapDistance[1] != 0) {
+//                galeryFullView.scrollBy(snapDistance[0], snapDistance[1]);
+//            }
+//        });
 
+        final LinearLayout buttonsLayout = (LinearLayout) findViewById(R.id.full_view_button_layout);
         galeryShapshotListener();
+
+        Log.d("qwerty4557", position+"");
 
         final Handler uiHandler = new Handler();
 
@@ -170,6 +205,41 @@ private String TAG_DARK = "dark_theme";
         });
     }
 
+    private void foo(LinearLayoutManager layoutManager, PagerSnapHelper pagerSnapHelper){
+        View view = layoutManager.findViewByPosition(position);
+        if (view == null) {
+//                Log.e(WingPickerView.class.getSimpleName(), "Cant find target View for initial Snap");
+            return;
+        }
+
+        int[] snapDistance = pagerSnapHelper.calculateDistanceToFinalSnap(layoutManager, view);
+        if (snapDistance[0] != 0 || snapDistance[1] != 0) {
+            galeryFullView.scrollBy(snapDistance[0], snapDistance[1]);
+        }
+    }
+
+    private void scrollToPosition(final int position){
+        galeryFullView.scrollToPosition(position);
+        RecyclerView.ViewHolder viewHolder = galeryFullView.findViewHolderForLayoutPosition(position);
+        if (viewHolder != null){
+            galeryFullView.scrollToPosition(position);
+        }
+        else{
+            galeryFullView.addOnScrollListener(new RecyclerView.OnScrollListener() {
+                @Override
+                public void onScrolled(@NonNull RecyclerView recyclerView, int dx, int dy) {
+                    super.onScrolled(recyclerView, dx, dy);
+                    galeryFullView.removeOnScrollListener(this);
+                    if (dx == 0){
+                        scrollToPosition(position);
+                    }
+                }
+            });
+            galeryFullView.scrollToPosition(position);
+        }
+
+    }
+
     @Override
     public void onDeleteClicked()
     {
@@ -195,7 +265,7 @@ private String TAG_DARK = "dark_theme";
 
 
 
-        @Override
+    @Override
     public boolean onCreateOptionsMenu(Menu menu){
         getMenuInflater().inflate(R.menu.base_menu, menu);
         return true;
@@ -271,6 +341,49 @@ private String TAG_DARK = "dark_theme";
 
     }
 
+    public void updateImages(HashMap<String, Boolean> hashMap){
+        for (String key : hashMap.keySet()){
+            final Long l = Long.parseLong(key);
+            if (names.contains(l) && hashMap.get(key) == true && images.get(names.indexOf(l)).getType()==0){
+                imageStorage.child(key).getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
+                    @Override
+                    public void onSuccess(Uri uri) {
+                        images.set(names.indexOf(l), new ImageClass(uri));
+                        adapter.notifyItemChanged(names.indexOf(l));
+                    }
+                });
+            }
+            else if (!names.contains(l)){
+                int index0 = names.size();
+                for (int i = 0; i < names.size(); i++){
+                    if (names.get(i) > l){
+                        index0 = i;
+                        Log.d("qwerty3248632", names.get(i) + " " + l + " " + positionName);
+                        break;
+                    }
+                }
+                names.add(index0, l);
+                images.add(index0, new ImageClass(BitmapFactory.decodeResource(getApplicationContext().getResources(), R.drawable.no_image)));
+                final int finalIndex0 = index0;
+                adapter.notifyItemInserted(index0);
+                galeryFullView.scrollToPosition(names.indexOf(positionName));
+                Log.d("qwerty2312", names.size() + " hash " + hashMap.size());
+
+                if (hashMap.get(key)){
+                    imageStorage.child(key).getDownloadUrl().
+                            addOnSuccessListener(new OnSuccessListener<Uri>() {
+                                @Override
+                                public void onSuccess(Uri uri) {
+//                                    names.add(finalIndex0, l);
+                                    images.set(names.indexOf(l), new ImageClass(uri));
+                                    adapter.notifyItemChanged(names.indexOf(l));
+                                }
+                            });
+                }
+            }
+        }
+    }
+
 
     public void galeryShapshotListener(){
         imagePathsDoc.addSnapshotListener(new EventListener<DocumentSnapshot>() {
@@ -282,85 +395,85 @@ private String TAG_DARK = "dark_theme";
                     return;
                 }
                 else{
-                    HashMap<String, Boolean> hashMap = (HashMap) documentSnapshot.getData();
+                    final HashMap<String, Boolean> hashMap = (HashMap) documentSnapshot.getData();
                     if (hashMap != null){
-                        for (String key : hashMap.keySet()){
-                            final Long l = Long.parseLong(key);
-                            if (names.contains(l) && hashMap.get(key) == true && images.get(names.indexOf(l)).getType()==0){
-                                imageStorage.child(key).getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
-                                    @Override
-                                    public void onSuccess(Uri uri) {
-                                        Log.d("qwerty31", "HI2");
-                                        images.set(names.indexOf(l), new ImageClass(uri));
-                                        adapter.notifyItemChanged(names.indexOf(l));
-                                    }
-                                })
-                                        .addOnFailureListener(new OnFailureListener() {
+                        Log.d("qwerty24324", "hi from galery " + "hashMap");
+                        if (!names.contains(positionName) && hashMap.containsKey(positionName+"")){
+                            Log.d("qwerty24324", "hi from galery " + "contains");
+//                            long l = positionName;
+                            int index=names.size();
+                            for (int i = 0; i < names.size(); i++){
+                                if (names.get(i) > positionName){
+                                    index = i;
+                                    break;
+                                }
+                            }
+                            final int finalIndex = index;
+                            if (hashMap.get(positionName+"")==false){
+                                names.add(index, positionName);
+                                images.add(index, new ImageClass(BitmapFactory.decodeResource(getApplicationContext().getResources(), R.drawable.no_image)));
+                                adapter.notifyItemInserted(index);
+                                position = index;
+                                galeryFullView.scrollToPosition(position);
+                                updateImages(hashMap);
+                            }
+                            else{
+                                imageStorage.child(positionName+"").getDownloadUrl().
+                                        addOnSuccessListener(new OnSuccessListener<Uri>() {
                                             @Override
-                                            public void onFailure(@NonNull Exception e) {
-                                               // Toast.makeText(getApplicationContext(), e.getMessage(), Toast.LENGTH_LONG).show();
+                                            public void onSuccess(Uri uri) {
+                                                names.add(finalIndex, positionName);
+                                                images.add(finalIndex, new ImageClass(uri));
+                                                adapter.notifyItemInserted(images.size()-1);
+                                                position = finalIndex;
+                                                galeryFullView.scrollToPosition(finalIndex);
+                                                Log.d("qwerty24324", "hi from falery " + finalIndex);
+                                                updateImages(hashMap);
                                             }
                                         });
-
-                            }
-                            else if (!names.contains(l)){
-                                if (hashMap.get(key)==false){
-                                    Log.d("qwerty31", "HI3");
-//                                    names.add(l);
-//                                    images.add(new ImageClass(BitmapFactory.decodeResource(getApplicationContext().getResources(), R.drawable.no_image)));
-//                                    adapter.notifyItemInserted(images.size()-1);
-                                    int index = -1;
-                                    for (int i = 0; i < names.size(); i++){
-                                        if (names.get(i) > l){
-                                            index = i;
-                                            break;
-                                        }
-                                    }
-                                    if (index==-1){
-                                        names.add(l);
-                                        images.add(new ImageClass(BitmapFactory.decodeResource(getApplicationContext().getResources(), R.drawable.no_image)));
-                                        adapter.notifyItemInserted(images.size()-1);
-                                    }
-                                    else{
-                                        names.add(index, l);
-                                        images.add(index, new ImageClass(BitmapFactory.decodeResource(getApplicationContext().getResources(), R.drawable.no_image)));
-                                        adapter.notifyItemInserted(index);
-                                    }
-                                }
-                                else{
-                                    imageStorage.child(key).getDownloadUrl().
-                                            addOnSuccessListener(new OnSuccessListener<Uri>() {
-                                                @Override
-                                                public void onSuccess(Uri uri) {
-                                                    int index = -1;
-                                                    for (int i = 0; i < names.size(); i++){
-                                                        if (names.get(i) > l){
-                                                            index = i;
-                                                            break;
-                                                        }
-                                                    }
-                                                    if (index==-1){
-                                                        names.add(l);
-                                                        images.add(new ImageClass(uri));
-                                                        adapter.notifyItemInserted(images.size()-1);
-                                                    }
-                                                    else{
-                                                        names.add(index, l);
-                                                        images.add(index, new ImageClass(uri));
-                                                        adapter.notifyItemInserted(index);
-                                                    }
-                                                }
-                                            })
-                                            .addOnFailureListener(new OnFailureListener() {
-                                                @Override
-                                                public void onFailure(@NonNull Exception e) {
-                                                    Log.d("qwerty31", "HI5");
-                                                   // Toast.makeText(getApplicationContext(), e.getMessage(), Toast.LENGTH_LONG).show();
-                                                }
-                                            });
-                                }
                             }
                         }
+                        else{
+                            updateImages(hashMap);
+                        }
+//                        for (String key : hashMap.keySet()){
+//                            final Long l = Long.parseLong(key);
+//                            if (names.contains(l) && hashMap.get(key) == true && images.get(names.indexOf(l)).getType()==0){
+//                                imageStorage.child(key).getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
+//                                    @Override
+//                                    public void onSuccess(Uri uri) {
+//                                        images.set(names.indexOf(l), new ImageClass(uri));
+//                                        adapter.notifyItemChanged(names.indexOf(l));
+//                                    }
+//                                });
+//                            }
+//                            else if (!names.contains(l)){
+//                                int index0 = names.size();
+//                                for (int i = 0; i < names.size(); i++){
+//                                    if (names.get(i) > l){
+//                                        index0 = i;
+//                                        break;
+//                                    }
+//                                }
+//                                final int finalIndex0 = index0;
+//                                if (hashMap.get(key)==false){
+//                                    names.add(index0, l);
+//                                    images.add(index0, new ImageClass(BitmapFactory.decodeResource(getApplicationContext().getResources(), R.drawable.no_image)));
+//                                    adapter.notifyItemInserted(index0);
+//                                }
+//                                else{
+//                                    imageStorage.child(key).getDownloadUrl().
+//                                            addOnSuccessListener(new OnSuccessListener<Uri>() {
+//                                                @Override
+//                                                public void onSuccess(Uri uri) {
+//                                                        names.add(finalIndex0, l);
+//                                                        images.add(finalIndex0, new ImageClass(uri));
+//                                                        adapter.notifyItemInserted(finalIndex0);
+//                                                }
+//                                            });
+//                                }
+//                            }
+//                        }
                     }
 
                 }
@@ -396,3 +509,4 @@ private String TAG_DARK = "dark_theme";
 
     }
 }
+

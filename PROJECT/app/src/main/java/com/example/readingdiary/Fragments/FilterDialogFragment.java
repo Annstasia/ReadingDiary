@@ -27,25 +27,23 @@ public class FilterDialogFragment extends DialogFragment implements multispinner
 //    String[] choices;
     List<String> authors = new ArrayList<>();
     List<String> genres = new ArrayList<>();
-    private ArrayList<String> uncheckedAuthors = new ArrayList<>();
-    private ArrayList<String> uncheckedGenres = new ArrayList<>();
+    private ArrayList<String> checkedAuthors = new ArrayList<>();
+    private ArrayList<String> checkedGenres = new ArrayList<>();
 
     boolean[] authorsCheck;
     boolean[] genresCheck;
     int position;
     public FilterDialogFragment(TreeSet<String> authors, TreeSet<String> genres,
-                                ArrayList<String> uncheckedAuthors,
-                                ArrayList<String> uncheckedGenres){
+                                ArrayList<String> checkedAuthors,
+                                ArrayList<String> checkedGenres){
         this.authors = new ArrayList<>(authors);
         this.genres = new ArrayList<>(genres);
-        Log.d("qwerty0101", uncheckedAuthors.size() + " " + uncheckedGenres.size());
-        this.uncheckedAuthors = uncheckedAuthors;
-        this.uncheckedGenres = uncheckedGenres;
+        this.checkedAuthors = checkedAuthors;
+        this.checkedGenres = checkedGenres;
         authorsCheck = new boolean[this.authors.size()];
         genresCheck = new boolean[this.genres.size()];
         for (int i = 0; i < authorsCheck.length; i++){
-            if (uncheckedAuthors.contains(this.authors.get(i))){
-                Log.d("qwerty0101", "uncheckedAuthor");
+            if (!checkedAuthors.contains(this.authors.get(i))){
                 authorsCheck[i]=false;
             }
             else{
@@ -54,7 +52,7 @@ public class FilterDialogFragment extends DialogFragment implements multispinner
 
         }
         for (int i = 0; i < genresCheck.length; i++){
-            if (uncheckedGenres.contains(this.genres.get(i))){
+            if (!checkedGenres.contains(this.genres.get(i))){
                 genresCheck[i]=false;
             }
             else{
@@ -72,6 +70,7 @@ public class FilterDialogFragment extends DialogFragment implements multispinner
         MaterialAlertDialogBuilder builder = new MaterialAlertDialogBuilder(getActivity());
         LayoutInflater inflater = getActivity().getLayoutInflater();
         View view = inflater.inflate(R.layout.filter_dialog, null);
+
         multispinner genreSpinner = (multispinner) view.findViewById(R.id.genre_spinner);
         genreSpinner.setType(0);
         multispinner authorSpinner = (multispinner) view.findViewById(R.id.author_spinner);
@@ -110,26 +109,25 @@ public class FilterDialogFragment extends DialogFragment implements multispinner
     }
 
     private void acceptChanges(){
-        ArrayList<String> uncheckedAuthors = new ArrayList<>();
-        ArrayList<String> uncheckedGenres = new ArrayList<>();
+        ArrayList<String> checkedAuthors = new ArrayList<>();
+        ArrayList<String> checkedGenres = new ArrayList<>();
         for (int i = 0; i < authorsCheck.length; i++){
-            if (authorsCheck[i]==false){
-                uncheckedAuthors.add(authors.get(i));
+            if (authorsCheck[i]==true){
+                checkedAuthors.add(authors.get(i));
             }
         }
         for (int i = 0; i < genresCheck.length; i++){
-            if (genresCheck[i]==false){
-                uncheckedGenres.add(genres.get(i));
+            if (genresCheck[i]==true){
+                checkedGenres.add(genres.get(i));
             }
         }
-        listener.onFilterClick(uncheckedAuthors, uncheckedGenres);
+        listener.onFilterClick(checkedAuthors, checkedGenres);
 
 
     }
 
     public interface FilterDialogListener{
         void onFilterClick(ArrayList<String> authors, ArrayList<String> genres);
-//        void onSortClick(int position);
     }
 
     @Override
