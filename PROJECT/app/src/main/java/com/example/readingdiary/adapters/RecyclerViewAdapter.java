@@ -1,7 +1,6 @@
 package com.example.readingdiary.adapters;
 
 import android.content.Context;
-import android.content.res.Resources;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -56,10 +55,10 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
     public ViewHolder onCreateViewHolder(ViewGroup viewGroup, int viewType) {
         View v;
         if (viewType == TYPE_ITEM1){
-            v = LayoutInflater.from(viewGroup.getContext()).inflate(R.layout.recycler_catalog_item0, viewGroup, false);
+            v = LayoutInflater.from(viewGroup.getContext()).inflate(R.layout.item_catalog_recycler0, viewGroup, false);
         }
         else{
-            v = LayoutInflater.from(viewGroup.getContext()).inflate(R.layout.recycler_catalog_item1, viewGroup, false);
+            v = LayoutInflater.from(viewGroup.getContext()).inflate(R.layout.item_catalog_recycler1, viewGroup, false);
         }
         ViewHolder vh = new ViewHolder(v);
         return vh;

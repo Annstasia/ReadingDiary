@@ -399,17 +399,18 @@ public class CatalogActivity extends AppCompatActivity implements SortDialogFrag
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
         if (fragment.toString()=="catalog"){
             if (item.getItemId()== R.id.item_delete){
-                action_mode=false;
-                mAdapter.setActionMode(false);
-//            deleteSelectedRealNote();
-//            deleteSelectedDirectories();
-                mAdapter.notifyDataSetChanged();
-                toolbar.getMenu().clear();
-                toolbar.inflateMenu(R.menu.menu_catalog);
-                toolbar.inflateMenu(R.menu.base_menu);
-                menuType = 0;
-                counterText.setText("Каталог");
-                count=0;
+                ((CatalogFragment)fragment).deleteClick();
+//                action_mode=false;
+//                mAdapter.setActionMode(false);
+////            deleteSelectedRealNote();
+////            deleteSelectedDirectories();
+//                mAdapter.notifyDataSetChanged();
+//                toolbar.getMenu().clear();
+//                toolbar.inflateMenu(R.menu.menu_catalog);
+//                toolbar.inflateMenu(R.menu.base_menu);
+//                menuType = 0;
+//                counterText.setText("Каталог");
+//                count=0;
             }
             if (item.getItemId() == R.id.item_search){
                 ((CatalogFragment)fragment).searchCLick1();

@@ -230,6 +230,26 @@ public class CatalogFragment extends Fragment {
 
     }
 
+    public void deleteClick(){
+        action_mode=false;
+        mAdapter.setActionMode(false);
+        deleteSelectedRealNote();
+        deleteSelectedDirectories();
+        mAdapter.notifyDataSetChanged();
+        toolbar.getMenu().clear();
+        toolbar.inflateMenu(R.menu.menu_catalog);
+        menuType = 0;
+        counterText.setText("Каталог");
+        count=0;
+        toolbar.setNavigationIcon(R.drawable.ic_navigation_light);
+        toolbar.setNavigationOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                ((CatalogActivity)getActivity()).drawerLayout.openDrawer(GravityCompat.START);
+            }
+        });
+    }
+
     public void searchCLick1(){
         Log.d("qwerty123456", "search");
         counterText.setVisibility(View.GONE);
@@ -332,6 +352,27 @@ public class CatalogFragment extends Fragment {
                 counterText.setText(count + " элементов выбрано");
                 toolbar.getMenu().clear();
                 toolbar.inflateMenu(R.menu.menu_long_click);
+                toolbar.setNavigationIcon(R.drawable.ic_back_light);
+                toolbar.setNavigationOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        action_mode=false;
+                        mAdapter.setActionMode(false);
+                        mAdapter.notifyDataSetChanged();
+                        toolbar.getMenu().clear();
+                        toolbar.inflateMenu(R.menu.menu_catalog);
+                        menuType = 0;
+                        counterText.setText("Каталог");
+                        count=0;
+                        toolbar.setNavigationIcon(R.drawable.ic_navigation_light);
+                        toolbar.setNavigationOnClickListener(new View.OnClickListener() {
+                            @Override
+                            public void onClick(View v) {
+                                ((CatalogActivity)getActivity()).drawerLayout.openDrawer(GravityCompat.START);
+                            }
+                        });
+                    }
+                });
                 menuType=1;
                 mAdapter.notifyDataSetChanged();
 //                getSupportActionBar().setDisplayHomeAsUpEnabled(true);
@@ -836,6 +877,7 @@ public class CatalogFragment extends Fragment {
         }
         mAdapter.notifyDataSetChanged();
     }
+
 
     public void onSortClick(int position) {
         sortType = position;
