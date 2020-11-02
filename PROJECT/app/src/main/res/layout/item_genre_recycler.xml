@@ -2,16 +2,22 @@
     <androidx.cardview.widget.CardView
         xmlns:android="http://schemas.android.com/apk/res/android"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content" >
+        android:layout_height="wrap_content"
+        android:layout_margin="5dp">
     <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent">
         <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/genre_view"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:hint="жанр"
             android:layout_toLeftOf="@id/edit_genre"
-            android:layout_margin="10dp">
+            android:layout_margin="5dp"
+            android:padding="5dp"
+            android:enabled="false"
+            android:background="@drawable/round_border"
+            >
         </com.google.android.material.textfield.TextInputEditText>
         <ImageView
             android:id="@+id/edit_genre"
@@ -19,7 +25,7 @@
             android:layout_height="wrap_content"
             android:src="@drawable/ic_edit_dark"
             android:layout_toLeftOf="@id/delete_genre"
-            android:layout_margin="10dp"
+            android:layout_margin="10dp"/>
         <ImageView
             android:id="@+id/delete_genre"
             android:layout_width="wrap_content"

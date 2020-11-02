@@ -19,6 +19,7 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.FirebaseFirestore;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -194,6 +195,18 @@ public class AuthorizationActivity extends AppCompatActivity {
         map.put("классика", false);
         map.put("научно-популярное", false);
         db.collection("genres").document(user.getUid()).set(map);
+
+        //         map.put(System.currentTimeMillis()+"", "фантастика");
+        //        map.put(System.currentTimeMillis()+"", "приключения");
+        //        map.put(System.currentTimeMillis()+"", "детективы");
+        //        map.put(System.currentTimeMillis()+"", "фэнтези");
+        //        map.put(System.currentTimeMillis()+"", "наука");
+        //        map.put(System.currentTimeMillis()+"", "классика");
+        //        map.put(System.currentTimeMillis()+"", "научно-популярное");
+        //        db.collection("genres").document(user.getUid()).set(map);
+
+
+
 
     }
 }
