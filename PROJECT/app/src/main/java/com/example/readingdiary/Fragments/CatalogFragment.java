@@ -1,4 +1,4 @@
-package com.example.readingdiary.Classes.ui;
+package com.example.readingdiary.Fragments;
 
 import android.app.Activity;
 import android.os.Bundle;
@@ -58,6 +58,7 @@ import com.example.readingdiary.Classes.DeleteUser;
 import com.example.readingdiary.Classes.Directory;
 import com.example.readingdiary.Classes.Note;
 import com.example.readingdiary.Classes.RealNote;
+import com.example.readingdiary.Classes.ui.CatalogViewModel;
 import com.example.readingdiary.Fragments.AddShortNameFragment;
 import com.example.readingdiary.Fragments.FilterDialogFragment;
 import com.example.readingdiary.Fragments.SettingsDialogFragment;
@@ -101,9 +102,7 @@ import com.example.readingdiary.R;
 
 public class CatalogFragment extends Fragment {
     public interface OnCatalogFragmentListener{
-        public void filterClick(TreeSet<String> authors, TreeSet<String> genres, ArrayList<String> checkedAuthors, ArrayList<String> checkedGenres);
-        public void sortClick();
-        public void changeFragment(Fragment fragment, String type);
+        public void changeFragment(Fragment fragment);
     }
     private OnCatalogFragmentListener onCatalogFragmentListener;
     private CatalogViewModel catalogViewModel;
@@ -158,7 +157,7 @@ public class CatalogFragment extends Fragment {
 
     public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container, Bundle savedInstanceState) {
-        catalogViewModel = ViewModelProviders.of(this).get(CatalogViewModel.class);
+//        catalogViewModel = ViewModelProviders.of(this).get(CatalogViewModel.class);
         root = inflater.inflate(R.layout.activity_catalog, container, false);
         if (FirebaseAuth.getInstance().getCurrentUser()==null){
             user=null;
@@ -214,7 +213,7 @@ public class CatalogFragment extends Fragment {
 //                onCatalogFragmentListener.addNote(parent);
             }
         });
-        onCatalogFragmentListener.changeFragment((Fragment)this, "catalog");
+        onCatalogFragmentListener.changeFragment((Fragment)this);
         toolbar = getActivity().findViewById(R.id.toolbar_navigation);
 //        toolbar.getMenu().clear();
         toolbar.getMenu().clear();
@@ -236,33 +235,58 @@ public class CatalogFragment extends Fragment {
     }
 
     public void filterClick(){
-        db.collection("genres").document(user).get().addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
-            @Override
-            public void onSuccess(DocumentSnapshot documentSnapshot) {
-                if (documentSnapshot != null && documentSnapshot.getData() != null){
-                    TreeSet<String> genres =  new TreeSet<>();
-                    genres.addAll(documentSnapshot.getData().keySet());
-                    TreeSet<String> authors = new TreeSet<>();
-                    for (Note note: notes) {
-                        if (note.getItemType()==0){
-                            authors.add(((RealNote) note).getAuthor());
+        ArrayList<String> authors = new ArrayList<>();
+        for (Note note: notes) {
+            if (note.getItemType()==0){
+                authors.add(((RealNote) note).getAuthor());
 //                    genres.add(((RealNote) note).getGenre());
-                        }
-                    }
-                    if (noFilter){
-                        checkedAuthors = new ArrayList<>(authors);
-                        checkedGenres = new ArrayList<>(genres);
-                    }
-                        onCatalogFragmentListener.filterClick(authors, genres, checkedAuthors, checkedGenres);
-                        FilterDialogFragment filterDialogFragment = new FilterDialogFragment(authors, genres, checkedAuthors, checkedGenres);
-                        FragmentManager manager = getActivity().getSupportFragmentManager();
-                        FragmentTransaction transaction = manager.beginTransaction();
-                        filterDialogFragment.show(transaction, "dialog");
-                }
             }
-        });
-
+        }
+        ArrayList<String> genresList = new ArrayList<>();
+        for (Object ob : genres.values()) {
+            genresList.add(ob.toString());
+        }
+        Collections.sort(authors);
+//        Collections.sort(genresList);
+        if (noFilter){
+            checkedAuthors = new ArrayList<>(authors);
+            checkedGenres = new ArrayList<>(genresList);
+        }
+//        onCatalogFragmentListener.filterClick(authors, genres, new ArrayList<String>(genres.keySet()), checkedAuthors, checkedGenres);
+        FilterDialogFragment filterDialogFragment = new FilterDialogFragment(authors, genresList, new ArrayList<String>(genres.keySet()), checkedAuthors, checkedGenres);
+        FragmentManager manager = getActivity().getSupportFragmentManager();
+        FragmentTransaction transaction = manager.beginTransaction();
+        filterDialogFragment.show(transaction, "dialog");
     }
+
+
+//        db.collection("genres").document(user).get().addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
+//            @Override
+//            public void onSuccess(DocumentSnapshot documentSnapshot) {
+//                if (documentSnapshot != null && documentSnapshot.getData() != null){
+//                    TreeSet<String> genres =  new TreeSet<>();
+//                    genres.addAll(documentSnapshot.getData().keySet());
+//                    TreeSet<String> authors = new TreeSet<>();
+//                    for (Note note: notes) {
+//                        if (note.getItemType()==0){
+//                            authors.add(((RealNote) note).getAuthor());
+////                    genres.add(((RealNote) note).getGenre());
+//                        }
+//                    }
+//                    if (noFilter){
+//                        checkedAuthors = new ArrayList<>(authors);
+//                        checkedGenres = new ArrayList<>(genres);
+//                    }
+//                        onCatalogFragmentListener.filterClick(authors, genres, checkedAuthors, checkedGenres);
+//                        FilterDialogFragment filterDialogFragment = new FilterDialogFragment(authors, genres, checkedAuthors, checkedGenres);
+//                        FragmentManager manager = getActivity().getSupportFragmentManager();
+//                        FragmentTransaction transaction = manager.beginTransaction();
+//                        filterDialogFragment.show(transaction, "dialog");
+//                }
+//            }
+//        });
+
+//    }
 
     public void deleteClick(){
         action_mode=false;
@@ -893,24 +917,21 @@ public class CatalogFragment extends Fragment {
         selectionDirectoriesList.clear();
     }
 //
-    public void onFilterClick(ArrayList<String> checkedAuthors, ArrayList<String> checkedGenres) {
+    public void onFilterClick(ArrayList<String> checkedAuthors, ArrayList<String> checkedGenres, ArrayList<String> checkedGenresID) {
         noFilter = false;
-        Log.d("qwerty878", "filterFragment " + checkedAuthors + "\n  " + checkedGenres);
         this.checkedAuthors=checkedAuthors;
         this.checkedGenres=checkedGenres;
         for (int i = 0; i < notes.size(); i++){
             if (notes.get(i).getItemType() != 0){
-                Log.d("qwerty878", "not null type");
                 continue;
             }
             if (!checkedAuthors.contains(((RealNote)notes.get(i)).getAuthor())){
-                Log.d("qwerty878", "not contains author");
                 notes.get(i).setVisibility(false);
                 continue;
             }
             boolean visible = false;
-            for (String j : checkedGenres){
-                if (((RealNote)notes.get(i)).getGenre().get(j) != null && (boolean)((RealNote)notes.get(i)).getGenre().get(j)){
+            for (String j : checkedGenresID){
+                if (((RealNote)notes.get(i)).getGenre().get(j) != null){
                     visible=true;
                     break;
                 }

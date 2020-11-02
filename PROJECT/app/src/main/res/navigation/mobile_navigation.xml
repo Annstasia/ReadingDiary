@@ -13,25 +13,24 @@
     </fragment>
     <fragment
         android:id="@+id/nav_change_password"
-        android:name="com.example.readingdiary.Classes.ui.ChangePasswordFragment"
+        android:name="com.example.readingdiary.Fragments.ChangePasswordFragment"
         android:label="Сменить пароль"
         tools:layout="@layout/fragment_change_password">
     </fragment>
     <fragment
         android:id="@+id/nav_log_out"
-        android:name="com.example.readingdiary.Classes.ui.LogOutFragment"
-        android:label="Выйти"
-        tools:layout="@layout/fragment_log_out">
+        android:name="com.example.readingdiary.Fragments.LogOutFragment"
+        android:label="Выйти">
     </fragment>
     <fragment
         android:id="@+id/nav_delete_account"
-        android:name="com.example.readingdiary.Classes.ui.DeleteAccountFragment"
+        android:name="com.example.readingdiary.Fragments.DeleteAccountFragment"
         android:label="Удалить аккаунт"
         tools:layout="@layout/fragment_delete_account">
     </fragment>
     <fragment
         android:id="@+id/nav_catalog"
-        android:name="com.example.readingdiary.Classes.ui.CatalogFragment"
+        android:name="com.example.readingdiary.Fragments.CatalogFragment"
         android:label="Каталог"
         tools:layout="@layout/activity_catalog"/>
 

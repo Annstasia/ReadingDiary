@@ -35,7 +35,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.example.readingdiary.Classes.Directory;
 import com.example.readingdiary.Classes.Note;
 import com.example.readingdiary.Classes.RealNote;
-import com.example.readingdiary.Classes.ui.CatalogFragment;
+import com.example.readingdiary.Fragments.CatalogFragment;
 import com.example.readingdiary.Fragments.FilterDialogFragment;
 import com.example.readingdiary.Fragments.SortDialogFragment;
 import com.example.readingdiary.R;
@@ -43,10 +43,10 @@ import com.example.readingdiary.adapters.CatalogButtonAdapter;
 import com.example.readingdiary.adapters.RecyclerViewAdapter;
 import com.google.android.material.appbar.MaterialToolbar;
 import com.google.android.material.navigation.NavigationView;
+import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.FirebaseFirestore;
 
 import java.util.ArrayList;
-import java.util.TreeSet;
 
 
 public class CatalogActivity extends AppCompatActivity implements SortDialogFragment.SortDialogListener, FilterDialogFragment.FilterDialogListener, CatalogFragment.OnCatalogFragmentListener {
@@ -173,20 +173,19 @@ public class CatalogActivity extends AppCompatActivity implements SortDialogFrag
 //        NavigationUI.setupActionBarWithNavController(this, navController, mAppBarConfiguration);
         NavigationUI.setupWithNavController(navigationView, navController);
         NavigationUI.setupActionBarWithNavController(this, navController, drawerLayout);
-//        toolbar.inflateMenu(R.menu.menu_catalog);
-//        setupDrawerContent(navigationView);
+
+        View headerView = navigationView.getHeaderView(0);
+        ((TextView)headerView.findViewById(R.id.textView)).setText(FirebaseAuth.getInstance().getCurrentUser().getEmail());
 
     }
 
 
 
+
         @Override
-    public void changeFragment(Fragment fragment, String type) {
+    public void changeFragment(Fragment fragment) {
         this.fragment = fragment;
 //        this.fragmentType = type;
-        if (type == "catalog"){
-
-        }
     }
 
     //    private void setupDrawerContent(NavigationView navigationView) {
@@ -346,16 +345,16 @@ public class CatalogActivity extends AppCompatActivity implements SortDialogFrag
 //        intent.putExtra("id", ID);
 //        startActivityForResult(intent, NOTE_REQUEST_CODE);
 //    }
+//
+//    @Override
+//    public void sortClick() {
+//
+//    }
 
-    @Override
-    public void sortClick() {
-
-    }
-
-    @Override
-    public void filterClick(TreeSet<String> authors, TreeSet<String> genres, ArrayList<String> checkedAuthors, ArrayList<String> checkedGenres) {
-
-    }
+//    @Override
+//    public void filterClick(TreeSet<String> authors, TreeSet<String> genres, ArrayList<String> checkedAuthors, ArrayList<String> checkedGenres) {
+//
+//    }
 
     @Override
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
@@ -657,9 +656,9 @@ public class CatalogActivity extends AppCompatActivity implements SortDialogFrag
 //    }
 
     @Override
-    public void onFilterClick(ArrayList<String> checkedAuthors, ArrayList<String> checkedGenres) {
+    public void onFilterClick(ArrayList<String> checkedAuthors, ArrayList<String> checkedGenres, ArrayList<String> checkedGenresID) {
         if (fragment.toString() == "catalog"){
-            ((CatalogFragment)fragment).onFilterClick(checkedAuthors, checkedGenres);
+            ((CatalogFragment)fragment).onFilterClick(checkedAuthors, checkedGenres, checkedGenresID);
         }
 //        noFilter = false;
 //        this.checkedAuthors=checkedAuthors;

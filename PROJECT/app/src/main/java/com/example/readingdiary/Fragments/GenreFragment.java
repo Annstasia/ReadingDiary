@@ -36,10 +36,12 @@ public class GenreFragment extends Fragment {
     private FirebaseFirestore db = FirebaseFirestore.getInstance();
     private String user;
     private GenreViewModel genreViewModel;
-    private ArrayList<String> genres;
+    private ArrayList<String> sortedGenres;
     private RecyclerView recyclerView;
     private View root;
     private GenreAdapter adapter;
+    private ArrayList<String> genres;
+    private ArrayList<String> genresID;
 
     public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container, Bundle savedInstanceState) {
@@ -49,8 +51,13 @@ public class GenreFragment extends Fragment {
             @Override
             public void onSuccess(DocumentSnapshot documentSnapshot) {
                 if (documentSnapshot != null && documentSnapshot.getData() != null){
-                    genres = new ArrayList<>(documentSnapshot.getData().keySet());
-                    Collections.sort(genres);
+                    genres = new ArrayList<>();
+                    for (Object ob : documentSnapshot.getData().values()){
+                        genres.add(ob.toString());
+                    }
+                    genresID = new ArrayList<>(documentSnapshot.getData().keySet());
+                    sortedGenres = new ArrayList<>(genres);
+                    Collections.sort(sortedGenres);
                     setAdapter();
 
                 }
@@ -85,25 +92,27 @@ public class GenreFragment extends Fragment {
         return root;
     }
 
-    public void addGenre(String newGenre){
+    private void addGenre(String newGenre){
         Map<String, Object> map = new HashMap<>();
-        map.put(newGenre, false);
-
+        long id = System.currentTimeMillis();
+        map.put(id+"", newGenre);
         db.collection("genres").document(user).set(map, SetOptions.merge());
         int index = genres.size();
-        for (int i = 0; i < genres.size(); i++){
-            if (genres.get(i).compareTo(newGenre)>0){
+        for (int i = 0; i < sortedGenres.size(); i++){
+            if (sortedGenres.get(i).compareTo(newGenre)>0){
                 index=i;
                 break;
             }
         }
-        genres.add(index, newGenre);
+        sortedGenres.add(index, newGenre);
         adapter.notifyItemInserted(index);
+        genres.add(newGenre);
+        genresID.add(id+"");
     }
 
     private void setAdapter(){
         recyclerView = root.findViewById(R.id.genre_recycler);
-        adapter = new GenreAdapter(genres);
+        adapter = new GenreAdapter(sortedGenres);
         LinearLayoutManager layoutManager = new LinearLayoutManager(getContext());
         RecyclerView.ItemAnimator itemAnimator = new DefaultItemAnimator();
         recyclerView.setAdapter(adapter);
@@ -113,18 +122,21 @@ public class GenreFragment extends Fragment {
             @Override
             public void onGenreChanged(String genre, int position) {
                 if (!genres.get(position).equals(genre)){
-                    db.collection("genres").document(user).update(genres.get(position), FieldValue.delete());
-                    Map<String, Object> map= new HashMap<>();
-                    map.put(genre.trim(), false);
-                    db.collection("genres").document(user).set(map, SetOptions.merge());
+                    db.collection("genres").document(user).update(genresID.get(genres.indexOf(sortedGenres.get(position))), genre.trim());
+//                    db.collection("genres").document(user).update(genres.get(position), FieldValue.delete());
+//                    Map<String, Object> map= new HashMap<>();
+//                    map.put(genre.trim(), false);
+//                    db.collection("genres").document(user).set(map, SetOptions.merge());
                     genres.set(position, genre.trim());
+                    sortedGenres.set(position, genre);
+                    adapter.notifyItemChanged(position);
                 }
 
             }
 
             @Override
             public void onDelete(int position) {
-                db.collection("genres").document(user).update(genres.get(position), FieldValue.delete());
+                db.collection("genres").document(user).update(genresID.get(genres.indexOf(sortedGenres.get(position))), FieldValue.delete());
                 genres.remove(position);
                 adapter.notifyItemRemoved(position);
             }

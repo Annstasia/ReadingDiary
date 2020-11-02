@@ -19,6 +19,9 @@ import com.example.readingdiary.R;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.TreeSet;
 
@@ -29,17 +32,22 @@ public class FilterDialogFragment extends DialogFragment implements multispinner
     List<String> genres = new ArrayList<>();
     private ArrayList<String> checkedAuthors = new ArrayList<>();
     private ArrayList<String> checkedGenres = new ArrayList<>();
+    private ArrayList<String> genresID;
+    private ArrayList<String> sortedGenres;
 
     boolean[] authorsCheck;
     boolean[] genresCheck;
     int position;
-    public FilterDialogFragment(TreeSet<String> authors, TreeSet<String> genres,
+    public FilterDialogFragment(ArrayList<String> authors, ArrayList<String> genres, ArrayList<String> genresID,
                                 ArrayList<String> checkedAuthors,
                                 ArrayList<String> checkedGenres){
-        this.authors = new ArrayList<>(authors);
-        this.genres = new ArrayList<>(genres);
+        this.authors = authors;
+        this.genres = genres;
+        this.genresID = genresID;
         this.checkedAuthors = checkedAuthors;
         this.checkedGenres = checkedGenres;
+        this.sortedGenres = new ArrayList<>(genres);
+        Collections.sort(this.sortedGenres);
         authorsCheck = new boolean[this.authors.size()];
         genresCheck = new boolean[this.genres.size()];
         for (int i = 0; i < authorsCheck.length; i++){
@@ -52,7 +60,7 @@ public class FilterDialogFragment extends DialogFragment implements multispinner
 
         }
         for (int i = 0; i < genresCheck.length; i++){
-            if (!checkedGenres.contains(this.genres.get(i))){
+            if (!checkedGenres.contains(this.sortedGenres.get(i))){
                 genresCheck[i]=false;
             }
             else{
@@ -76,7 +84,7 @@ public class FilterDialogFragment extends DialogFragment implements multispinner
         multispinner authorSpinner = (multispinner) view.findViewById(R.id.author_spinner);
         authorSpinner.setType(1);
 
-        genreSpinner.setItems(genres, genresCheck, "По жанру", this);
+        genreSpinner.setItems(sortedGenres, genresCheck, "По жанру", this);
         authorSpinner.setItems(authors, authorsCheck, "По автору", this);
 
 
@@ -116,18 +124,20 @@ public class FilterDialogFragment extends DialogFragment implements multispinner
                 checkedAuthors.add(authors.get(i));
             }
         }
+        ArrayList<String> checkedGenresID = new ArrayList<>();
         for (int i = 0; i < genresCheck.length; i++){
             if (genresCheck[i]==true){
-                checkedGenres.add(genres.get(i));
+                checkedGenresID.add(genresID.get(genres.indexOf(sortedGenres.get(i))));
+                checkedGenres.add(sortedGenres.get(i));
             }
         }
-        listener.onFilterClick(checkedAuthors, checkedGenres);
+        listener.onFilterClick(checkedAuthors, checkedGenres, checkedGenresID);
 
 
     }
 
     public interface FilterDialogListener{
-        void onFilterClick(ArrayList<String> authors, ArrayList<String> genres);
+        void onFilterClick(ArrayList<String> authors, ArrayList<String> genres, ArrayList<String> checkedGenresID);
     }
 
     @Override
