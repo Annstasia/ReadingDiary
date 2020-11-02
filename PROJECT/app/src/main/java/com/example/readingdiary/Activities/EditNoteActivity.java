@@ -72,6 +72,8 @@ import com.squareup.picasso.Picasso;
 import java.security.Key;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -114,7 +116,7 @@ private String TAG_DARK = "dark_theme";
     CheckBox privacyView;
     boolean isPrivate;
     MainActivity mein = new MainActivity();
-    TreeMap<String, Object> chosenGenres;
+    HashMap<String, String> chosenGenres=new HashMap<>();
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         sharedPreferences = this.getSharedPreferences(TAG_DARK, Context.MODE_PRIVATE);
@@ -131,7 +133,6 @@ private String TAG_DARK = "dark_theme";
         user = FirebaseAuth.getInstance().getCurrentUser().getUid();
         toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
-        findViews();
         findViews();
         toolbar.inflateMenu(R.menu.base_menu);
         Bundle args = getIntent().getExtras();
@@ -410,34 +411,31 @@ private String TAG_DARK = "dark_theme";
 
     private void chooseGenres(){
         final EditNoteActivity activity = EditNoteActivity.this;
-        if (chosenGenres == null){
-            db.collection("genres").document(user).get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
-                @Override
-                public void onComplete(@NonNull Task<DocumentSnapshot> task) {
-                    if (task.isSuccessful() && task.getResult() != null && task.getResult().getData() != null){
-                        TreeMap<String, Object> chosenGenres;
-                        chosenGenres = new TreeMap<>();
-                        chosenGenres.putAll(task.getResult().getData());
-//                        chosenGenres = (TreeMap)task.getResult().getData();
-                        if (chosenGenres == null){
-                            chosenGenres = new TreeMap<String, Object>();
-                        }
-                        ChooseGenreFragment dialog = new ChooseGenreFragment(activity, chosenGenres);
-                        dialog.show(getSupportFragmentManager(), "genreDialog");
-                    }
-                    else{
-                        TreeMap<String, Object> chosenGenres = new TreeMap<>();
-                        ChooseGenreFragment dialog = new ChooseGenreFragment(activity, chosenGenres);
-                        dialog.show(getSupportFragmentManager(), "genreDialog");
-                    }
+        db.collection("genres").document(user).get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
+            @Override
+            public void onComplete(@NonNull Task<DocumentSnapshot> task) {
 
+                if (task.isSuccessful() && task.getResult() != null && task.getResult().getData() != null){
+                    ArrayList<String> arrayList = new ArrayList<>();
+                    for (Object ob : task.getResult().getData().values()){
+                        arrayList.add(ob.toString());
+                    }
+                    ChooseGenreFragment dialog = new ChooseGenreFragment(
+                            activity, arrayList,
+                            new ArrayList<String>(task.getResult().getData().keySet()),
+                                    new ArrayList<String>(chosenGenres.values()));
+                    dialog.show(getSupportFragmentManager(), "genreDialog");
                 }
-            });
-        }
-        else{
-            ChooseGenreFragment dialog = new ChooseGenreFragment(activity, chosenGenres);
-            dialog.show(getSupportFragmentManager(), "genreDialog");
-        }
+                else{
+//                       HashMap<String, String> chosenGenres = new HashMap<>();
+                    ChooseGenreFragment dialog = new ChooseGenreFragment(activity,
+                            new ArrayList<String>(), new ArrayList<String>(), new ArrayList<>(chosenGenres.values()));
+                    dialog.show(getSupportFragmentManager(), "genreDialog");
+                }
+
+            }
+        });
+
 
 
 
@@ -445,7 +443,7 @@ private String TAG_DARK = "dark_theme";
 //        dialog.show(getSupportFragmentManager(), "genreDialog");
     }
 
-    public void changeGenres(TreeMap<String, Object> genres){
+    public void changeGenres(HashMap<String, String> genres){
         chosenGenres = genres;
         showChosenGenres(chosenGenres);
 //        String genresString = "";
@@ -487,11 +485,7 @@ private String TAG_DARK = "dark_theme";
                                     map.get("genre").toString(), map.get("time").toString(),
                                     map.get("place").toString(), map.get("short_comment").toString(),
                                     map.get("imagePath").toString(), map.get("timeAdd").toString()};
-                            chosenGenres = new TreeMap<>();
-                            chosenGenres.putAll((Map<String, Object>)map.get("genre"));
-//                            showChosenGenres(chosenGenres);
-//                            chosenGenres = (TreeMap<String, Object>) map.get("genre");
-                            Log.d("Qwerty001", chosenGenres.toString());
+                            chosenGenres = (HashMap<String, String>)map.get("genre");
                             setViews();
                         }
                         else{
@@ -503,29 +497,29 @@ private String TAG_DARK = "dark_theme";
     }
 
 
-    private void showChosenGenres(TreeMap<String, Object> chosenGenres){
+    private void showChosenGenres(HashMap<String, String> chosenGenres){
         if (chosenGenres == null){
             return;
         }
         String genresString = "";
-        for (String genre : chosenGenres.keySet()){
-            if ((boolean)chosenGenres.get(genre)){
-                if (genresString==""){
-                    genresString += genre;
-                }
-                else{
-                    genresString += ",  " + genre;
-                }
-
+        ArrayList<String> arrayList = new ArrayList<>(chosenGenres.values());
+        Collections.sort(arrayList);
+        for (String genre : arrayList){
+            if (genresString==""){
+                genresString += genre;
             }
+            else{
+                genresString += ",  " + genre;
+            }
+
         }
         genreView.setText(genresString);
     }
 
 
-    public void addGenre(String newGenre){
-        Map<String, Object> map = new HashMap<>();
-        map.put(newGenre, false);
+    public void addGenre(long id, String newGenre){
+        Map<String, String> map = new HashMap<>();
+        map.put(id+"", newGenre);
         db.collection("genres").document(user).set(map, SetOptions.merge());
     }
 
@@ -555,7 +549,7 @@ private String TAG_DARK = "dark_theme";
         note.put("imagePath", imagePath);
         note.put("rating", String.valueOf(ratingView.getRating()));
         if (chosenGenres == null){
-            chosenGenres = new TreeMap<>();
+            chosenGenres = new HashMap<>();
         }
         note.put("genre", chosenGenres);
         note.put("time", timeView.getText().toString());

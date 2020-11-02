@@ -88,6 +88,7 @@ import com.google.firebase.storage.FirebaseStorage;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -109,6 +110,7 @@ public class CatalogFragment extends Fragment {
     RecyclerViewAdapter mAdapter;
     String parent = "./";
     ArrayList<Note> notes;
+    HashMap<String, Object>  genres;
     ArrayList<String> buttons;
     RecyclerView recyclerView;
     RecyclerView buttonView;
@@ -158,13 +160,45 @@ public class CatalogFragment extends Fragment {
                              ViewGroup container, Bundle savedInstanceState) {
         catalogViewModel = ViewModelProviders.of(this).get(CatalogViewModel.class);
         root = inflater.inflate(R.layout.activity_catalog, container, false);
-        user = FirebaseAuth.getInstance().getCurrentUser().getUid();
+        if (FirebaseAuth.getInstance().getCurrentUser()==null){
+            user=null;
+        }
+        else{
+            user = FirebaseAuth.getInstance().getCurrentUser().getUid();
+        }
+
         notes = new ArrayList<Note>(); // список того, что будет отображаться в каталоге.
         buttons = new ArrayList<String>(); // Список пройденный каталогов до текущего
         findViews();
 //        counterText.setText("Каталог");
         buttons.add(parent);
-        selectAll(); // чтение данных из бд
+//        db.collection("genres").document(user).get().addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
+//            @Override
+//            public void onSuccess(DocumentSnapshot documentSnapshot) {
+//                if (documentSnapshot != null && documentSnapshot.getData() != null){
+//                    genres = (HashMap)documentSnapshot.getData();
+//                    selectAll();
+//                }
+//            }
+//        });
+////
+        db.collection("genres").document(user).addSnapshotListener(new EventListener<DocumentSnapshot>() {
+            @Override
+            public void onEvent(@Nullable DocumentSnapshot documentSnapshot, @Nullable FirebaseFirestoreException e) {
+                if (documentSnapshot != null && documentSnapshot.getData()!= null){
+                    if (genres==null){
+                        genres = (HashMap)documentSnapshot.getData();
+                        selectAll();
+                    }
+                    else{
+                        genres = (HashMap)documentSnapshot.getData();
+                    }
+
+                }
+            }
+        });
+
+//        selectAll(); // чтение данных из бд
         setAdapters();
         // Кнопка добавление новой активности
         FloatingActionButton addNote = (FloatingActionButton) root.findViewById(R.id.addNote);
@@ -667,12 +701,25 @@ public class CatalogFragment extends Fragment {
                     public void onSuccess(final DocumentSnapshot documentSnapshot0) {
                         final HashMap<String, Object> map = (HashMap) documentSnapshot0.getData();
                         if (map==null) return;
-                        TreeMap<String, Object> genreMap = new TreeMap<>();
+                        HashMap<String, Object> genreMap = new HashMap<>();
                         if (map.get("genre")!= null){
                             Log.d("qwerty5676", id + " genre != null");
-
-                            genreMap.putAll((Map)map.get("genre"));
-                            Log.d("qwerty5676", (genreMap == null) + " ");
+                            genreMap = (HashMap)map.get("genre");
+                            boolean changes = false;
+                            ArrayList<String> arrayList = new ArrayList<>(genreMap.keySet());
+                            for (String i : arrayList){
+                                if (!genres.containsKey(i)){
+                                    genreMap.remove(i);
+                                    changes = true;
+                                }
+                                if (genres.get(i) != genreMap.get(i)){
+                                    genreMap.put(i, genres.get(i));
+                                    changes=true;
+                                }
+                            }
+                            if (changes){
+                                db.collection("Notes").document(user).collection("userNotes").document(id).update("genre", genreMap);
+                            }
                         }
                         final RealNote realNote = new RealNote(id, map.get("path").toString(), map.get("author").toString(),
                                 map.get("title").toString(), Double.valueOf(map.get("rating").toString()), (boolean)map.get("private"),

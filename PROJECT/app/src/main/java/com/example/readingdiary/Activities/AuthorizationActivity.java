@@ -186,24 +186,24 @@ public class AuthorizationActivity extends AppCompatActivity {
 
     public void addUser(FirebaseUser user){
         FirebaseFirestore db = FirebaseFirestore.getInstance();
-        Map<String, Boolean> map = new HashMap<>();
-        map.put("фантастика", false);
-        map.put("приключения", false);
-        map.put("детективы", false);
-        map.put("фэнтези", false);
-        map.put("наука", false);
-        map.put("классика", false);
-        map.put("научно-популярное", false);
-        db.collection("genres").document(user.getUid()).set(map);
+        Map<String, String> map = new HashMap<>();
+//        map.put("фантастика", false);
+//        map.put("приключения", false);
+//        map.put("детективы", false);
+//        map.put("фэнтези", false);
+//        map.put("наука", false);
+//        map.put("классика", false);
+//        map.put("научно-популярное", false);
+//        db.collection("genres").document(user.getUid()).set(map);
 
-        //         map.put(System.currentTimeMillis()+"", "фантастика");
-        //        map.put(System.currentTimeMillis()+"", "приключения");
-        //        map.put(System.currentTimeMillis()+"", "детективы");
-        //        map.put(System.currentTimeMillis()+"", "фэнтези");
-        //        map.put(System.currentTimeMillis()+"", "наука");
-        //        map.put(System.currentTimeMillis()+"", "классика");
-        //        map.put(System.currentTimeMillis()+"", "научно-популярное");
-        //        db.collection("genres").document(user.getUid()).set(map);
+        map.put(System.currentTimeMillis()+"a", "фантастика");
+        map.put(System.currentTimeMillis()+"b", "приключения");
+        map.put(System.currentTimeMillis()+"c", "детективы");
+        map.put(System.currentTimeMillis()+"d", "фэнтези");
+        map.put(System.currentTimeMillis()+"f", "наука");
+        map.put(System.currentTimeMillis()+"g", "классика");
+        map.put(System.currentTimeMillis()+"h", "научно-популярное");
+        db.collection("genres").document(user.getUid()).set(map);
 
 
 

@@ -44,6 +44,9 @@ import com.google.firebase.firestore.FirebaseFirestoreException;
 import com.google.firebase.storage.FirebaseStorage;
 import com.squareup.picasso.Picasso;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.TreeMap;
@@ -262,11 +265,10 @@ public class NoteActivity extends AppCompatActivity implements SettingsDialogFra
 
     }
 
-    private void setViews(String path, String author, String title, String rating, TreeMap<String, Object> chosenGenres,
+    private void setViews(String path, String author, String title, String rating, HashMap<String, Object> chosenGenres,
                           String time, String place, String shortComment){
         this.path = path;
         this.authorView.setText(author);
-       // Toast.makeText(this, "!" + author + " " + author.equals(""), Toast.LENGTH_SHORT).show();
         if (author.equals("")){
             this.authorView.setVisibility(View.GONE);
         }
@@ -282,16 +284,18 @@ public class NoteActivity extends AppCompatActivity implements SettingsDialogFra
         }
 
         String genresString = "";
-        for (String genre : chosenGenres.keySet()){
-            if ((boolean)chosenGenres.get(genre)){
+        ArrayList<String> arrayList = new ArrayList<>();
+        for (Object ob : chosenGenres.values()){
+            arrayList.add(ob.toString());
+        }
+        Collections.sort(arrayList);
+        for (String genre : arrayList){
                 if (genresString==""){
                     genresString += genre;
                 }
                 else{
                     genresString += ",  " + genre;
                 }
-
-            }
         }
 //        genreView.setText(genresString);
         this.genreView.setText(genresString);
@@ -440,10 +444,7 @@ public class NoteActivity extends AppCompatActivity implements SettingsDialogFra
                         final HashMap<String, Object> map = (HashMap<String, Object>) documentSnapshot.getData();
                         imagePath = "";
                         if (map != null){
-                            TreeMap<String, Object> chosenGenres = new TreeMap<>();
-                            if (map.get("genre")!= null){
-                                chosenGenres.putAll((Map<String, Object>)map.get("genre"));
-                            }
+                            HashMap<String, Object> chosenGenres = (HashMap) map.get("genre");
 
                             setViews(
                                     map.get("path").toString(), map.get("author").toString(),

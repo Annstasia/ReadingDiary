@@ -24,23 +24,32 @@ import com.example.readingdiary.R;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.TreeMap;
 
 public class ChooseGenreFragment extends DialogFragment {
     ArrayList<CheckBox> genres;
-    TreeMap<String, Object> chosenGenres;
+    ArrayList<String> allGenres;
+    ArrayList<String> allGenresID;
     EditNoteActivity activity;
     LinearLayout linearLayout;
     Button addGenreButton;
 
-    public ChooseGenreFragment(EditNoteActivity activity, TreeMap<String, Object> chosenGenres){
-        genres = new ArrayList<>(chosenGenres.size());
-        this.chosenGenres = chosenGenres;
-        this.activity = activity;
-        for (String i : chosenGenres.keySet()){
+    public ChooseGenreFragment(EditNoteActivity activity, ArrayList<String> allGenres, ArrayList<String> allGenresID, ArrayList<String> chosenGenres){
+        genres = new ArrayList<>(allGenres.size());
+        this.allGenresID = allGenresID;
+        this.allGenres = allGenres;
+        this.activity=activity;
+        ArrayList<String> sortedGenres = new ArrayList<String>(allGenres);
+        Collections.sort(sortedGenres);
+        for (String i : sortedGenres){
             CheckBox checkBox = new CheckBox(activity.getApplicationContext());
             checkBox.setText(i);
-            checkBox.setChecked((boolean)chosenGenres.get(i));
+            if (chosenGenres.contains(i)){
+                checkBox.setChecked(true);
+            }
+//            checkBox.setChecked((boolean)chosenGenres.get(i));
             checkBox.setPadding(10, 10, 10, 10);
             checkBox.setTextSize(18);
             genres.add(checkBox);
@@ -64,10 +73,13 @@ public class ChooseGenreFragment extends DialogFragment {
         builder.setPositiveButton("pos", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
+                HashMap<String, String> hashMap = new HashMap<String, String>();
                 for (CheckBox checkBox : genres){
-                    chosenGenres.put(checkBox.getText().toString(), checkBox.isChecked());
+                    if (checkBox.isChecked()){
+                        hashMap.put(allGenresID.get(allGenres.indexOf(checkBox.getText().toString())), checkBox.getText().toString());
+                    }
                 }
-                activity.changeGenres(chosenGenres);
+                activity.changeGenres(hashMap);
             }
         });
         ScrollView scrollView = new ScrollView(getContext());
@@ -121,9 +133,11 @@ public class ChooseGenreFragment extends DialogFragment {
         checkBox.setPadding(10, 10, 10, 10);
         checkBox.setTextSize(18);
         genres.add(checkBox);
-        chosenGenres.put(newGenre, true);
         linearLayout.addView(checkBox, genres.size()-1);
-        activity.addGenre(newGenre);
+        long id = System.currentTimeMillis();
+        allGenres.add(newGenre);
+        allGenresID.add(id+"");
+        activity.addGenre(id, newGenre);
     }
 
 }

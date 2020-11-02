@@ -2,6 +2,7 @@ package com.example.readingdiary.Classes;
 
 import android.net.Uri;
 
+import java.util.HashMap;
 import java.util.TreeMap;
 import java.util.TreeSet;
 
@@ -19,14 +20,14 @@ public class RealNote implements Note {
     private long publicRatingCount;
     private String owner;
     private long time;
-    private TreeMap<String, Object> genre;
+    private HashMap<String, Object> genre;
     private boolean visibility=true;
 
 
 
 
 
-    public RealNote(String id, String path, String author, String title, double rating, boolean isPrivate, double publicRatingSum, long publicRatingCount, Uri coverUri, TreeMap<String, Object> genre){
+    public RealNote(String id, String path, String author, String title, double rating, boolean isPrivate, double publicRatingSum, long publicRatingCount, Uri coverUri, HashMap<String, Object> genre){
         this.id = id;
         this.path = path;
         this.title = title;
@@ -38,7 +39,7 @@ public class RealNote implements Note {
         this.publicRatingCount=publicRatingCount;
         this.genre = genre;
     }
-    public RealNote(String id, String path, String author, String title, double rating, boolean isPrivate, double publicRatingSum, long publicRatingCount, TreeMap<String, Object> genre){
+    public RealNote(String id, String path, String author, String title, double rating, boolean isPrivate, double publicRatingSum, long publicRatingCount, HashMap<String, Object> genre){
         this.id = id;
         this.path = path;
         this.title = title;
@@ -137,11 +138,11 @@ public class RealNote implements Note {
         this.coverUri = coverUri;
     }
 
-    public TreeMap<String, Object> getGenre() {
+    public HashMap<String, Object> getGenre() {
         return genre;
     }
 
-    public void setGenre(TreeMap<String, Object> genre) {
+    public void setGenre(HashMap<String, Object> genre) {
         this.genre = genre;
     }
 

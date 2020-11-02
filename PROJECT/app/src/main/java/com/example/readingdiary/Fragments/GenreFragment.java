@@ -112,7 +112,7 @@ public class GenreFragment extends Fragment {
         adapter.setOnGenreAdapterListener(new GenreAdapter.GenreAdapterListener() {
             @Override
             public void onGenreChanged(String genre, int position) {
-                if (genres.get(position) != genre){
+                if (!genres.get(position).equals(genre)){
                     db.collection("genres").document(user).update(genres.get(position), FieldValue.delete());
                     Map<String, Object> map= new HashMap<>();
                     map.put(genre.trim(), false);
