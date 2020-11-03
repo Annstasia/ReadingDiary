@@ -54,6 +54,7 @@ public class DeleteNote {
     }
 
     public static void deleteNote(String user, String id){
+        db.collection("Notes").document(user).collection("userNotes").document("allNotes").update(id, FieldValue.delete());
         db.collection("Notes").document(user).collection("userNotes").document(id).delete();
         deleteImages(user, id);
         deleteVariousNote(user, id, "comment");

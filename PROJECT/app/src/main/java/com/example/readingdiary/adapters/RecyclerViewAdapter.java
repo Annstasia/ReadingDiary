@@ -67,6 +67,9 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
 
     @Override
     public void onBindViewHolder(ViewHolder viewHolder, int i) {
+        if (notes.get(i)==null){
+            return;
+        }
         int type = getItemViewType(i);
 
         if (actionMode == false){
@@ -128,6 +131,9 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
     @Override
     public int getItemViewType(int position) {
         // определяем какой тип в текущей позиции
+        if (notes.get(position)==null){
+            return TYPE_ITEM1;
+        }
         int type = notes.get(position).getItemType();
         if (type == 0) return TYPE_ITEM1;
         else return TYPE_ITEM2;

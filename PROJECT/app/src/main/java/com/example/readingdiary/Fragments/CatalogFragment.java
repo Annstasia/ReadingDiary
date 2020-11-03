@@ -66,6 +66,7 @@ public class CatalogFragment extends Fragment {
     RecyclerViewAdapter mAdapter;
     String parent = "./";
     ArrayList<Note> notes;
+    ArrayList<String> notesID;
     HashMap<String, Object>  genres;
     ArrayList<String> buttons;
     RecyclerView recyclerView;
@@ -295,7 +296,8 @@ public class CatalogFragment extends Fragment {
     public void searchClick2(){
         if (!findText1.getText().toString().equals("")){
             notes.clear();
-            selectTitle(findText1.getText().toString());
+            searchInDocuments(findText1.getText().toString());
+//            selectTitle(findText1.getText().toString());
             mAdapter.notifyDataSetChanged();
             findText1.clearComposingText();
 
@@ -475,7 +477,7 @@ public class CatalogFragment extends Fragment {
                                                     break;
                                                 }
                                                 final HashMap<String, Object> map = (HashMap<String, Object>) documentSnapshot.getData();
-                                                generateNote(documentSnapshot.getId(), -1);
+                                                generateNote(documentSnapshot.getId(), -1, false);
                                             }
                                         }
                                         mAdapter.notifyDataSetChanged();
@@ -674,8 +676,9 @@ public class CatalogFragment extends Fragment {
     }
 
 
-    public void generateNote(final String id, final int index){
+    public void generateNote(final String id, final int index, final boolean change){
         final int active0 = active;
+
         db.collection("Notes").document(user).collection("userNotes").document(id).get()
                 .addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
                     @Override
@@ -713,8 +716,14 @@ public class CatalogFragment extends Fragment {
                                 index1 = notes.size()-1;
 
                             } else {
-                                notes.set(index, realNote);
-                                mAdapter.notifyItemChanged(index);
+                                if (change){
+                                    notes.set(index, realNote);
+                                    mAdapter.notifyItemChanged(index);
+                                }
+                                else{
+                                    notes.add(index, realNote);
+                                    mAdapter.notifyItemInserted(index);
+                                }
                                 index1 = index;
                             }
                         }
@@ -729,8 +738,6 @@ public class CatalogFragment extends Fragment {
                                 public void onEvent(@Nullable DocumentSnapshot documentSnapshot, @Nullable FirebaseFirestoreException e) {
 //                                                Log.d("qwerty72", (boolean)documentSnapshot.get(map.get("imagePath").toString()) + "");
                                     if (documentSnapshot.get(map.get("imagePath").toString()) != null && (boolean)documentSnapshot.get(map.get("imagePath").toString())==true){
-                                        Log.d("qwerty72", "imagePathTrue");
-                                        Log.d("qwerty72", map.get("imagePath").toString());
                                         FirebaseStorage.getInstance().getReference(user).child(documentSnapshot0.getId()).child("Images").child(map.get("imagePath").toString()).getDownloadUrl()
                                                 .addOnSuccessListener(new OnSuccessListener<Uri>() {
                                                     @Override
@@ -741,15 +748,6 @@ public class CatalogFragment extends Fragment {
                                                             ((RealNote)notes.get(index1)).setCoverPath(uri);
                                                             mAdapter.notifyItemChanged(index1);
                                                         }
-
-
-//                                                                    if (index == -1) {
-//                                                                        notes.add(realNote);
-//                                                                        mAdapter.notifyItemInserted(notes.size() - 1);
-//                                                                    } else {
-//                                                                        notes.set(index, realNote);
-//                                                                        mAdapter.notifyItemChanged(index);
-//                                                                    }
                                                     }
                                                 })
                                                 .addOnFailureListener(new OnFailureListener() {
@@ -799,13 +797,13 @@ public class CatalogFragment extends Fragment {
                 });
     }
     public void insertById(final String id){
-        generateNote(id, -1);
+        generateNote(id, -1, false);
     }
     public void changeById(final String id){
         for (int j = startPos; j < notes.size(); j++){
             final int i = j;
             if (notes.get(i).getID().equals(id)){
-                generateNote(notes.get(i).getID(), i);
+                generateNote(notes.get(i).getID(), i, true);
                 break;
             }
         }
@@ -817,7 +815,7 @@ public class CatalogFragment extends Fragment {
                     public void onSuccess(QuerySnapshot queryDocumentSnapshots) {
                         if (queryDocumentSnapshots != null){
                             for (QueryDocumentSnapshot documentSnapshot : queryDocumentSnapshots) {
-                                generateNote(documentSnapshot.getId(), -1);
+                                generateNote(documentSnapshot.getId(), -1, false);
                             }
                         }
                         mAdapter.notifyDataSetChanged();
@@ -1106,6 +1104,102 @@ public class CatalogFragment extends Fragment {
         super.onAttach(context);
         onCatalogFragmentListener = (OnCatalogFragmentListener) context;
     }
+
+
+
+//    class NoteItem{
+//        public NoteItem() {
+//
+//        }
+//    }
+
+    private void searchInDocuments(final String searched){
+        class NoteItem implements Comparable<NoteItem>{
+            String id;
+            int difference;
+            public NoteItem(String id, int diffence){
+                this.id = id;
+                this.difference = diffence;
+            }
+
+            @Override
+            public int compareTo(NoteItem o) {
+                return this.difference - o.difference;
+            }
+        }
+        db.collection("Notes").document(user).collection("userNotes").document("allNotes").get().addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
+            @Override
+            public void onSuccess(DocumentSnapshot documentSnapshot) {
+
+                if (documentSnapshot != null && documentSnapshot.getData() != null){
+                    ArrayList<NoteItem> arrayList = new ArrayList<>();
+                    for (String id : documentSnapshot.getData().keySet()){
+                        arrayList.add(new NoteItem(id, levenshteinAlgorithm(searched, documentSnapshot.getData().get(id).toString())));
+                    }
+                    Collections.sort(arrayList);
+                    ArrayList<String> notesID = new ArrayList<>();
+                    notes.clear();
+                    for (NoteItem noteItem : arrayList) {
+                        if (noteItem.difference <= searched.length()) {
+                            notesID.add(noteItem.id);
+                            notes.add(null);
+
+//                            generateNote(noteItem.id, -1);
+                        }
+                        else {
+                            break;
+                        }
+                    }
+//                    notes = new ArrayList<>(notesID.size());
+                    for (int i = 0; i <notesID.size(); i++){
+                        generateNote(notesID.get(i), i, true);
+                    }
+
+                }
+            }
+        });
+
+    }
+
+    private int levenshteinAlgorithm(String searched, String saved){
+        if (searched.equals(saved)){
+            return -100000;
+        }
+        if (saved.contains(searched)){
+            return -searched.length();
+        }
+
+
+        if (searched.length() < saved.length()){
+            String temp = saved;
+            saved = searched;
+            searched = temp;
+        }
+        char[] s = searched.toCharArray();
+        char[] t = saved.toCharArray();
+        int m = s.length;
+        int n = t.length;
+        int[] current = new int[n+1];
+        for (int i = 0; i < n + 1; i++){
+            current[i] = i;
+        }
+        for (int i = 1; i < m + 1; i++){
+            int[] previous = current.clone();
+            current = new int[n+1];
+            current[0] = i;
+//            Log.d("qwerty5554433", searched + " " + saved + " " + current.length + " " + n + " " + m);
+            for (int j = 1; j < n + 1; j++){
+                int change = previous[j - 1];
+                if (s[i-1]!=t[j-1]){
+                    change++;
+                }
+//                Log.d("qwerty5554433", searched + " " + saved + " " + current.length + " " + n + " " + m + " " + previous.length + " " + i + " " + );
+                current[j] = Math.min(Math.min(current[j - 1] + 1, previous[j] + 1), change);
+            }
+        }
+        return current[n];
+    }
+
 
 //    @Override
 //    public void onAttach(@NonNull Context context) {

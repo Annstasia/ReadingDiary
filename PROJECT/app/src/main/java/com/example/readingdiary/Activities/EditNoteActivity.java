@@ -309,7 +309,7 @@ private String TAG_DARK = "dark_theme";
         }
         showChosenGenres(chosenGenres);
 //        this.genreView.setText(beforeChanging[4]);
-        if (!beforeChanging[5].isEmpty()){
+        if (!beforeChanging[5].isEmpty() && !beforeChanging[5].equals(" ")){
             String[] time = beforeChanging[5].split(" ");
             if (!time[0].isEmpty()){
                 dayStart.setText(time[0].split("\\.")[0]);
@@ -557,7 +557,10 @@ private String TAG_DARK = "dark_theme";
             beforeChanging[0] = path1;
             savePaths();
         }
-        if (isNoteNew == true){
+        if (isNoteNew){
+            Map<String, String> map = new HashMap<>();
+            map.put(id, titleView.getText().toString());
+            db.collection("Notes").document(user).collection("userNotes").document("allNotes").set(map, SetOptions.merge());
             db.collection("Notes").document(user).collection("userNotes").document(id).set(note).addOnSuccessListener(new OnSuccessListener<Void>() {
                 @Override
                 public void onSuccess(Void aVoid) {
@@ -571,6 +574,7 @@ private String TAG_DARK = "dark_theme";
         }
         else
         {
+            db.collection("Notes").document(user).collection("userNotes").document("allNotes").update(id, titleView.getText().toString());
             db.collection("Notes").document(user).collection("userNotes").document(id).set(note, SetOptions.merge());
             changedIntent();
             closeActivity();
