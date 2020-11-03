@@ -13,28 +13,24 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
-import android.widget.Toast;
+import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
-import androidx.fragment.app.FragmentManager;
-import androidx.fragment.app.FragmentTransaction;
 import androidx.recyclerview.widget.DefaultItemAnimator;
 import androidx.recyclerview.widget.GridLayoutManager;
-import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.example.readingdiary.Classes.DeleteUser;
+import com.example.readingdiary.Classes.DeleteNote;
 import com.example.readingdiary.Classes.ImageClass;
 import com.example.readingdiary.Classes.SaveImage;
-import com.example.readingdiary.Fragments.AddShortNameFragment;
-import com.example.readingdiary.Fragments.SettingsDialogFragment;
 import com.example.readingdiary.R;
 import com.example.readingdiary.adapters.GaleryFullViewAdapter;
 import com.example.readingdiary.adapters.GaleryRecyclerViewAdapter;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.material.appbar.MaterialToolbar;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
@@ -44,18 +40,13 @@ import com.google.firebase.firestore.FirebaseFirestoreException;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.InputStream;
-import java.io.OutputStream;
 import java.util.ArrayList;
-import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.List;
 
 import javax.annotation.Nullable;
 
-public class GaleryActivity extends AppCompatActivity implements SettingsDialogFragment.SettingsDialogListener {
+public class GaleryActivity extends AppCompatActivity {
     // класс отвечает за активность с каталогами
     private String TAG_DARK = "dark_theme";
     SharedPreferences sharedPreferences;
@@ -66,9 +57,10 @@ public class GaleryActivity extends AppCompatActivity implements SettingsDialogF
     private GaleryFullViewAdapter adapter1;
     private List<ImageClass> images;
     private List<Long> names;
+    private ArrayList<Long> selectedImagesList = new ArrayList<>();
     private final int FULL_GALERY_CODE = 8800;
-    Toolbar toolbar;
-    private int count = 3;
+    MaterialToolbar toolbar;
+    private int count = 0;
     String id;
     String user;
     private StorageReference imageStorage;
@@ -76,21 +68,16 @@ public class GaleryActivity extends AppCompatActivity implements SettingsDialogF
     long time;
     boolean editAccess;
     private String idUser; // в неё передаём id текущего пользовтеля
+    boolean action_mode;
+    TextView counterText;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
 
-        sharedPreferences = this.getSharedPreferences(TAG_DARK, Context.MODE_PRIVATE);
-        boolean dark = sharedPreferences.getBoolean(TAG_DARK, false);
-        if (dark){
-            setTheme(R.style.DarkTheme);
-        }
-        else{
-            setTheme(R.style.AppTheme);
-        }
         super.onCreate(savedInstanceState);
         setContentView(R.layout.galery_activity);
-        toolbar = findViewById(R.id.base_toolbar);
+        toolbar = (MaterialToolbar)findViewById(R.id.long_click_toolbar);
+        toolbar.setTitle("");
         setSupportActionBar(toolbar);
         Bundle args = getIntent().getExtras();
         id = args.get("id").toString();
@@ -118,7 +105,10 @@ public class GaleryActivity extends AppCompatActivity implements SettingsDialogF
         images = new ArrayList<>(); // список bitmap изображений
         names = new ArrayList<Long>(); // список путей к изображениями в файловой системе
 //        newImages = new ArrayList<>();
-
+        counterText = (TextView)findViewById(R.id.counter_text);
+        counterText.setText("Галерея");
+        toolbar.getMenu().clear();
+        toolbar.setTitle("");
         galeryView = (RecyclerView) findViewById(R.id.galery_recycle_view);
         GridLayoutManager layoutManager = new GridLayoutManager(this, 3); // отображение изображений в 3 колонки
         RecyclerView.ItemAnimator itemAnimator = new DefaultItemAnimator();
@@ -127,6 +117,7 @@ public class GaleryActivity extends AppCompatActivity implements SettingsDialogF
         galeryView.setItemAnimator(itemAnimator);
         galeryView.setLayoutManager(layoutManager);
         Button pickImage = (Button) findViewById(R.id.button);
+
 
         if (!editAccess){pickImage.setVisibility(View.GONE);} //проверка на автора
 
@@ -229,6 +220,31 @@ public class GaleryActivity extends AppCompatActivity implements SettingsDialogF
                 intent.putExtra("position", names.get(position));
                 startActivityForResult(intent, FULL_GALERY_CODE);
             }
+
+            @Override
+            public void onItemLongClick(int position) {
+                adapter.setActionMode(true);
+                action_mode = true;
+                counterText.setText(count + " выбрано");
+                toolbar.getMenu().clear();
+                toolbar.inflateMenu(R.menu.menu_long_click);
+                adapter.notifyDataSetChanged();
+                getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+            }
+
+            @Override
+            public void onCheckClick(int position) {
+                selectedImagesList.add(names.get(position));
+                count++;
+                counterText.setText(count + " выбрано");
+            }
+
+            @Override
+            public void onUncheckClick(int position) {
+                selectedImagesList.remove(names.get(position));
+                count--;
+                counterText.setText(count + " выбрано");
+            }
         });
 
 
@@ -247,77 +263,51 @@ public class GaleryActivity extends AppCompatActivity implements SettingsDialogF
         setResultChanged();
     }
 
-    @Override
-    public void onChangeThemeClick(boolean isChecked) {
-        Toast.makeText(this, "На нас напали светлые маги. Темная тема пока заперта", Toast.LENGTH_LONG).show();
-    }
-
-    @Override
-    public void onExitClick() {
-//        ext =1;
-        MainActivity MainActivity = new MainActivity();
-        MainActivity.currentUser=null;
-        MainActivity.mAuth.signOut();
-        Intent intent = new Intent(GaleryActivity.this, MainActivity.class);
-        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-        startActivity(intent);
-    }
-
-
-    @Override
-    public void onDelete()
-    {
-        DeleteUser.deleteUser(this, user);
-        FirebaseFirestore.getInstance().collection("PublicID").document(user).addSnapshotListener(new EventListener<DocumentSnapshot>() {
-            @Override
-            public void onEvent(@androidx.annotation.Nullable DocumentSnapshot documentSnapshot, @androidx.annotation.Nullable FirebaseFirestoreException e) {
-                if (documentSnapshot == null || documentSnapshot.getString("id")==null){
-                    Toast.makeText(getApplicationContext(),"Аккаунт удалён",Toast.LENGTH_SHORT).show();
-                    Intent intent = new Intent(GaleryActivity.this, MainActivity.class);
-                    intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-                    intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
-                    startActivity(intent);
-                }
-            }
-        });
-    }
-
-    @Override
-    public void onChangeIdClick(String userID) {
-        AddShortNameFragment saveDialogFragment = new AddShortNameFragment(true, userID, user);
-        saveDialogFragment.setCancelable(false);
-        FragmentManager manager = getSupportFragmentManager();
-        FragmentTransaction transaction = manager.beginTransaction();
-        saveDialogFragment.show(transaction, "dialog");
-    }
-
-    @Override
-    public void onForgot() {
-        Intent intent = new Intent(GaleryActivity.this, ForgotPswActivity.class);
-        startActivity(intent);
-
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(@NonNull MenuItem item) {
-        if (item.getItemId() == R.id.item_settings) {
-            int location[] = new int[2];
-            toolbar.getLocationInWindow(location);
-            int y = getResources().getDisplayMetrics().heightPixels;
-            int x = getResources().getDisplayMetrics().widthPixels;
-
-            SettingsDialogFragment settingsDialogFragment = new SettingsDialogFragment(y, x, sharedPreferences.getBoolean(TAG_DARK, false));
-            FragmentManager manager = getSupportFragmentManager();
-            FragmentTransaction transaction = manager.beginTransaction();
-            settingsDialogFragment.show(transaction, "dialog");
-        }
-        return false;
-    }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu){
         getMenuInflater().inflate(R.menu.base_menu, menu);
         return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(@NonNull MenuItem item) {
+        if (item.getItemId() == android.R.id.home){
+            if (action_mode){
+                action_mode=false;
+                adapter.setActionMode(false);
+                adapter.notifyDataSetChanged();
+                toolbar.getMenu().clear();
+                toolbar.inflateMenu(R.menu.base_menu);
+                getSupportActionBar().setDisplayHomeAsUpEnabled(false);
+                counterText.setText("Галерея");
+                count=0;
+            }
+        }
+        if (item.getItemId()== R.id.item_delete)
+        {
+            action_mode=false;
+            adapter.setActionMode(false);
+            deleteSelectedImages();
+            adapter.notifyDataSetChanged();
+            toolbar.getMenu().clear();
+            getSupportActionBar().setDisplayHomeAsUpEnabled(false);
+            counterText.setText("Галерея");
+            count=0;
+        }
+        return false;
+    }
+
+    private void deleteSelectedImages(){
+        DeleteNote.deleteSelectedImages(user, id, selectedImagesList);
+        for (Long i : selectedImagesList){
+            images.remove(names.indexOf(i));
+            names.remove(i);
+//            adapter.notifyItemRemoved(names.indexOf(i));
+        }
+        selectedImagesList.clear();
+        adapter.notifyDataSetChanged();
+
     }
 
     public void setResultChanged(){

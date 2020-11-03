@@ -8,44 +8,22 @@ import android.view.ViewGroup;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.appcompat.widget.Toolbar;
 import androidx.core.view.GravityCompat;
 import androidx.fragment.app.Fragment;
-import androidx.lifecycle.ViewModelProviders;
-import android.Manifest;
+
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.content.pm.PackageManager;
-import android.database.sqlite.SQLiteDatabase;
 
 import android.net.Uri;
-import android.os.Bundle;
-import android.os.CountDownTimer;
 import android.util.Log;
-import android.view.Menu;
-import android.view.MenuItem;
-import android.view.MotionEvent;
-import android.view.View;
-import android.view.WindowManager;
-import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.Spinner;
 import android.widget.TextView;
-import android.widget.Toast;
 
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.app.ActivityCompat;
-import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
-import androidx.navigation.NavController;
-import androidx.navigation.Navigation;
 import androidx.navigation.ui.AppBarConfiguration;
-import androidx.navigation.ui.NavigationUI;
 import androidx.recyclerview.widget.DefaultItemAnimator;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -54,27 +32,17 @@ import com.example.readingdiary.Activities.CatalogActivity;
 import com.example.readingdiary.Activities.EditNoteActivity;
 import com.example.readingdiary.Activities.NoteActivity;
 import com.example.readingdiary.Classes.DeleteNote;
-import com.example.readingdiary.Classes.DeleteUser;
 import com.example.readingdiary.Classes.Directory;
 import com.example.readingdiary.Classes.Note;
 import com.example.readingdiary.Classes.RealNote;
 import com.example.readingdiary.Classes.ui.CatalogViewModel;
-import com.example.readingdiary.Fragments.AddShortNameFragment;
-import com.example.readingdiary.Fragments.FilterDialogFragment;
-import com.example.readingdiary.Fragments.SettingsDialogFragment;
-import com.example.readingdiary.Fragments.SortDialogFragment;
 import com.example.readingdiary.R;
 import com.example.readingdiary.adapters.CatalogButtonAdapter;
 import com.example.readingdiary.adapters.RecyclerViewAdapter;
-import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
-import com.google.android.gms.tasks.Task;
-import com.google.android.material.appbar.MaterialToolbar;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
-import com.google.android.material.navigation.NavigationView;
 import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.EventListener;
 import com.google.firebase.firestore.FieldValue;
@@ -82,23 +50,12 @@ import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.FirebaseFirestoreException;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
-import com.google.firebase.firestore.SetOptions;
-import com.google.firebase.firestore.Transaction;
 import com.google.firebase.storage.FirebaseStorage;
 
 import java.io.File;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.TreeMap;
-import java.util.TreeSet;
-import java.util.stream.Collectors;
-
-import com.example.readingdiary.R;
 
 public class CatalogFragment extends Fragment {
     public interface OnCatalogFragmentListener{
@@ -746,8 +703,7 @@ public class CatalogFragment extends Fragment {
                             }
                         }
                         final RealNote realNote = new RealNote(id, map.get("path").toString(), map.get("author").toString(),
-                                map.get("title").toString(), Double.valueOf(map.get("rating").toString()), (boolean)map.get("private"),
-                                (double) map.get("publicRatingSum"), (long)map.get("publicRatingCount"), genreMap);
+                                map.get("title").toString(), Double.valueOf(map.get("rating").toString()), genreMap);
                         realNote.setTime(Long.parseLong(map.get("timeAdd").toString()));
                         final int index1;
                         if (active0 == active){
@@ -897,9 +853,6 @@ public class CatalogFragment extends Fragment {
                         if (queryDocumentSnapshots != null){
                             for (QueryDocumentSnapshot documentSnapshot : queryDocumentSnapshots) {
                                 DeleteNote.deleteNote(user, documentSnapshot.getId());
-                                if (!(boolean)documentSnapshot.get("private")){
-                                    DeleteNote.deletePublicly(user, documentSnapshot.getId());
-                                }
                             }
                         }
 
@@ -1085,9 +1038,6 @@ public class CatalogFragment extends Fragment {
     public void deleteSelectedRealNote(){
         for (int i = 0; i < selectionRealNotesList.size(); i++){
             String id = selectionRealNotesList.get(i).getID();
-            if (!((RealNote)selectionRealNotesList.get(i)).getPrivate()){
-                DeleteNote.deletePublicly(user, id);
-            }
             notes.remove(selectionRealNotesList.get(i));
             mAdapter.notifyItemRemoved(i);
             DeleteNote.deleteNote(user, id);

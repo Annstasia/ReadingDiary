@@ -6,52 +6,32 @@ import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
-import android.view.MenuItem;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.appcompat.widget.Toolbar;
-import androidx.fragment.app.FragmentManager;
-import androidx.fragment.app.FragmentTransaction;
 
-import com.example.readingdiary.Classes.DeleteUser;
-import com.example.readingdiary.Fragments.AddShortNameFragment;
 import com.example.readingdiary.Fragments.SaveDialogFragment;
-import com.example.readingdiary.Fragments.SettingsDialogFragment;
 import com.example.readingdiary.Fragments.WrongLengthDialogFragment;
 import com.example.readingdiary.R;
-import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
-import com.google.android.gms.tasks.Task;
 import com.google.android.material.appbar.MaterialToolbar;
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
-import com.google.firebase.firestore.EventListener;
 import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.FirebaseFirestore;
-import com.google.firebase.firestore.FirebaseFirestoreException;
 import com.google.firebase.firestore.SetOptions;
 
-import java.io.BufferedReader;
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.FileReader;
-import java.io.OutputStreamWriter;
-import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.Map;
 
 
 public class VariousNotebook extends AppCompatActivity implements SaveDialogFragment.SaveDialogListener,
-        SettingsDialogFragment.SettingsDialogListener, WrongLengthDialogFragment.WrongLengthDialogListener {
+        WrongLengthDialogFragment.WrongLengthDialogListener {
     // класс отвечает за активность с каталогами
     private String TAG_DARK = "dark_theme";
     SharedPreferences sharedPreferences;
@@ -124,74 +104,6 @@ public class VariousNotebook extends AppCompatActivity implements SaveDialogFrag
     }
 
 
-    @Override
-    public void onChangeThemeClick(boolean isChecked) {
-        Toast.makeText(this, "На нас напали светлые маги. Темная тема пока заперта", Toast.LENGTH_LONG).show();
-    }
-
-    @Override
-    public void onExitClick() {
-//        ext =1;
-        MainActivity MainActivity = new MainActivity();
-        MainActivity.currentUser=null;
-        MainActivity.mAuth.signOut();
-        Intent intent = new Intent(VariousNotebook.this, MainActivity.class);
-        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-        startActivity(intent);
-    }
-
-
-    @Override
-    public void onDelete()
-    {
-        DeleteUser.deleteUser(this, user);
-        FirebaseFirestore.getInstance().collection("PublicID").document(user).addSnapshotListener(new EventListener<DocumentSnapshot>() {
-            @Override
-            public void onEvent(@Nullable DocumentSnapshot documentSnapshot, @Nullable FirebaseFirestoreException e) {
-                if (documentSnapshot == null || documentSnapshot.getString("id")==null){
-                    Toast.makeText(getApplicationContext(),"Аккаунт удалён",Toast.LENGTH_SHORT).show();
-                    Intent intent = new Intent(VariousNotebook.this, MainActivity.class);
-                    intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-                    intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
-                    startActivity(intent);
-                }
-            }
-        });
-    }
-
-    @Override
-    public void onChangeIdClick(String userID) {
-        AddShortNameFragment saveDialogFragment = new AddShortNameFragment(true, userID, user);
-        saveDialogFragment.setCancelable(false);
-        FragmentManager manager = getSupportFragmentManager();
-        FragmentTransaction transaction = manager.beginTransaction();
-        saveDialogFragment.show(transaction, "dialog");
-//        this.userID = userID;
-    }
-
-
-    @Override
-    public void onForgot()
-    {
-        Intent intent = new Intent(VariousNotebook.this, ForgotPswActivity.class);
-        startActivity(intent);
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(@NonNull MenuItem item) {
-        if (item.getItemId() == R.id.item_settings) {
-            int location[] = new int[2];
-            toolbar.getLocationInWindow(location);
-            int y = getResources().getDisplayMetrics().heightPixels;
-            int x = getResources().getDisplayMetrics().widthPixels;
-
-            SettingsDialogFragment settingsDialogFragment = new SettingsDialogFragment(y, x, sharedPreferences.getBoolean(TAG_DARK, false));
-            FragmentManager manager = getSupportFragmentManager();
-            FragmentTransaction transaction = manager.beginTransaction();
-            settingsDialogFragment.show(transaction, "dialog");
-        }
-        return false;
-    }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu){

@@ -1,33 +1,24 @@
 package com.example.readingdiary.Activities;
 
-import android.content.ContentValues;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.database.Cursor;
-import android.database.sqlite.SQLiteDatabase;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Bundle;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.util.Log;
-import android.view.KeyEvent;
 import android.view.Menu;
-import android.view.MenuItem;
-import android.view.MotionEvent;
 import android.view.View;
-import android.view.Window;
 import android.view.WindowManager;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.CheckBox;
-import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.ImageView;
-import android.widget.LinearLayout;
 import android.widget.RatingBar;
-import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -39,49 +30,38 @@ import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
 
 import com.example.readingdiary.Classes.DeleteNote;
-import com.example.readingdiary.Classes.DeleteUser;
 import com.example.readingdiary.Classes.SaveImage;
 //import com.example.readingdiary.Fragments.ChooseDataDialogFragment;
-import com.example.readingdiary.Fragments.AddShortNameFragment;
 import com.example.readingdiary.Fragments.ChooseGenreFragment;
 import com.example.readingdiary.Fragments.CreateWithoutNoteDialogFragment;
 import com.example.readingdiary.Fragments.DeleteDialogFragment;
 import com.example.readingdiary.Fragments.DeleteTitleAndAuthorDialogFragment;
 import com.example.readingdiary.Fragments.SaveDialogFragment;
-import com.example.readingdiary.Fragments.SettingsDialogFragment;
 import com.example.readingdiary.R;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
-import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
-import com.google.android.material.textview.MaterialTextView;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
-import com.google.firebase.firestore.EventListener;
 import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.FirebaseFirestore;
-import com.google.firebase.firestore.FirebaseFirestoreException;
 import com.google.firebase.firestore.SetOptions;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.squareup.picasso.Picasso;
 
-import java.security.Key;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.TreeMap;
 
 public class EditNoteActivity extends AppCompatActivity implements DeleteDialogFragment.DeleteDialogListener,
         CreateWithoutNoteDialogFragment.CreateWithoutNoteDialogListener,
-        SaveDialogFragment.SaveDialogListener, SettingsDialogFragment.SettingsDialogListener {
+        SaveDialogFragment.SaveDialogListener{
 // класс отвечает за активность с каталогами
 private String TAG_DARK = "dark_theme";
         SharedPreferences sharedPreferences;
@@ -90,10 +70,16 @@ private String TAG_DARK = "dark_theme";
     EditText authorView;
     RatingBar ratingView;
     TextView genreView;
-    EditText timeView;
     EditText placeView;
     EditText shortCommentView;
     ImageView coverView;
+    EditText dayStart;
+    EditText monthStart;
+    EditText yearStart;
+    EditText dayEnd;
+    EditText monthEnd;
+    EditText yearEnd;
+
     String imagePath="";
     String id;
     String path;
@@ -113,9 +99,6 @@ private String TAG_DARK = "dark_theme";
     private DocumentReference imagePathsDoc;
     long time;
     Bitmap cover;
-    CheckBox privacyView;
-    boolean isPrivate;
-    MainActivity mein = new MainActivity();
     HashMap<String, String> chosenGenres=new HashMap<>();
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -148,7 +131,6 @@ private String TAG_DARK = "dark_theme";
             id = db.collection("Notes").document(user).collection("userNotes").document().getId();
             path = args.get("path").toString();
             beforeChanging = new String[]{path, "", "", "0.0", "", "", "", "", "", "0"};
-            isPrivate=false;
             setViews();
         }
         else{
@@ -156,7 +138,6 @@ private String TAG_DARK = "dark_theme";
             id = db.collection("Notes").document(user).collection("userNotes").document().getId();
             path = "./";
             beforeChanging = new String[]{"./", "", "", "0.0", "", "", "", "", "", "0"};
-            isPrivate = false;
             setViews();
         }
         imagePathsDoc = FirebaseFirestore.getInstance().collection("Common").document(user).collection(id).document("Images");
@@ -237,77 +218,6 @@ private String TAG_DARK = "dark_theme";
         finish();
     }
 
-    @Override
-    public void onChangeThemeClick(boolean isChecked) {
-        Toast.makeText(this, "На нас напали светлые маги. Темная тема пока заперта", Toast.LENGTH_LONG).show();
-    }
-
-    @Override
-    public void onExitClick()
-    {
-//        int ext =0;
-//        ext =1;
-        MainActivity MainActivity = new MainActivity();
-        MainActivity.currentUser=null;
-        MainActivity.mAuth.signOut();
-        Intent intent = new Intent(EditNoteActivity.this, MainActivity.class);
-        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-        startActivity(intent);
-    }
-
-
-    @Override
-    public void onDelete()
-    {
-        String currentUser =  FirebaseAuth.getInstance().getCurrentUser().getUid();
-        DeleteUser.deleteUser(this, currentUser);
-        db.collection("PublicID").document(currentUser).addSnapshotListener(new EventListener<DocumentSnapshot>() {
-            @Override
-            public void onEvent(@Nullable DocumentSnapshot documentSnapshot, @Nullable FirebaseFirestoreException e) {
-                if (documentSnapshot == null || documentSnapshot.getString("id")==null){
-                    Toast.makeText(getApplicationContext(),"Аккаунт удалён",Toast.LENGTH_SHORT).show();
-                    Intent intent = new Intent(EditNoteActivity.this, MainActivity.class);
-                    intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-                    intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
-                    startActivity(intent);
-                }
-            }
-        });
-    }
-
-    @Override
-    public void onChangeIdClick(String userID) {
-        AddShortNameFragment saveDialogFragment = new AddShortNameFragment(true, userID, user);
-        saveDialogFragment.setCancelable(false);
-        FragmentManager manager = getSupportFragmentManager();
-        FragmentTransaction transaction = manager.beginTransaction();
-        saveDialogFragment.show(transaction, "dialog");
-//        this.userID = userID;
-    }
-
-    @Override
-    public void onForgot()
-    {
-        Intent intent = new Intent(EditNoteActivity.this, ForgotPswActivity.class);
-        startActivity(intent);
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(@NonNull MenuItem item) {
-        if (item.getItemId() == R.id.item_settings) {
-            int location[] = new int[2];
-            toolbar.getLocationInWindow(location);
-            int y = getResources().getDisplayMetrics().heightPixels;
-            int x = getResources().getDisplayMetrics().widthPixels;
-
-            SettingsDialogFragment settingsDialogFragment = new SettingsDialogFragment(y, x, sharedPreferences.getBoolean(TAG_DARK, false));
-            FragmentManager manager = getSupportFragmentManager();
-            FragmentTransaction transaction = manager.beginTransaction();
-            settingsDialogFragment.show(transaction, "dialog");
-        }
-        return false;
-    }
-
 
     public void findViews(){
         pathView = (EditText) findViewById(R.id.editPath);
@@ -315,14 +225,80 @@ private String TAG_DARK = "dark_theme";
         authorView = (EditText) findViewById(R.id.editAuthorNoteActivity);
         ratingView = (RatingBar) findViewById(R.id.editRatingBar);
         genreView = (TextView) findViewById(R.id.editGenre);
-        timeView = (EditText) findViewById(R.id.editTime);
         placeView = (EditText) findViewById(R.id.editPlace);
         shortCommentView = (EditText) findViewById(R.id.editShortComment);
         coverView = (ImageView) findViewById(R.id.editCoverImage);
         acceptButton = (FloatingActionButton) findViewById(R.id.acceptAddingNote2);
         cancelButton = (FloatingActionButton) findViewById(R.id.cancelAddingNote2);
-        privacyView = (CheckBox) findViewById(R.id.privacyCheckBox);
- }
+
+        dayStart = (EditText) findViewById(R.id.edit_start_day);
+        monthStart = (EditText) findViewById(R.id.edit_start_month);
+        yearStart = (EditText) findViewById(R.id.edit_start_year);
+        datePicker(dayStart, monthStart, yearStart);
+
+        dayEnd = (EditText) findViewById(R.id.edit_end_day);
+        monthEnd = (EditText) findViewById(R.id.edit_end_month);
+        yearEnd = (EditText) findViewById(R.id.edit_end_year);
+        datePicker(dayEnd, monthEnd, yearEnd);
+
+    }
+
+
+    private void datePicker(final EditText day, final EditText month, final EditText year){
+        final InputMethodManager inputManager = (InputMethodManager) getApplicationContext().getSystemService(Context.INPUT_METHOD_SERVICE);
+        TextWatcher dayWatcher = new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                if (s.length() == 2) {
+                    inputManager.showSoftInput(month, InputMethodManager.SHOW_IMPLICIT);
+                    ((InputMethodManager) getApplicationContext().getSystemService(Context.INPUT_METHOD_SERVICE)).showSoftInput(month, 0);
+                    month.requestFocus();
+
+                }
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+                if (day.getText().toString().length() < 2){
+                    return;
+                }
+                if (Integer.parseInt(day.getText().toString())==0 || Integer.parseInt(day.getText().toString())>32){
+                    day.setText("32");
+                }
+            }
+        };
+
+        TextWatcher monthWatcher = new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                if (s.length() == 2) {
+                    inputManager.showSoftInput(year, InputMethodManager.SHOW_IMPLICIT);
+                    ((InputMethodManager) getApplicationContext().getSystemService(Context.INPUT_METHOD_SERVICE)).showSoftInput(year, 0);
+                    year.requestFocus();
+
+                }
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+                if (month.getText().toString().length() < 2){
+                    return;
+                }
+                if (Integer.parseInt(month.getText().toString())==0 || Integer.parseInt(month.getText().toString())>12){
+                    month.setText("12");
+                }
+            }
+        };
+
+        day.addTextChangedListener(dayWatcher);
+        month.addTextChangedListener(monthWatcher);
+    }
 
     public void setViews(){
         this.pathView.setText(beforeChanging[0].substring(beforeChanging[0].indexOf('/')+1));
@@ -333,14 +309,27 @@ private String TAG_DARK = "dark_theme";
         }
         showChosenGenres(chosenGenres);
 //        this.genreView.setText(beforeChanging[4]);
-        this.timeView.setText(beforeChanging[5]);
+        if (!beforeChanging[5].isEmpty()){
+            String[] time = beforeChanging[5].split(" ");
+            if (!time[0].isEmpty()){
+                dayStart.setText(time[0].split("\\.")[0]);
+                monthStart.setText(time[0].split("\\.")[1]);
+                yearStart.setText(time[0].split("\\.")[2]);
+            }
+            if (!time[1].isEmpty()){
+                dayEnd.setText(time[1].split("\\.")[0]);
+                monthEnd.setText(time[1].split("\\.")[1]);
+                yearEnd.setText(time[1].split("\\.")[2]);
+            }
+        }
+
+
         this.placeView.setText(beforeChanging[6]);
         this.shortCommentView.setText(beforeChanging[7]);
         if (!beforeChanging[8].equals("")){
             this.coverView.setImageBitmap(BitmapFactory.decodeFile(beforeChanging[8]));
             this.imagePath = imagePath;
         }
-        this.privacyView.setChecked(!isPrivate);
     }
 
     private void setButtons(){
@@ -478,7 +467,6 @@ private String TAG_DARK = "dark_theme";
                         HashMap<String, Object> map = (HashMap<String, Object>) documentSnapshot.getData();
                         if (map != null){
                             imagePath = map.get("imagePath").toString();
-                            isPrivate = (boolean)map.get("private");
                             beforeChanging = new String[]{
                                     map.get("path").toString().replace("\\", "/"), map.get("author").toString(),
                                     map.get("title").toString(), map.get("rating").toString(),
@@ -535,10 +523,10 @@ private String TAG_DARK = "dark_theme";
         if (authorView.length()>50){Toast.makeText(EditNoteActivity.this,"Введено слишком большое имя автора ",Toast.LENGTH_SHORT).show(); return false;}
         else if (titleView.length()>50){Toast.makeText(EditNoteActivity.this,"Ведено слишком большое название книги ",Toast.LENGTH_SHORT).show();return false;}
 //        else if (genreView.length()>50){ Toast.makeText(EditNoteActivity.this,"Введено слишком большое название жанра ",Toast.LENGTH_SHORT).show();return false;}
-        else if (timeView.length()>50){Toast.makeText(EditNoteActivity.this,"Введен слишком большой текст для периода прочтения",Toast.LENGTH_SHORT).show();return false;}
         else if (placeView.length()>50){Toast.makeText(EditNoteActivity.this,"Введено слишком большое название места прочтения",Toast.LENGTH_SHORT).show();return false;}
         else if (shortCommentView.length()>50){Toast.makeText(EditNoteActivity.this,"Введен слишком большой краткий комментарий",Toast.LENGTH_SHORT).show();return false;}
         else if (pathView.getText().toString().contains("\\")) {Toast.makeText(EditNoteActivity.this, "Введен недопустимы символ: \\", Toast.LENGTH_LONG).show();return false;}
+
         String time = (beforeChanging[9].equals("0"))?System.currentTimeMillis()+"":beforeChanging[9];
         String path1 = pathView.getText().toString();
         path1 = fixPath(path1);
@@ -552,28 +540,24 @@ private String TAG_DARK = "dark_theme";
             chosenGenres = new HashMap<>();
         }
         note.put("genre", chosenGenres);
-        note.put("time", timeView.getText().toString());
+        String date = "";
+        if (!dayStart.getText().toString().isEmpty() && !monthStart.getText().toString().isEmpty() && !yearStart.getText().toString().isEmpty()){
+            date += dayStart.getText().toString() + "." + monthStart.getText().toString() + "." + yearStart.getText().toString();
+        }
+        date+=" ";
+        if (!dayEnd.getText().toString().isEmpty() && !monthEnd.getText().toString().isEmpty() && !yearEnd.getText().toString().isEmpty()){
+            date += dayEnd.getText().toString() + "." + monthEnd.getText().toString() + "." + yearEnd.getText().toString();
+        }
+        note.put("time", date);
         note.put("place", placeView.getText().toString());
         note.put("short_comment", shortCommentView.getText().toString());
         note.put("timeAdd", time);
-        if (privacyView.isChecked() && (isPrivate || isNoteNew)){
-            Map<String, String> map = new HashMap<>();
-//            List<String> list = new ArrayList<>();
-            map.put(time, id);
-            db.collection("Publicly").document(user).set(map, SetOptions.merge());
-        }
-        else if (!privacyView.isChecked() && !isPrivate){
-            db.collection("Publicly").document(user).update(time, FieldValue.delete());
-        }
-        note.put("private", !privacyView.isChecked());
 
         if (!beforeChanging[0].equals(path1)){
             beforeChanging[0] = path1;
             savePaths();
         }
         if (isNoteNew == true){
-            note.put("publicRatingSum", 0.0);
-            note.put("publicRatingCount", 0);
             db.collection("Notes").document(user).collection("userNotes").document(id).set(note).addOnSuccessListener(new OnSuccessListener<Void>() {
                 @Override
                 public void onSuccess(Void aVoid) {
@@ -618,10 +602,13 @@ private String TAG_DARK = "dark_theme";
                 beforeChanging[2].equals(titleView.getText().toString()) &&
                 beforeChanging[3].equals(ratingView.getRating()+"")  &&
                 beforeChanging[4].equals(genreView.getText().toString()) &&
-                beforeChanging[5].equals(timeView.getText().toString()) &&
+                beforeChanging[5].equals(
+                        dayStart.getText().toString() + "." + monthStart.getText().toString() + "." +
+                                yearStart.getText().toString() + " " + dayEnd.getText().toString() +
+                                "." + monthEnd.getText().toString() + "." + yearEnd.getText().toString()) &&
                 beforeChanging[6].equals(placeView.getText().toString()) &&
                 beforeChanging[7].equals(shortCommentView.getText().toString()) &&
-                beforeChanging[8].equals(imagePath) && isPrivate==privacyView.isChecked())
+                beforeChanging[8].equals(imagePath))
         {
             return false;
         }
@@ -686,9 +673,6 @@ private String TAG_DARK = "dark_theme";
         }
         else{
             DeleteNote.deleteImages(user, id);
-            if (!isPrivate){
-                DeleteNote.deletePublicly(user, id);
-            }
         }
     }
     public void changedIntent(){

@@ -54,13 +54,5 @@
             android:layout_alignParentRight="true"
             android:id="@+id/catalogNoteCheckBox" />
 
-        <ImageButton
-            android:id="@+id/privacyButton"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignParentTop="true"
-            android:layout_alignParentRight="true"
-            android:backgroundTint="#fff"
-            app:srcCompat="@drawable/ic_action_private_dark" />
     </RelativeLayout>
 </com.google.android.material.card.MaterialCardView>

@@ -3,8 +3,6 @@ package com.example.readingdiary.Activities;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.database.Cursor;
-import android.database.sqlite.SQLiteDatabase;
 import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Bundle;
@@ -27,15 +25,8 @@ import androidx.appcompat.widget.Toolbar;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
 
-import com.example.readingdiary.Classes.DeleteUser;
-import com.example.readingdiary.Classes.Note;
-import com.example.readingdiary.Fragments.AddShortNameFragment;
-import com.example.readingdiary.Fragments.SettingsDialogFragment;
 import com.example.readingdiary.R;
-import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
-import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.EventListener;
@@ -45,13 +36,10 @@ import com.google.firebase.storage.FirebaseStorage;
 import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.Map;
-import java.util.TreeMap;
 
-public class NoteActivity extends AppCompatActivity implements SettingsDialogFragment.SettingsDialogListener {
+public class NoteActivity extends AppCompatActivity{
     // класс отвечает за активность с каталогами
     private String TAG_DARK = "dark_theme";
     SharedPreferences sharedPreferences;
@@ -135,58 +123,6 @@ public class NoteActivity extends AppCompatActivity implements SettingsDialogFra
         return true;
     }
 
-    @Override
-    public void onChangeThemeClick(boolean isChecked) {
-        Toast.makeText(this, "На нас напали светлые маги. Темная тема пока заперта", Toast.LENGTH_LONG).show();
-    }
-
-    @Override
-    public void onExitClick() {
-        MainActivity MainActivity = new MainActivity();
-        MainActivity.currentUser=null;
-        MainActivity.mAuth.signOut();
-        Intent intent = new Intent(NoteActivity.this, MainActivity.class);
-        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-        startActivity(intent);
-    }
-
-    @Override
-    public void onDelete()
-    {
-        DeleteUser.deleteUser(this, user);
-        db.collection("PublicID").document(user).addSnapshotListener(new EventListener<DocumentSnapshot>() {
-            @Override
-            public void onEvent(@Nullable DocumentSnapshot documentSnapshot, @Nullable FirebaseFirestoreException e) {
-                if (documentSnapshot == null || documentSnapshot.getString("id")==null){
-                    Toast.makeText(getApplicationContext(),"Аккаунт удалён",Toast.LENGTH_SHORT).show();
-                    Intent intent = new Intent(NoteActivity.this, MainActivity.class);
-                    intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-                    intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
-                    startActivity(intent);
-                }
-            }
-        });
-    }
-
-    @Override
-    public void onChangeIdClick(String userID) {
-        AddShortNameFragment saveDialogFragment = new AddShortNameFragment(true, userID, user);
-        saveDialogFragment.setCancelable(false);
-        FragmentManager manager = getSupportFragmentManager();
-        FragmentTransaction transaction = manager.beginTransaction();
-        saveDialogFragment.show(transaction, "dialog");
-//        this.userID = userID;
-    }
-
-
-    @Override
-    public void onForgot()
-    {
-        Intent intent = new Intent(NoteActivity.this, ForgotPswActivity.class);
-        startActivity(intent);
-    }
-
-
 
     @Override
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
@@ -196,11 +132,9 @@ public class NoteActivity extends AppCompatActivity implements SettingsDialogFra
             int y = getResources().getDisplayMetrics().heightPixels;
             int x = getResources().getDisplayMetrics().widthPixels;
 
-            SettingsDialogFragment settingsDialogFragment = new SettingsDialogFragment(y, x, sharedPreferences.getBoolean(TAG_DARK, false));
             FragmentManager manager = getSupportFragmentManager();
             FragmentTransaction transaction = manager.beginTransaction();
-            settingsDialogFragment.show(transaction, "dialog");
-        }
+            }
 //        int id = item.getItemId();
         int it = item.getItemId();
         if (it == R.id.edit_note) {

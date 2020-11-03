@@ -11,7 +11,6 @@ import android.provider.MediaStore;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.MotionEvent;
 import android.view.View;
 import android.widget.Button;
 import android.widget.SeekBar;
@@ -21,26 +20,17 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.fragment.app.FragmentManager;
-import androidx.fragment.app.FragmentTransaction;
 import androidx.recyclerview.widget.DefaultItemAnimator;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.example.readingdiary.Classes.DeleteFilesClass;
-import com.example.readingdiary.Classes.DeleteUser;
-import com.example.readingdiary.Classes.VariousNoteComparator;
 import com.example.readingdiary.Classes.VariousNotes;
 import com.example.readingdiary.Classes.VariousNotesAudio;
 import com.example.readingdiary.Classes.VariousNotesInterface;
-import com.example.readingdiary.Fragments.AddShortNameFragment;
-import com.example.readingdiary.Fragments.SettingsDialogFragment;
 import com.example.readingdiary.R;
 import com.example.readingdiary.adapters.VariousViewAdapter;
-import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
-import com.google.android.gms.tasks.Task;
 import com.google.android.material.appbar.MaterialToolbar;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.firebase.auth.FirebaseAuth;
@@ -57,20 +47,12 @@ import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
 
-import java.io.BufferedReader;
-import java.io.BufferedWriter;
 import java.io.File;
-import java.io.FileOutputStream;
-import java.io.FileReader;
-import java.io.IOException;
-import java.io.OutputStreamWriter;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
-public class VariousShow extends AppCompatActivity implements SettingsDialogFragment.SettingsDialogListener
+public class VariousShow extends AppCompatActivity
 {
     // класс отвечает за активность с каталогами
     private String TAG_DARK = "dark_theme";
@@ -114,16 +96,6 @@ public class VariousShow extends AppCompatActivity implements SettingsDialogFrag
     @Override
     protected void onCreate(Bundle savedInstanceState)
     {
-        sharedPreferences = this.getSharedPreferences(TAG_DARK, Context.MODE_PRIVATE);
-        boolean dark = sharedPreferences.getBoolean(TAG_DARK, false);
-        if (dark)
-        {
-            setTheme(R.style.DarkTheme);
-        }
-        else
-        {
-            setTheme(R.style.AppTheme);
-        }
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_various_show);
 
@@ -175,75 +147,12 @@ public class VariousShow extends AppCompatActivity implements SettingsDialogFrag
 
 //    private int binarySearch
 
-    @Override
-    public void onChangeThemeClick(boolean isChecked) {
-        Toast.makeText(this, "На нас напали светлые маги. Темная тема пока заперта", Toast.LENGTH_LONG).show();
-    }
-
-    @Override
-    public void onExitClick()
-    {
-        MainActivity MainActivity = new MainActivity();
-        MainActivity.currentUser=null;
-        MainActivity.mAuth.signOut();
-        Intent intent = new Intent(VariousShow.this, MainActivity.class);
-        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-        startActivity(intent);
-    }
-
-
-    @Override
-    public void onDelete()
-    {
-        DeleteUser.deleteUser(this, user);
-        FirebaseFirestore.getInstance().collection("PublicID").document(user).addSnapshotListener(new EventListener<DocumentSnapshot>() {
-            @Override
-            public void onEvent(@Nullable DocumentSnapshot documentSnapshot, @Nullable FirebaseFirestoreException e) {
-                if (documentSnapshot == null || documentSnapshot.getString("id")==null){
-                    Toast.makeText(getApplicationContext(),"Аккаунт удалён",Toast.LENGTH_SHORT).show();
-                    Intent intent = new Intent(VariousShow.this, MainActivity.class);
-                    intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-                    intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
-                    startActivity(intent);
-                }
-            }
-        });
-    }
-
-    @Override
-    public void onChangeIdClick(String userID) {
-        AddShortNameFragment saveDialogFragment = new AddShortNameFragment(true, userID, user);
-        saveDialogFragment.setCancelable(false);
-        FragmentManager manager = getSupportFragmentManager();
-        FragmentTransaction transaction = manager.beginTransaction();
-        saveDialogFragment.show(transaction, "dialog");
-//        this.userID = userID;
-    }
-
-
-    @Override
-    public void onForgot()
-    {
-        Intent intent = new Intent(VariousShow.this, ForgotPswActivity.class);
-        startActivity(intent);
-    }
 
 
     @Override
     public boolean onOptionsItemSelected(@NonNull MenuItem item)
     {
-        if (item.getItemId()==R.id.item_settings)
-        {
-            int location[] = new int[2];
-            toolbar.getLocationInWindow(location);
-            int y = getResources().getDisplayMetrics().heightPixels;
-            int x = getResources().getDisplayMetrics().widthPixels;
 
-            SettingsDialogFragment settingsDialogFragment = new SettingsDialogFragment(y, x, sharedPreferences.getBoolean(TAG_DARK, false));
-            FragmentManager manager = getSupportFragmentManager();
-            FragmentTransaction transaction = manager.beginTransaction();
-            settingsDialogFragment.show(transaction, "dialog");
-        }
         if (item.getItemId()== R.id.item_delete)
         {
             action_mode=false;

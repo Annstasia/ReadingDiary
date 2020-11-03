@@ -7,11 +7,11 @@
     android:orientation="vertical"
     tools:context=".Activities.GaleryActivity">
     <include
-        android:id="@+id/toolbar_galery"
-        layout="@layout/base_toolbar">
+        android:id="@+id/appbarVariousShow"
+        layout="@layout/long_click_toolbar">
     </include>
     <androidx.recyclerview.widget.RecyclerView
-        android:layout_below="@id/toolbar_galery"
+        android:layout_below="@id/appbarVariousShow"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:paddingBottom="100dp"

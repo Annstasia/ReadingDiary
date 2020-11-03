@@ -14,6 +14,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.example.readingdiary.Classes.ImageClass;
 import com.example.readingdiary.Classes.SmallGaleryTransform;
 import com.example.readingdiary.R;
+import com.google.android.material.checkbox.MaterialCheckBox;
 import com.squareup.picasso.Picasso;
 
 import java.util.List;
@@ -24,8 +25,12 @@ public class GaleryRecyclerViewAdapter extends RecyclerView.Adapter<GaleryRecycl
     private List<ImageClass> buttons;
     private GaleryRecyclerViewAdapter.OnItemClickListener mListener;
     private Context context;
+    private boolean actionMode;
     public interface OnItemClickListener{
         void onItemClick(int position);
+        void onItemLongClick(int position);
+        void onCheckClick(int position);
+        void onUncheckClick(int position);
     }
 
 
@@ -36,13 +41,14 @@ public class GaleryRecyclerViewAdapter extends RecyclerView.Adapter<GaleryRecycl
     public GaleryRecyclerViewAdapter(List<ImageClass> buttons, Context context) {
         this.buttons = buttons;
         this.context = context;
+        this.actionMode=false;
     }
 
 
     @Override
     public ViewHolder onCreateViewHolder(ViewGroup viewGroup, int viewType) {
         View v;
-        v = LayoutInflater.from(viewGroup.getContext()).inflate(R.layout.galery_view_item, viewGroup, false);
+        v = LayoutInflater.from(viewGroup.getContext()).inflate(R.layout.item_galery_view, viewGroup, false);
         ViewHolder vh = new ViewHolder(v);
 //        v.setOnClickListener(this);
         return vh;
@@ -50,6 +56,13 @@ public class GaleryRecyclerViewAdapter extends RecyclerView.Adapter<GaleryRecycl
 
     @Override
     public void onBindViewHolder(ViewHolder viewHolder, int i) {
+        if (!actionMode){
+            viewHolder.checkBox.setChecked(false);
+            viewHolder.checkBox.setVisibility(View.GONE);
+        }
+        else{
+            viewHolder.checkBox.setVisibility(View.VISIBLE);
+        }
         if (buttons.get(i).getType()==1){
             DisplayMetrics metricsB = context.getResources().getDisplayMetrics();
             float size = metricsB.widthPixels / 3;
@@ -91,6 +104,10 @@ public class GaleryRecyclerViewAdapter extends RecyclerView.Adapter<GaleryRecycl
         notifyDataSetChanged();
     }
 
+    public void setActionMode(boolean mode){
+        actionMode = mode;
+    }
+
     class ViewHolder extends RecyclerView.ViewHolder {
         //        private TextView path1;
 //        private TextView path2;
@@ -98,12 +115,14 @@ public class GaleryRecyclerViewAdapter extends RecyclerView.Adapter<GaleryRecycl
 //        private TextView title;
 //        private TextView author;
         private ImageView imageView;
+        private MaterialCheckBox checkBox;
 
 //        private ImageView icon;
 
         public ViewHolder(View itemView) {
             super(itemView);
             imageView = (ImageView) itemView.findViewById(R.id.galery_image_el0);
+            checkBox = (MaterialCheckBox) itemView.findViewById(R.id.galery_item_check);
 //            title = (TextView) itemView.findViewById(R.id.titleViewCatalog);
 //            author = (TextView) itemView.findViewById(R.id.authorViewCatalog);
 //            path2 = (TextView) itemView.findViewById(R.id.pathViewCatalog1);
@@ -118,6 +137,31 @@ public class GaleryRecyclerViewAdapter extends RecyclerView.Adapter<GaleryRecycl
                         }
                     }
                 }
+            });
+            itemView.setOnLongClickListener(new View.OnLongClickListener() {
+                @Override
+                public boolean onLongClick(View v) {
+                    if (mListener != null){
+                        int position = getAdapterPosition();
+                        if (position != RecyclerView.NO_POSITION){
+                            mListener.onItemLongClick(position);
+                        }
+                        return true;
+                    }
+                    return false;
+                }
+            });
+            checkBox.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    if (checkBox.isChecked()){
+                        mListener.onCheckClick(getAdapterPosition());
+                    }
+                    else{
+                        mListener.onUncheckClick(getAdapterPosition());
+                    }
+                }
+
             });
         }
 

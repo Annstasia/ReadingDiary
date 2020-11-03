@@ -14,10 +14,7 @@ public class RealNote implements Note {
     private String id;
     private final int type = 0;
     private double rating;
-    private boolean isPrivate;
     private Uri coverUri;
-    private double publicRatingSum;
-    private long publicRatingCount;
     private String owner;
     private long time;
     private HashMap<String, Object> genre;
@@ -27,27 +24,21 @@ public class RealNote implements Note {
 
 
 
-    public RealNote(String id, String path, String author, String title, double rating, boolean isPrivate, double publicRatingSum, long publicRatingCount, Uri coverUri, HashMap<String, Object> genre){
+    public RealNote(String id, String path, String author, String title, double rating, Uri coverUri, HashMap<String, Object> genre){
         this.id = id;
         this.path = path;
         this.title = title;
         this.author = author;
         this.rating = rating;
         this.coverUri = coverUri;
-        this.isPrivate = isPrivate;
-        this.publicRatingSum=publicRatingSum;
-        this.publicRatingCount=publicRatingCount;
         this.genre = genre;
     }
-    public RealNote(String id, String path, String author, String title, double rating, boolean isPrivate, double publicRatingSum, long publicRatingCount, HashMap<String, Object> genre){
+    public RealNote(String id, String path, String author, String title, double rating, HashMap<String, Object> genre){
         this.id = id;
         this.path = path;
         this.title = title;
         this.author = author;
         this.rating = rating;
-        this.isPrivate = isPrivate;
-        this.publicRatingSum=publicRatingSum;
-        this.publicRatingCount=publicRatingCount;
         this.genre = genre;
 
     }
@@ -85,34 +76,7 @@ public class RealNote implements Note {
         this.rating = rating;
     }
 
-    public boolean getPrivate() {
-        return isPrivate;
-    }
 
-    public void setPrivate(boolean aPrivate) {
-        isPrivate = aPrivate;
-    }
-
-    public boolean changePrivate(){
-        isPrivate = !isPrivate;
-        return isPrivate;
-    }
-
-    public double getPublicRatingSum() {
-        return publicRatingSum;
-    }
-
-    public void setPublicRatingSum(double publicRatingSum) {
-        this.publicRatingSum = publicRatingSum;
-    }
-
-    public long getPublicRatingCount() {
-        return publicRatingCount;
-    }
-
-    public void setPublicRatingCount(long publicRatingCount) {
-        this.publicRatingCount = publicRatingCount;
-    }
 
     public String getOwner() {
         return owner;

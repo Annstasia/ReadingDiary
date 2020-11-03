@@ -14,6 +14,7 @@ import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -44,7 +45,6 @@ public class DeleteNote {
                             for (QueryDocumentSnapshot documentSnapshot : queryDocumentSnapshots) {
                                 deleteNote(user, documentSnapshot.getId());
                                 if (!(boolean)documentSnapshot.get("private")){
-                                    deletePublicly(user, documentSnapshot.getId());
                                 }
                             }
                         }
@@ -55,31 +55,13 @@ public class DeleteNote {
 
     public static void deleteNote(String user, String id){
         db.collection("Notes").document(user).collection("userNotes").document(id).delete();
-        deletePublicly(user, id);
         deleteImages(user, id);
         deleteVariousNote(user, id, "comment");
         deleteVariousNote(user, id, "description");
         deleteVariousNote(user, id, "quotes");
     }
 
-    public static void deletePublicly(final String user, final String id){
-        db.collection("Publicly").document(user).get().addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
-            @Override
-            public void onSuccess(DocumentSnapshot documentSnapshot) {
-                HashMap<String, Object> hashMap = (HashMap)documentSnapshot.getData();
-                if (hashMap != null){
-                    for (String key : hashMap.keySet()){
-                        if (hashMap.get(key).equals(id)){
-                            db.collection("Publicly").document(user).update(key, FieldValue.delete());
-                            break;
-                        }
-                    }
-                }
-            }
-        });
-//        db.collection("Publicly").document(user).update();
-//        db.collection("Publicly").document(user).update("notesId", FieldValue.arrayRemove(id));
-    }
+
 
     public static void deleteVariousNote(String user, String id, final String type){
         final CollectionReference collectionReference = db.collection("VariousNotes").document(user).collection(id);
@@ -98,21 +80,21 @@ public class DeleteNote {
                 });
     }
 
-    public static void deleteImages(String user, String id){
+    public static void deleteImages(String user, String id) {
         final StorageReference storageReference = FirebaseStorage.getInstance().getReference(user).child(id);
         final DocumentReference documentReference = db.collection("Common").document(user).collection(id).document("Images");
         documentReference.get()
                 .addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
                     @Override
                     public void onSuccess(DocumentSnapshot documentSnapshot) {
-                        Map <String, Boolean> map = (HashMap) documentSnapshot.getData();
+                        Map<String, Boolean> map = (HashMap) documentSnapshot.getData();
                         Log.d("qwerty41", "hi1");
 
-                        if (map != null){
+                        if (map != null) {
                             Log.d("qwerty41", "hi2");
 
-                            for (String path : map.keySet()){
-                                Log.d("qwerty41", "hi3 " + path );
+                            for (String path : map.keySet()) {
+                                Log.d("qwerty41", "hi3 " + path);
 
                                 storageReference.child("Images").child(path).delete();
                             }
@@ -121,9 +103,21 @@ public class DeleteNote {
 
                     }
                 });
-
-
     }
 
+
+
+
+
+    public static void deleteSelectedImages(String user, String noteID, ArrayList<Long> imagesID){
+        final StorageReference storageReference = FirebaseStorage.getInstance().getReference(user).child(noteID).child("Images");
+        final DocumentReference documentReference = db.collection("Common").document(user).collection(noteID).document("Images");
+
+        for (long i : imagesID) {
+            documentReference.update(i + "", FieldValue.delete());
+            storageReference.child(i+"").delete();
+            Log.d("qwerty121", "storage " +  user + " " + noteID + " " + i);
+        }
+    }
 
 }

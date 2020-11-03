@@ -100,14 +100,6 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
                 viewHolder.author.setText(realNote.getAuthor());
                 viewHolder.title.setText(realNote.getTitle());
                 viewHolder.ratingBar.setRating((float)realNote.getRating());
-                if (realNote.getPrivate()){
-                    viewHolder.privacyButton.setImageDrawable(
-                            context.getResources().getDrawable(R.drawable.ic_action_private_dark));
-                }
-                else{
-                    viewHolder.privacyButton.setImageDrawable(
-                            context.getResources().getDrawable(R.drawable.ic_action_public_dark));
-                }
                 if (realNote.getCoverUri() !=null){
                     viewHolder.cover.setVisibility(View.VISIBLE);
                     Picasso.get().load(realNote.getCoverUri()).into(viewHolder.cover);
@@ -175,7 +167,6 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
         private RatingBar ratingBar;
         private MaterialCardView cardView;
         private MaterialCardView cardView2;
-        private ImageButton privacyButton;
         private View itemView;
 
 
@@ -195,7 +186,6 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
             path2 = (TextView) itemView.findViewById(R.id.pathViewCatalog1);
             cardView = (MaterialCardView) itemView.findViewById(R.id.catalogNoteCardView);
             cardView2 = (MaterialCardView) itemView.findViewById(R.id.catalogDirectoryCardView);
-            privacyButton = (ImageButton) itemView.findViewById(R.id.privacyButton);
 
 
 
