@@ -13,4 +13,47 @@
         android:layout_height="wrap_content"
         android:layout_margin="5dp"
         android:padding="5dp"/>
+    <com.google.android.material.textview.MaterialTextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:drawableRight="@drawable/ic_arrow_down_dark"
+        android:text="По рейтингу"
+        android:layout_marginHorizontal="18dp"
+        android:layout_marginVertical="5dp"
+        android:textColor="#000000"
+        android:textSize="15sp"
+        android:id="@+id/filter_rating_view">
+    </com.google.android.material.textview.MaterialTextView>
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_marginHorizontal="18dp"
+        android:visibility="gone"
+        android:id="@+id/edit_rating_layout">
+        <EditText
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:hint="3.0"
+            android:inputType="numberDecimal"
+            android:id="@+id/edit_rating_start">
+        </EditText>
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="-"/>
+        <EditText
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:hint="4.5"
+            android:inputType="numberDecimal"
+            android:id="@+id/edit_rating_end">
+        </EditText>
+    </LinearLayout>
+    <com.google.android.material.checkbox.MaterialCheckBox
+        android:id="@+id/checkbox_show_catalog"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_margin="10dp"
+        android:text="Отображать каталоги"/>
 </LinearLayout>

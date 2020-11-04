@@ -18,10 +18,17 @@ import com.google.android.material.dialog.MaterialDialogs;
 
 public class SortDialogFragment extends DialogFragment {
     SortDialogFragment.SortDialogListener listener;
-    String[] choices;
+    String[] choices = new String[]{"По названиям по возрастанию",
+            "По названиям по убыванию",
+            "По автору по возрастанию",
+            "По автору по убыванию",
+            "По рейтингу по возрастанию",
+            "По рейтингу по убыванию",
+            "По дате добавления по возрастанию",
+            "По дате добавления по убыванию"
+    };
     int position;
-    public SortDialogFragment(String[] choices, int sortType){
-        this.choices = choices;
+    public SortDialogFragment(int sortType){
         position = sortType;
     }
     @NonNull

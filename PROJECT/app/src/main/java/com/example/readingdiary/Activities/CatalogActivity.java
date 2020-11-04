@@ -103,21 +103,8 @@ public class CatalogActivity extends AppCompatActivity implements SortDialogFrag
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        sharedPreferences = this.getSharedPreferences(TAG_DARK, Context.MODE_PRIVATE);
-        boolean dark = sharedPreferences.getBoolean(TAG_DARK, false);
-
-
-//        if (dark){
-//            setTheme(R.style.DarkTheme);
-//        }
-//        else{
-//            setTheme(R.style.AppTheme);
-//        }
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_navigation);
-//        user = FirebaseAuth.getInstance().getCurrentUser().getUid();
-
-//        Получение разрешений на чтение и запись
         if (checkSelfPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE)
                 == PackageManager.PERMISSION_GRANTED) {
 
@@ -131,27 +118,6 @@ public class CatalogActivity extends AppCompatActivity implements SortDialogFrag
         } else {
             ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.READ_EXTERNAL_STORAGE}, 1);
         }
-//        notes = new ArrayList<Note>(); // список того, что будет отображаться в каталоге.
-//        buttons = new ArrayList<String>(); // Список пройденный каталогов до текущего
-//        findViews();
-
-//        setSupportActionBar(toolbar);
-//        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-//        getSupportActionBar().setDisplayShowHomeEnabled(true);
-//        counterText.setText("Каталог");
-//        buttons.add(parent);
-//        selectAll(); // чтение данных из бд
-//        setAdapters();
-//        online= (Button) findViewById(R.id.bOnline);
-//        online.setOnClickListener(new View.OnClickListener() {
-//            @Override
-//            public void onClick(View view) {
-//                Intent intent = new Intent(CatalogActivity.this, OnlineActivity.class);
-//                startActivity(intent);
-//
-//            }
-//        });
-
 
         // Кнопка добавление новой активности
         Toolbar toolbar = findViewById(R.id.toolbar_navigation);
@@ -187,65 +153,6 @@ public class CatalogActivity extends AppCompatActivity implements SortDialogFrag
         this.fragment = fragment;
 //        this.fragmentType = type;
     }
-
-    //    private void setupDrawerContent(NavigationView navigationView) {
-////        try {
-////            fragment = (Fragment)CatalogFragment.class.newInstance();
-//////            this.fragment = fragment;
-////        } catch (Exception e) {
-////            e.printStackTrace();
-////        }
-////        FragmentManager fragmentManager = getSupportFragmentManager();
-////        fragmentManager.beginTransaction().replace(R.id.navigation_base, fragment).commit();
-//        navigationView.setNavigationItemSelectedListener(
-//                new NavigationView.OnNavigationItemSelectedListener() {
-//                    @Override
-//                    public boolean onNavigationItemSelected(MenuItem menuItem) {
-//                        selectDrawerItem(menuItem);
-//                        return true;
-//                    }
-//                });
-//    }
-
-//
-//    public void selectDrawerItem(MenuItem menuItem) {
-//        // Создать новый фрагмент и задать фрагмент для отображения
-//        // на основе нажатия на элемент навигации
-//        //        fragmentClass = new Fragment(menuItem.getItemId());
-//        Fragment newFragment;
-//        switch(menuItem.getItemId()) {
-//            case R.id.nav_catalog:
-//                fragmentClass = CatalogFragment.class;
-//                break;
-//            case R.id.nav_genres:
-//                fragmentClass = GenreFragment.class;
-//                break;
-//            default:
-//                fragmentClass = CatalogFragment.class;
-//        }
-//
-//        Log.d("qwerty782", "hello fragment " +menuItem.getItemId() + " " + R.id.nav_genres + " " + (fragmentClass == GenreFragment.class));
-//        try {
-//            fragment = (Fragment)fragmentClass.newInstance();
-//            Log.d("qwerty782", "success");
-////            this.fragment = fragment;
-//        } catch (Exception e) {
-//            e.printStackTrace();
-//        }
-//
-//        // Вставить фрагмент, заменяя любой существующий
-//        FragmentManager fragmentManager = getSupportFragmentManager();
-//        fragmentManager.beginTransaction().replace(R.id.navigation_base, fragment).commit();
-//
-//        // Выделение существующего элемента выполнено с помощью
-//        // NavigationView
-//        menuItem.setChecked(true);        // Установить заголовок для action bar'а
-//        setTitle(menuItem.getTitle());        // Закрыть navigation drawer
-//        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
-//        drawer.closeDrawer(GravityCompat.START);
-//    }
-
-    // ...
 
 
     @Override
@@ -329,32 +236,6 @@ public class CatalogActivity extends AppCompatActivity implements SortDialogFrag
 
         }
 
-//    @Override
-//    public void addNote(String parent) {
-//        Intent intent = new Intent(CatalogActivity.this, EditNoteActivity.class);
-//
-//        intent.putExtra("path", parent);
-//        Log.d("qwerty67374", "addNote " + parent);
-//        startActivityForResult(intent, CREATE_NOTE_REQUEST_CODE);
-//    }
-//
-//    @Override
-//    public void openNote(String ID) {
-//        Intent intent = new Intent(CatalogActivity.this, NoteActivity.class);
-//        // чтобы понять какую запись нужно отобразить в NoteActivity, запихиваем в intent id записи из бд
-//        intent.putExtra("id", ID);
-//        startActivityForResult(intent, NOTE_REQUEST_CODE);
-//    }
-//
-//    @Override
-//    public void sortClick() {
-//
-//    }
-
-//    @Override
-//    public void filterClick(TreeSet<String> authors, TreeSet<String> genres, ArrayList<String> checkedAuthors, ArrayList<String> checkedGenres) {
-//
-//    }
 
     @Override
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
@@ -453,181 +334,6 @@ public class CatalogActivity extends AppCompatActivity implements SortDialogFrag
         return super.onOptionsItemSelected(item);
     }
 
-//    @Override
-//    public void inflateCatalogMenu() {
-//
-//    }
-
-    //
-//    @Override
-//    public void onChangeThemeClick(boolean isChecked) {
-//        Toast.makeText(this, "На нас напали светлые маги. Темная тема пока заперта", Toast.LENGTH_LONG).show();
-//    }
-
-
-
-//    @Override
-//    public void onExitClick() {
-//        ext =1;
-//        mein.currentUser=null;
-//        mein.mAuth.signOut();
-//        Intent intent = new Intent(CatalogActivity.this, MainActivity.class);
-//        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-//        startActivity(intent);
-//    }
-
-
-//    @Override
-//    public void onForgot()
-//    {
-//        Intent intent = new Intent(CatalogActivity.this, ForgotPswActivity.class);
-//        startActivity(intent);
-//    }
-//
-//    @Override
-//    public void onDelete()
-//    {
-//        DeleteUser.deleteUser(this, user);
-//        db.collection("PublicID").document(user).addSnapshotListener(new EventListener<DocumentSnapshot>() {
-//            @Override
-//            public void onEvent(@Nullable DocumentSnapshot documentSnapshot, @Nullable FirebaseFirestoreException e) {
-//                if (documentSnapshot == null || documentSnapshot.getString("id")==null){
-//                    Toast.makeText(CatalogActivity.this,"Аккаунт удалён",Toast.LENGTH_SHORT).show();
-//                    Intent intent = new Intent(CatalogActivity.this, MainActivity.class);
-//                    intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-//                    intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
-//                    startActivity(intent);
-//                }
-//            }
-//        });
-//    }
-
-//    @Override
-//    public void onChangeIdClick(String userID) {
-//        AddShortNameFragment saveDialogFragment = new AddShortNameFragment(true, userID, user);
-//        saveDialogFragment.setCancelable(false);
-//        FragmentManager manager = getSupportFragmentManager();
-//        FragmentTransaction transaction = manager.beginTransaction();
-//        saveDialogFragment.show(transaction, "dialog");
-//        this.userID = userID;
-//    }
-
-
-//    @Override
-//    public boolean onOptionsItemSelected(@NonNull MenuItem item) {
-//        if (item.getItemId()==R.id.item_settings){
-//            int location[] = new int[2];
-//            toolbar.getLocationInWindow(location);
-//            int y = getResources().getDisplayMetrics().heightPixels;
-//            int x = getResources().getDisplayMetrics().widthPixels;
-//            SettingsDialogFragment settingsDialogFragment = new SettingsDialogFragment(y, x, sharedPreferences.getBoolean(TAG_DARK, false));
-//            FragmentManager manager = getSupportFragmentManager();
-//            FragmentTransaction transaction = manager.beginTransaction();
-//            settingsDialogFragment.show(transaction, "dialog");
-//        }
-//        if (item.getItemId()== R.id.item_delete){
-//            action_mode=false;
-//            mAdapter.setActionMode(false);
-//            deleteSelectedRealNote();
-//            deleteSelectedDirectories();
-//            mAdapter.notifyDataSetChanged();
-//            toolbar.getMenu().clear();
-//            toolbar.inflateMenu(R.menu.menu_catalog);
-//            toolbar.inflateMenu(R.menu.base_menu);
-//            getSupportActionBar().setDisplayHomeAsUpEnabled(false);
-//            menuType = 0;
-//            counterText.setText("Каталог");
-//            count=0;
-//        }
-//        if (item.getItemId() == R.id.item_search){
-//            counterText.setVisibility(View.GONE);
-//            findText1.setVisibility(View.VISIBLE);
-//            toolbar.getMenu().clear();
-//            toolbar.inflateMenu(R.menu.menu_search);
-//            getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-//            getSupportActionBar().setDisplayShowHomeEnabled(true);
-//            menuType = 2;
-//
-//        }
-//        if (item.getItemId() == R.id.item_search1){
-//            if (!findText1.getText().toString().equals("")){
-//                notes.clear();
-//                selectTitle(findText1.getText().toString());
-//                mAdapter.notifyDataSetChanged();
-//                findText1.clearComposingText();
-//            }
-//            counterText.setVisibility(View.VISIBLE);
-//            findText1.setVisibility(View.GONE);
-//            toolbar.getMenu().clear();
-//            toolbar.inflateMenu(R.menu.menu_catalog);
-//            toolbar.inflateMenu(R.menu.base_menu);
-//            menuType = 0;
-//        }
-//
-//        if (item.getItemId() == R.id.item_sort){
-//            SortDialogFragment sortDialogFragment = new SortDialogFragment(choices, sortType);
-//            FragmentManager manager = getSupportFragmentManager();
-//            FragmentTransaction transaction = manager.beginTransaction();
-//            sortDialogFragment.show(transaction, "dialog");
-//        }
-//
-//        if (item.getItemId()==R.id.item_filter){
-//            db.collection("genres").document(user).get().addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
-//                @Override
-//                public void onSuccess(DocumentSnapshot documentSnapshot) {
-//                    if (documentSnapshot != null && documentSnapshot.getData() != null){
-//                        TreeSet<String> genres =  new TreeSet<>();
-//                        genres.addAll(documentSnapshot.getData().keySet());
-//                        TreeSet<String> authors = new TreeSet<>();
-//                        for (Note note: notes) {
-//                            if (note.getItemType()==0){
-//                                authors.add(((RealNote) note).getAuthor());
-////                    genres.add(((RealNote) note).getGenre());
-//                            }
-//                        }
-//                        if (noFilter){
-//                            checkedAuthors = new ArrayList<>(authors);
-//                            checkedGenres = new ArrayList<>(genres);
-//                        }
-//                        FilterDialogFragment filterDialogFragment = new FilterDialogFragment(authors, genres, checkedAuthors, checkedGenres);
-//                        FragmentManager manager = getSupportFragmentManager();
-//                        FragmentTransaction transaction = manager.beginTransaction();
-//                        filterDialogFragment.show(transaction, "dialog");
-//                    }
-//                }
-//            });
-//
-//
-//        }
-//
-//        if (item.getItemId() == android.R.id.home){
-//            if (menuType==0){
-////                finish();
-//            }
-//            else if (menuType == 1){
-//                action_mode=false;
-//                mAdapter.setActionMode(false);
-//                mAdapter.notifyDataSetChanged();
-//                toolbar.getMenu().clear();
-//                toolbar.inflateMenu(R.menu.menu_catalog);
-//                toolbar.inflateMenu(R.menu.base_menu);
-//                getSupportActionBar().setDisplayHomeAsUpEnabled(false);
-//                menuType = 0;
-//                counterText.setText("Каталог");
-//                count=0;
-//            }
-//            else if (menuType==2){
-//                findText1.clearComposingText();
-//                counterText.setVisibility(View.VISIBLE);
-//                findText1.setVisibility(View.GONE);
-//                toolbar.getMenu().clear();
-//                toolbar.inflateMenu(R.menu.menu_catalog);
-//                toolbar.inflateMenu(R.menu.base_menu);
-//                menuType = 0;
-//            }
-//        }
-//        return super.onOptionsItemSelected(item);
-//    }
 
     @Override
     public void onSortClick(int position) {
@@ -656,9 +362,9 @@ public class CatalogActivity extends AppCompatActivity implements SortDialogFrag
 //    }
 
     @Override
-    public void onFilterClick(ArrayList<String> checkedAuthors, ArrayList<String> checkedGenres, ArrayList<String> checkedGenresID) {
+    public void onFilterClick(ArrayList<String> checkedAuthors, ArrayList<String> checkedGenres, ArrayList<String> checkedGenresID, String ratingStart, String ratingEnd, boolean showCatalog) {
         if (fragment.toString() == "catalog"){
-            ((CatalogFragment)fragment).onFilterClick(checkedAuthors, checkedGenres, checkedGenresID);
+            ((CatalogFragment)fragment).onFilterClick(checkedAuthors, checkedGenres, checkedGenresID, ratingStart, ratingEnd, showCatalog);
         }
 //        noFilter = false;
 //        this.checkedAuthors=checkedAuthors;

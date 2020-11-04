@@ -115,9 +115,11 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
         if (type == TYPE_ITEM2){
             Directory directory = (Directory) notes.get(i);
             if (directory.getVisibility()==false){
+                viewHolder.hide();
 //                viewHolder.cardView2.setVisibility(View.GONE);
             }
             else{
+                viewHolder.show();
 //                viewHolder.cardView2.setVisibility(View.VISIBLE);
                 String[] dir = directory.getDirectory().split("/");
                 viewHolder.path2.setText(dir[dir.length-1]);

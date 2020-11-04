@@ -128,14 +128,16 @@ private String TAG_DARK = "dark_theme";
         }
         else if (args != null && args.get("path") != null){
             isNoteNew=true;
-            id = db.collection("Notes").document(user).collection("userNotes").document().getId();
+//            id = db.collection("Notes").document(user).collection("userNotes").document().getId();
+            id = ""+System.currentTimeMillis();
             path = args.get("path").toString();
             beforeChanging = new String[]{path, "", "", "0.0", "", "", "", "", "", "0"};
             setViews();
         }
         else{
             isNoteNew=true;
-            id = db.collection("Notes").document(user).collection("userNotes").document().getId();
+//            id = db.collection("Notes").document(user).collection("userNotes").document().getId();
+            id = ""+System.currentTimeMillis();
             path = "./";
             beforeChanging = new String[]{"./", "", "", "0.0", "", "", "", "", "", "0"};
             setViews();
@@ -527,7 +529,7 @@ private String TAG_DARK = "dark_theme";
         else if (shortCommentView.length()>50){Toast.makeText(EditNoteActivity.this,"Введен слишком большой краткий комментарий",Toast.LENGTH_SHORT).show();return false;}
         else if (pathView.getText().toString().contains("\\")) {Toast.makeText(EditNoteActivity.this, "Введен недопустимы символ: \\", Toast.LENGTH_LONG).show();return false;}
 
-        String time = (beforeChanging[9].equals("0"))?System.currentTimeMillis()+"":beforeChanging[9];
+//        String time = (beforeChanging[9].equals("0"))?System.currentTimeMillis()+"":beforeChanging[9];
         String path1 = pathView.getText().toString();
         path1 = fixPath(path1);
         Map<String, Object> note = new HashMap<String, Object>();
@@ -551,7 +553,7 @@ private String TAG_DARK = "dark_theme";
         note.put("time", date);
         note.put("place", placeView.getText().toString());
         note.put("short_comment", shortCommentView.getText().toString());
-        note.put("timeAdd", time);
+        note.put("timeAdd", id);
 
         if (!beforeChanging[0].equals(path1)){
             beforeChanging[0] = path1;

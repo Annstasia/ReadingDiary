@@ -55,6 +55,7 @@ import com.google.firebase.storage.FirebaseStorage;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 
 public class CatalogFragment extends Fragment {
@@ -90,12 +91,12 @@ public class CatalogFragment extends Fragment {
     int sortType = 0;
     ArrayList<RealNote> selectionRealNotesList = new ArrayList<>();
     ArrayList<Directory> selectionDirectoriesList = new ArrayList<>();
-    String[] choices = new String[]{"По названиям по возрастанию",
-            "По названиям по убыванию",
-            "По автору по возрастанию",
-            "По автору по убыванию",
-            "По рейтингу по возрастанию",
-            "По рейтингу по убыванию"};
+//    String[] choices = new String[]{"По названиям по возрастанию",
+//            "По названиям по убыванию",
+//            "По автору по возрастанию",
+//            "По автору по убыванию",
+//            "По рейтингу по возрастанию",
+//            "По рейтингу по убыванию"};
     ArrayList<Note> notFilteredNotes;
     private String TAG_DARK = "dark_theme";
     SharedPreferences sharedPreferences;
@@ -111,6 +112,8 @@ public class CatalogFragment extends Fragment {
     private boolean noFilter = true;
     private AppBarConfiguration mAppBarConfiguration;
     View root;
+    private boolean filterClicked = false;
+    private boolean showCatalog=true;
 
 
     public View onCreateView(@NonNull LayoutInflater inflater,
@@ -186,13 +189,20 @@ public class CatalogFragment extends Fragment {
 
 
     public void sortClick(){
-        SortDialogFragment sortDialogFragment = new SortDialogFragment(choices, sortType);
+        SortDialogFragment sortDialogFragment = new SortDialogFragment(sortType);
         FragmentManager manager = getActivity().getSupportFragmentManager();
         FragmentTransaction transaction = manager.beginTransaction();
         sortDialogFragment.show(transaction, "dialog");
     }
 
     public void filterClick(){
+//        while (notes.contains(null)){
+//
+//        }
+        if (notes.contains(null)){
+            filterClicked = true;
+            return;
+        }
         ArrayList<String> authors = new ArrayList<>();
         for (Note note: notes) {
             if (note.getItemType()==0){
@@ -209,9 +219,12 @@ public class CatalogFragment extends Fragment {
         if (noFilter){
             checkedAuthors = new ArrayList<>(authors);
             checkedGenres = new ArrayList<>(genresList);
+            checkedAuthors.add("Не указан");
+            checkedGenres.add("Не указан");
+
         }
 //        onCatalogFragmentListener.filterClick(authors, genres, new ArrayList<String>(genres.keySet()), checkedAuthors, checkedGenres);
-        FilterDialogFragment filterDialogFragment = new FilterDialogFragment(authors, genresList, new ArrayList<String>(genres.keySet()), checkedAuthors, checkedGenres);
+        FilterDialogFragment filterDialogFragment = new FilterDialogFragment(authors, genresList, new ArrayList<String>(genres.keySet()), checkedAuthors, checkedGenres, showCatalog);
         FragmentManager manager = getActivity().getSupportFragmentManager();
         FragmentTransaction transaction = manager.beginTransaction();
         filterDialogFragment.show(transaction, "dialog");
@@ -472,15 +485,28 @@ public class CatalogFragment extends Fragment {
                                     @Override
                                     public void onSuccess(QuerySnapshot queryDocumentSnapshots) {
                                         if (queryDocumentSnapshots != null){
+                                            ArrayList<Long> names = new ArrayList<>();
                                             for (final QueryDocumentSnapshot documentSnapshot : queryDocumentSnapshots) {
                                                 if (active!=old_active){
                                                     break;
                                                 }
-                                                final HashMap<String, Object> map = (HashMap<String, Object>) documentSnapshot.getData();
-                                                generateNote(documentSnapshot.getId(), -1, false);
+//                                                final HashMap<String, Object> map = (HashMap<String, Object>) documentSnapshot.getData();
+                                                int index = names.size();
+                                                for (int i = 0; i < index; i++){
+                                                    if (Long.parseLong(documentSnapshot.getId().toString()) > names.get(i)){
+                                                        index = i;
+                                                        break;
+                                                    }
+                                                }
+                                                names.add(index, Long.parseLong(documentSnapshot.getId().toString()));
+                                                notes.add(startPos + index, null);
                                             }
+                                            for (int i = 0; i < names.size(); i++){
+                                                generateNote(names.get(i).toString(), startPos + i, true);
+                                            }
+
                                         }
-                                        mAdapter.notifyDataSetChanged();
+//                                        mAdapter.notifyDataSetChanged();
                                     }
                                 })
                                 .addOnFailureListener(new OnFailureListener() {
@@ -731,6 +757,11 @@ public class CatalogFragment extends Fragment {
                             index1=0;
                             return;
                         }
+                        if(filterClicked && !notes.contains(null)){
+                            filterClicked=false;
+                            filterClick();
+
+                        }
 
                         if (map.get("imagePath")!= null && !map.get("imagePath").toString().equals("")){
                             db.collection("Common").document(user).collection(documentSnapshot0.getId()).document("Images").addSnapshotListener(getActivity(), new EventListener<DocumentSnapshot>() {
@@ -767,37 +798,15 @@ public class CatalogFragment extends Fragment {
                                                     }
                                                 });
                                     }
-//                                                else if (documentSnapshot.get(map.get("imagePath").toString()) != null && (boolean)documentSnapshot.get(map.get("imagePath").toString())==false){
-//                                                    if (index == -1){
-//                                                        notes.add(realNote);
-//                                                        mAdapter.notifyItemInserted(notes.size()-1);
-//
-//                                                    }
-//                                                    else{
-//                                                        notes.set(index, realNote);
-//                                                        mAdapter.notifyItemChanged(index);
-//                                                    }
-//                                                }
                                 }});
                         }
 
-//                            else{
-//                                if (index == -1){
-//                                    notes.add(realNote);
-//                                    mAdapter.notifyItemInserted(notes.size()-1);
-//
-//                                }
-//                                else{
-//                                    notes.set(index, realNote);
-//                                    mAdapter.notifyItemChanged(index);
-//                                }
-//                            }
 
                     }
                 });
     }
     public void insertById(final String id){
-        generateNote(id, -1, false);
+        generateNote(id, startPos, false);
     }
     public void changeById(final String id){
         for (int j = startPos; j < notes.size(); j++){
@@ -868,15 +877,20 @@ public class CatalogFragment extends Fragment {
         selectionDirectoriesList.clear();
     }
 //
-    public void onFilterClick(ArrayList<String> checkedAuthors, ArrayList<String> checkedGenres, ArrayList<String> checkedGenresID) {
+    public void onFilterClick(ArrayList<String> checkedAuthors, ArrayList<String> checkedGenres, ArrayList<String> checkedGenresID, String ratingStart, String ratingEnd, boolean showCatalog) {
         noFilter = false;
+        this.showCatalog = showCatalog;
+        Log.d("qwerty433", "filter");
         this.checkedAuthors=checkedAuthors;
         this.checkedGenres=checkedGenres;
         for (int i = 0; i < notes.size(); i++){
             if (notes.get(i).getItemType() != 0){
+                notes.get(i).setVisibility(showCatalog);
+                Log.d("qwerty433", "catalog "+ showCatalog);
                 continue;
             }
             if (!checkedAuthors.contains(((RealNote)notes.get(i)).getAuthor())){
+                Log.d("qwerty433", "noAuthor");
                 notes.get(i).setVisibility(false);
                 continue;
             }
@@ -891,8 +905,33 @@ public class CatalogFragment extends Fragment {
                 notes.get(i).setVisibility(true);
             }
             else{
-                notes.get(i).setVisibility(false);
+                if (checkedGenres.contains("Не указан") && ((RealNote)notes.get(i)).getGenre().size()==0){
+                    notes.get(i).setVisibility(true);
+                }
+                else{
+                    notes.get(i).setVisibility(false);
+                    continue;
+                }
+
             }
+            try{
+                double start = 0.0, end = 5.0;
+                if (!ratingStart.isEmpty()){
+                    start = Double.parseDouble(ratingStart);
+                }
+                if (!ratingEnd.isEmpty()){
+                    end = Double.parseDouble(ratingEnd);
+                }
+                if (((RealNote)notes.get(i)).getRating() < start || ((RealNote)notes.get(i)).getRating() > end){
+                    notes.get(i).setVisibility(false);
+                }
+            }
+            catch (Exception e){
+                Log.e("ratingException", e.getMessage());
+            }
+            finally {
+            }
+
         }
         mAdapter.notifyDataSetChanged();
     }
@@ -900,8 +939,108 @@ public class CatalogFragment extends Fragment {
 
     public void onSortClick(int position) {
         sortType = position;
-        Log.d("strangeSort", choices[position]);
-        startSort();
+        Comparator<Note> comparator;
+        final int minus;
+        if (position % 2 == 1){
+            minus = -1;
+        }
+        else{
+            minus = 1;
+        }
+        if (position==0 || position==1){
+            comparator = new Comparator<Note>() {
+                @Override
+                public int compare(Note o1, Note o2) {
+                    if (o1.getItemType()==1 && o2.getItemType()==0){
+                        return -1;
+                    }
+                    else if (o1.getItemType()==0 && o2.getItemType()==1){
+                        return 1;
+                    }
+                    else if (o1.getItemType() == 0 && o2.getItemType() == 0){
+                        return minus * ((RealNote)o1).getTitle().toLowerCase().compareTo(((RealNote)o2).getTitle().toLowerCase());
+                    }
+                    else{
+                        return minus * ((Directory)o1).getDirectory().compareTo(((Directory)o2).getDirectory());
+                    }
+                }
+            };
+        }
+        else if (position == 2 || position == 3){
+            comparator = new Comparator<Note>() {
+                @Override
+                public int compare(Note o1, Note o2) {
+                    if (o1.getItemType()==1 && o2.getItemType()==0){
+                        return -1;
+                    }
+                    else if (o1.getItemType()==0 && o2.getItemType()==1){
+                        return 1;
+                    }
+                    else if (o1.getItemType() == 0 && o2.getItemType() == 0){
+                        return minus * ((RealNote)o1).getAuthor().toLowerCase().compareTo(((RealNote)o2).getAuthor().toLowerCase());
+                    }
+                    else{
+                        return minus * ((Directory)o1).getDirectory().compareTo(((Directory)o2).getDirectory());
+                    }
+                }
+            };
+        }
+        else if (position == 4 || position == 5){
+            comparator = new Comparator<Note>() {
+                @Override
+                public int compare(Note o1, Note o2) {
+                    if (o1.getItemType()==1 && o2.getItemType()==0){
+                        return -1;
+                    }
+                    else if (o1.getItemType()==0 && o2.getItemType()==1){
+                        return 1;
+                    }
+                    else if (o1.getItemType() == 0 && o2.getItemType() == 0){
+                        if (((RealNote)o1).getRating() - ((RealNote)o2).getRating() > 0){
+                            return minus;
+                        }
+                        else if (((RealNote)o1).getRating() - ((RealNote)o2).getRating() < 0)
+                        {
+                            return -minus;
+                        }
+                        return 0;
+                    }
+                    else{
+                        return minus * ((Directory)o1).getDirectory().compareTo(((Directory)o2).getDirectory());
+                    }
+                }
+            };
+        }
+        else{
+            comparator =new Comparator<Note>() {
+                @Override
+                public int compare(Note o1, Note o2) {
+                    if (o1.getItemType()==1 && o2.getItemType()==0){
+                        return -1;
+                    }
+                    else if (o1.getItemType()==0 && o2.getItemType()==1){
+                        return 1;
+                    }
+                    else if (o1.getItemType() == 0 && o2.getItemType() == 0){
+                        if (((RealNote)o1).getTime() - ((RealNote)o2).getTime() > 0){
+                            return minus;
+                        }
+                        else if (((RealNote)o1).getTime() - ((RealNote)o2).getTime() < 0){
+                            return -minus;
+                        }
+                        return 0;
+                    }
+                    else{
+                        return minus * ((Directory)o1).getDirectory().compareTo(((Directory)o2).getDirectory());
+                    }
+                }
+            };
+        }
+        Collections.sort(notes, comparator);
+        mAdapter.notifyDataSetChanged();
+
+
+//        startSort();
     }
 
     @NonNull
