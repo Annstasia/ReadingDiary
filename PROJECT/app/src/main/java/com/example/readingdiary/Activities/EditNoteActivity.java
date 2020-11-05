@@ -166,8 +166,11 @@ public class EditNoteActivity extends AppCompatActivity implements DeleteDialogF
 
     @Override
     public void onCreateWithoutNoteClicked() {
+
         String path1 = pathView.getText().toString();
+        Log.d("qwerty4567654", path1);
         path1 = fixPath(path1);
+        Log.d("qwerty4567654", path1);
         if (!beforeChanging[0].equals(path1)){
             beforeChanging[0] = path1;
             savePaths();
@@ -177,7 +180,7 @@ public class EditNoteActivity extends AppCompatActivity implements DeleteDialogF
         }
         Intent returnIntent = new Intent();
         returnIntent.putExtra("noNote", "true");
-        returnIntent.putExtra("path", path);
+        returnIntent.putExtra("path", path1);
         setResult(RESULT_OK, returnIntent);
         finish();
     }
@@ -603,9 +606,10 @@ public class EditNoteActivity extends AppCompatActivity implements DeleteDialogF
     }
 
     public void savePaths(){
+
         final String[] pathTokens = beforeChanging[0].split("/");
         String prev="";
-        for (int i = 0; i < pathTokens.length - 1; i++) {
+        for (int i = 0; i < pathTokens.length-1; i++) {
             if (pathTokens[i].equals("")) {
                 continue;
             }

@@ -85,25 +85,23 @@ public class CatalogActivity extends AppCompatActivity implements SortDialogFrag
         // Кнопка добавление новой активности
         Toolbar toolbar = findViewById(R.id.toolbar_navigation);
         setSupportActionBar(toolbar);
-//        toolbar.inflateMenu(R.menu.menu_catalog);
-//        toolbar.inflateMenu(R.menu.activity_navigation_drawer);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         drawerLayout = findViewById(R.id.drawer_layout);
         NavigationView navigationView = findViewById(R.id.nav_view);
-        // Passing each menu ID as a set of Ids because each
-        // menu should be considered as top level destinations.
         mAppBarConfiguration = new AppBarConfiguration.Builder(R.id.nav_catalog,
                 R.id.nav_genres, R.id.nav_change_password, R.id.nav_log_out, R.id.nav_delete_account)
                 .setDrawerLayout(drawerLayout)
                 .build();
 
         NavController navController = Navigation.findNavController(this, R.id.nav_host_fragment);
-//        NavigationUI.setupActionBarWithNavController(this, navController, mAppBarConfiguration);
         NavigationUI.setupWithNavController(navigationView, navController);
         NavigationUI.setupActionBarWithNavController(this, navController, drawerLayout);
 
         View headerView = navigationView.getHeaderView(0);
-        ((TextView)headerView.findViewById(R.id.textView)).setText(FirebaseAuth.getInstance().getCurrentUser().getEmail());
+        if (FirebaseAuth.getInstance().getCurrentUser() != null){
+            ((TextView)headerView.findViewById(R.id.textView)).setText(FirebaseAuth.getInstance().getCurrentUser().getEmail());
+        }
+
 
     }
 
@@ -113,7 +111,6 @@ public class CatalogActivity extends AppCompatActivity implements SortDialogFrag
         @Override
     public void changeFragment(Fragment fragment) {
         this.fragment = fragment;
-//        this.fragmentType = type;
     }
 
 
@@ -127,8 +124,6 @@ public class CatalogActivity extends AppCompatActivity implements SortDialogFrag
     @Override
     public boolean onSupportNavigateUp() {
         NavController navController = Navigation.findNavController(this, R.id.nav_host_fragment);
-
-//        navController.n
         return NavigationUI.navigateUp(navController, mAppBarConfiguration)
                 || super.onSupportNavigateUp();
     }
@@ -142,62 +137,6 @@ public class CatalogActivity extends AppCompatActivity implements SortDialogFrag
         }
         return super.dispatchTouchEvent(event);
     }
-
-
-
-//
-//    @Override
-//    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
-//        super.onActivityResult(requestCode, resultCode, data);
-//        active++;
-//        if (data != null && requestCode == NOTE_REQUEST_CODE){
-//            // если изменился путь до записи, добавилась новая запись, то переходим к этой записи
-//            if (data.getExtras().get("deleted") != null){
-//                CatalogFragment catalogFragment = (CatalogFragment) fragment;
-//                catalogFragment.deleteNote(data.getExtras().get("id").toString());
-//                String id = data.getExtras().get("id").toString();
-////                int index = -1;
-////                for (int i = 0; i < notes.size(); i++){
-////                    if (notes.get(i).getID().equals(id)){
-////                        index = i;
-////                        break;
-////                    }
-////                }
-////                if (index != -1){
-////                    notes.remove(index);
-////                    mAdapter.notifyItemRemoved(index);
-////                }
-//
-//            }
-//
-//            else if (data.getExtras().get("path") != null){
-//                CatalogFragment catalogFragment = (CatalogFragment) fragment;
-//                catalogFragment.pathUpdate(data.getExtras().get("path").toString());
-//
-//            }
-//            else{
-//                CatalogFragment catalogFragment = (CatalogFragment) fragment;
-//                catalogFragment.changeById(data.getExtras().get("id").toString());
-//            }
-//        }
-//
-//        if (requestCode==CREATE_NOTE_REQUEST_CODE && resultCode == RESULT_OK){
-//                Intent intent = new Intent(CatalogActivity.this, NoteActivity.class); // вызов активности записи
-//                intent.putExtra("id", data.getExtras().get("id").toString()); // передаем id активности в бд, чтобы понять какую активность надо показывать
-//                intent.putExtra("changed", "true");
-////                CatalogFragment catalogFragment = (CatalogFragment)getSupportFragmentManager().findFragmentById(R.id.nav_catalog);
-//                CatalogFragment catalogFragment = (CatalogFragment) fragment;
-//                catalogFragment.insertById(data.getExtras().get("id").toString());
-//                startActivityForResult(intent, NOTE_REQUEST_CODE);
-//
-//            }
-//            else if (data != null && data.getExtras() != null && data.getExtras().get("noNote") != null){
-//                CatalogFragment catalogFragment = (CatalogFragment) fragment;
-//                catalogFragment.pathUpdate(data.getExtras().get("path").toString());
-//            }
-//
-//        }
-
 
     @Override
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
@@ -215,12 +154,7 @@ public class CatalogActivity extends AppCompatActivity implements SortDialogFrag
 
             if (item.getItemId() == R.id.item_sort){
                 ((CatalogFragment)fragment).sortClick();
-//            onCatalogFragmentListener.sortClick();
             }
-//            SortDialogFragment sortDialogFragment = new SortDialogFragment(choices, sortType);
-//            FragmentManager manager = getSupportFragmentManager();
-//            FragmentTransaction transaction = manager.beginTransaction();
-//            sortDialogFragment.show(transaction, "dialog");
 //        }
 
             if (item.getItemId()==R.id.item_filter){

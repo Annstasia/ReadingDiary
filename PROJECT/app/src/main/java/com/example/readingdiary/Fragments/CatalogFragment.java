@@ -60,7 +60,7 @@ import java.util.HashMap;
 
 public class CatalogFragment extends Fragment {
     public interface OnCatalogFragmentListener{
-        public void changeFragment(Fragment fragment);
+        void changeFragment(Fragment fragment);
     }
     private OnCatalogFragmentListener onCatalogFragmentListener;
     private CatalogViewModel catalogViewModel;
@@ -126,12 +126,12 @@ public class CatalogFragment extends Fragment {
         else{
             user = FirebaseAuth.getInstance().getCurrentUser().getUid();
         }
-
-        notes = new ArrayList<Note>(); // список того, что будет отображаться в каталоге.
-        buttons = new ArrayList<String>(); // Список пройденный каталогов до текущего
-        findViews();
+        if (user != null){
+            notes = new ArrayList<Note>(); // список того, что будет отображаться в каталоге.
+            buttons = new ArrayList<String>(); // Список пройденный каталогов до текущего
+            findViews();
 //        counterText.setText("Каталог");
-        buttons.add(parent);
+            buttons.add(parent);
 //        db.collection("genres").document(user).get().addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
 //            @Override
 //            public void onSuccess(DocumentSnapshot documentSnapshot) {
@@ -142,46 +142,50 @@ public class CatalogFragment extends Fragment {
 //            }
 //        });
 ////
-        db.collection("genres").document(user).addSnapshotListener(new EventListener<DocumentSnapshot>() {
-            @Override
-            public void onEvent(@Nullable DocumentSnapshot documentSnapshot, @Nullable FirebaseFirestoreException e) {
-                if (documentSnapshot != null && documentSnapshot.getData()!= null){
-                    if (genres==null){
-                        genres = (HashMap)documentSnapshot.getData();
-                        selectAll();
-                    }
-                    else{
-                        genres = (HashMap)documentSnapshot.getData();
-                    }
 
+            db.collection("genres").document(user).addSnapshotListener(new EventListener<DocumentSnapshot>() {
+                @Override
+                public void onEvent(@Nullable DocumentSnapshot documentSnapshot, @Nullable FirebaseFirestoreException e) {
+                    if (documentSnapshot != null && documentSnapshot.getData()!= null){
+                        if (genres==null){
+                            genres = (HashMap)documentSnapshot.getData();
+                            selectAll();
+                        }
+                        else{
+                            genres = (HashMap)documentSnapshot.getData();
+                        }
+
+                    }
                 }
-            }
-        });
+            });
 
 //        selectAll(); // чтение данных из бд
-        setAdapters();
-        // Кнопка добавление новой активности
-        FloatingActionButton addNote = (FloatingActionButton) root.findViewById(R.id.addNote);
-        addNote.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view)
-            {
-                Intent intent = new Intent(getContext(), EditNoteActivity.class);
-                intent.putExtra("path", parent);
-                Log.d("qwerty67374", "addNote " + parent);
-                startActivityForResult(intent, CREATE_NOTE_REQUEST_CODE);
-                Log.d("qwerty9898982", "clickAdd");
+            setAdapters();
+            // Кнопка добавление новой активности
+            FloatingActionButton addNote = root.findViewById(R.id.addNote);
+            addNote.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view)
+                {
+                    Intent intent = new Intent(getContext(), EditNoteActivity.class);
+                    intent.putExtra("path", parent);
+                    Log.d("qwerty67374", "addNote " + parent);
+                    startActivityForResult(intent, CREATE_NOTE_REQUEST_CODE);
+                    Log.d("qwerty9898982", "clickAdd");
 //                onCatalogFragmentListener.addNote(parent);
-            }
-        });
-        onCatalogFragmentListener.changeFragment((Fragment)this);
-        toolbar = getActivity().findViewById(R.id.toolbar_navigation);
+                }
+            });
+            onCatalogFragmentListener.changeFragment(this);
+            toolbar = getActivity().findViewById(R.id.toolbar_navigation);
 //        toolbar.getMenu().clear();
-        toolbar.getMenu().clear();
-        toolbar.inflateMenu(R.menu.menu_catalog);
+            toolbar.getMenu().clear();
+            toolbar.inflateMenu(R.menu.menu_catalog);
 //        getActivity().getActionBar().setDisplayHomeAsUpEnabled(true);
 //        toolbar.inflateMenu(R.menu.menu_catalog);
 //        Log.d("qwerty")
+
+        }
+
 
         return root;
     }
@@ -331,12 +335,12 @@ public class CatalogFragment extends Fragment {
 
 
     private void findViews(){
-        recyclerView = (RecyclerView) root.findViewById(R.id.recyclerViewCatalog);  // здесь будут отображаться каталоги и файлы notes
-        buttonView = (RecyclerView) root.findViewById(R.id.buttonViewCatalog);  // здесь будут отображаться пройденные поддиректории buttons
+        recyclerView = root.findViewById(R.id.recyclerViewCatalog);  // здесь будут отображаться каталоги и файлы notes
+        buttonView = root.findViewById(R.id.buttonViewCatalog);  // здесь будут отображаться пройденные поддиректории buttons
 //        toolbar = (Toolbar) root.findViewById(R.id.long_click_toolbar);
-        counterText = (TextView) getActivity().findViewById(R.id.counter_text);
+        counterText = getActivity().findViewById(R.id.counter_text);
 //        counterText.setText("Каталог");
-        findText1 = (EditText) getActivity().findViewById(R.id.editTextFind);
+        findText1 = getActivity().findViewById(R.id.editTextFind);
     }
 
     private void setAdapters(){
@@ -430,9 +434,9 @@ public class CatalogFragment extends Fragment {
                 counterText.setText(count + " выбрано");
                 Note note = notes.get(position);
                 if (note.getItemType() == 1) {
-                    selectionDirectoriesList.remove((Directory) note);
+                    selectionDirectoriesList.remove(note);
                 } else {
-                    selectionRealNotesList.remove((RealNote) note);
+                    selectionRealNotesList.remove(note);
                 }
             }
         });
@@ -493,12 +497,12 @@ public class CatalogFragment extends Fragment {
 //                                                final HashMap<String, Object> map = (HashMap<String, Object>) documentSnapshot.getData();
                                                 int index = names.size();
                                                 for (int i = 0; i < index; i++){
-                                                    if (Long.parseLong(documentSnapshot.getId().toString()) > names.get(i)){
+                                                    if (Long.parseLong(documentSnapshot.getId()) > names.get(i)){
                                                         index = i;
                                                         break;
                                                     }
                                                 }
-                                                names.add(index, Long.parseLong(documentSnapshot.getId().toString()));
+                                                names.add(index, Long.parseLong(documentSnapshot.getId()));
                                                 notes.add(startPos + index, null);
                                             }
                                             for (int i = 0; i < names.size(); i++){
@@ -656,7 +660,7 @@ public class CatalogFragment extends Fragment {
     private void reloadButtonsView(){
         // перезагрузка buttonView. Удаляются все элементы button, выбираются новые из текущего пути
         buttons.clear();
-        String pathTokens[] = (parent).split("/");
+        String[] pathTokens = (parent).split("/");
         // текущий путь - строка из названий директорий
         String prev = "";
         for (int i = 0; i < pathTokens.length; i++){
@@ -1228,10 +1232,11 @@ public class CatalogFragment extends Fragment {
 
         if (data != null && data.getExtras() != null && data.getExtras().get("noNote") != null && requestCode==CREATE_NOTE_REQUEST_CODE && resultCode == Activity.RESULT_OK){
             parent = data.getExtras().get("path").toString();
+            Log.d("Qwerty4567654", parent);
             reloadRecyclerView();
             reloadButtonsView();
         }
-        if (requestCode==CREATE_NOTE_REQUEST_CODE && resultCode == Activity.RESULT_OK && data != null && data.getExtras() != null && data.getExtras().get("deleted")==null){
+        else if (requestCode==CREATE_NOTE_REQUEST_CODE && resultCode == Activity.RESULT_OK && data != null && data.getExtras() != null && data.getExtras().get("deleted")==null){
             Intent intent = new Intent(getContext(), NoteActivity.class); // вызов активности записи
             intent.putExtra("id", data.getExtras().get("id").toString()); // передаем id активности в бд, чтобы понять какую активность надо показывать
             intent.putExtra("changed", "true");

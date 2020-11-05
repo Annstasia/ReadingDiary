@@ -62,7 +62,7 @@ public class AuthorizationActivity extends AppCompatActivity {
             }
         });
 
-        if (auth.getCurrentUser() != null){
+        if (auth.getCurrentUser() != null && (getIntent() == null || getIntent().getExtras() == null || getIntent().getExtras().get("user")==null)){
             Intent intent = new Intent(AuthorizationActivity.this, CatalogActivity.class);
             startActivity(intent);
         }
