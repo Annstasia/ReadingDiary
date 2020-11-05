@@ -50,53 +50,17 @@ import java.util.ArrayList;
 
 
 public class CatalogActivity extends AppCompatActivity implements SortDialogFragment.SortDialogListener, FilterDialogFragment.FilterDialogListener, CatalogFragment.OnCatalogFragmentListener {
-    // класс отвечает за активность с каталогами
-    RecyclerViewAdapter mAdapter;
     public DrawerLayout drawerLayout;
     Fragment fragment;
-    String parent = "./";
-    ArrayList<Note> notes;
-    ArrayList<String> buttons;
-    RecyclerView recyclerView;
-    RecyclerView buttonView;
-    CatalogButtonAdapter buttonAdapter;
-    Button findButton;
-    EditText findText1;
-    EditText findText;
-    ArrayList<String> sortsList;
     MaterialToolbar toolbar;
     TextView counterText;
-    String comp="";
-    int order;
-    int startPos;
-    int NOTE_REQUEST_CODE = 12345;
-    int CREATE_NOTE_REQUEST_CODE = 12346;
     public boolean action_mode = false;
     int count=0;
-    int menuType = 0;
-    int ext =0;
-    int sortType=0;
-    ArrayList<RealNote> selectionRealNotesList = new ArrayList<>();
-    ArrayList<Directory> selectionDirectoriesList = new ArrayList<>();
-    String[] choices = new String[]{"По названиям по возрастанию",
-            "По названиям по убыванию",
-            "По автору по возрастанию",
-            "По автору по убыванию",
-            "По рейтингу по возрастанию",
-            "По рейтингу по убыванию"};
-    ArrayList<Note> notFilteredNotes;
-    private String TAG_DARK = "dark_theme";
-    SharedPreferences sharedPreferences;
-    Button online;
-    int toolbarHeight=0;
     private FirebaseFirestore db = FirebaseFirestore.getInstance();
     private String user = "user0";
     int active=0;
     String userID;
-    private ArrayList<String> checkedAuthors = new ArrayList<>();
-    private ArrayList<String> checkedGenres = new ArrayList<>();
     LinearLayoutManager layoutManager;
-    private boolean noFilter = true;
     private AppBarConfiguration mAppBarConfiguration;
 
 
@@ -181,63 +145,63 @@ public class CatalogActivity extends AppCompatActivity implements SortDialogFrag
 
 
 
-
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
-        active++;
-        if (data != null && requestCode == NOTE_REQUEST_CODE){
-            // если изменился путь до записи, добавилась новая запись, то переходим к этой записи
-            if (data.getExtras().get("deleted") != null){
-                CatalogFragment catalogFragment = (CatalogFragment) fragment;
-                catalogFragment.deleteNote(data.getExtras().get("id").toString());
-                String id = data.getExtras().get("id").toString();
-//                int index = -1;
-//                for (int i = 0; i < notes.size(); i++){
-//                    if (notes.get(i).getID().equals(id)){
-//                        index = i;
-//                        break;
-//                    }
-//                }
-//                if (index != -1){
-//                    notes.remove(index);
-//                    mAdapter.notifyItemRemoved(index);
-//                }
-
-            }
-
-            else if (data.getExtras().get("path") != null){
-                CatalogFragment catalogFragment = (CatalogFragment) fragment;
-                catalogFragment.pathUpdate(data.getExtras().get("path").toString());
-
-            }
-            else{
-                CatalogFragment catalogFragment = (CatalogFragment) fragment;
-                catalogFragment.changeById(data.getExtras().get("id").toString());
-            }
-        }
-
-        if (requestCode==CREATE_NOTE_REQUEST_CODE && resultCode == RESULT_OK){
-                Intent intent = new Intent(CatalogActivity.this, NoteActivity.class); // вызов активности записи
-                intent.putExtra("id", data.getExtras().get("id").toString()); // передаем id активности в бд, чтобы понять какую активность надо показывать
-                intent.putExtra("changed", "true");
-//                CatalogFragment catalogFragment = (CatalogFragment)getSupportFragmentManager().findFragmentById(R.id.nav_catalog);
-                CatalogFragment catalogFragment = (CatalogFragment) fragment;
-                catalogFragment.insertById(data.getExtras().get("id").toString());
-                startActivityForResult(intent, NOTE_REQUEST_CODE);
-
-            }
-            else if (data != null && data.getExtras() != null && data.getExtras().get("noNote") != null){
-                CatalogFragment catalogFragment = (CatalogFragment) fragment;
-                catalogFragment.pathUpdate(data.getExtras().get("path").toString());
-            }
-
-        }
+//
+//    @Override
+//    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+//        super.onActivityResult(requestCode, resultCode, data);
+//        active++;
+//        if (data != null && requestCode == NOTE_REQUEST_CODE){
+//            // если изменился путь до записи, добавилась новая запись, то переходим к этой записи
+//            if (data.getExtras().get("deleted") != null){
+//                CatalogFragment catalogFragment = (CatalogFragment) fragment;
+//                catalogFragment.deleteNote(data.getExtras().get("id").toString());
+//                String id = data.getExtras().get("id").toString();
+////                int index = -1;
+////                for (int i = 0; i < notes.size(); i++){
+////                    if (notes.get(i).getID().equals(id)){
+////                        index = i;
+////                        break;
+////                    }
+////                }
+////                if (index != -1){
+////                    notes.remove(index);
+////                    mAdapter.notifyItemRemoved(index);
+////                }
+//
+//            }
+//
+//            else if (data.getExtras().get("path") != null){
+//                CatalogFragment catalogFragment = (CatalogFragment) fragment;
+//                catalogFragment.pathUpdate(data.getExtras().get("path").toString());
+//
+//            }
+//            else{
+//                CatalogFragment catalogFragment = (CatalogFragment) fragment;
+//                catalogFragment.changeById(data.getExtras().get("id").toString());
+//            }
+//        }
+//
+//        if (requestCode==CREATE_NOTE_REQUEST_CODE && resultCode == RESULT_OK){
+//                Intent intent = new Intent(CatalogActivity.this, NoteActivity.class); // вызов активности записи
+//                intent.putExtra("id", data.getExtras().get("id").toString()); // передаем id активности в бд, чтобы понять какую активность надо показывать
+//                intent.putExtra("changed", "true");
+////                CatalogFragment catalogFragment = (CatalogFragment)getSupportFragmentManager().findFragmentById(R.id.nav_catalog);
+//                CatalogFragment catalogFragment = (CatalogFragment) fragment;
+//                catalogFragment.insertById(data.getExtras().get("id").toString());
+//                startActivityForResult(intent, NOTE_REQUEST_CODE);
+//
+//            }
+//            else if (data != null && data.getExtras() != null && data.getExtras().get("noNote") != null){
+//                CatalogFragment catalogFragment = (CatalogFragment) fragment;
+//                catalogFragment.pathUpdate(data.getExtras().get("path").toString());
+//            }
+//
+//        }
 
 
     @Override
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
-        if (fragment.toString()=="catalog"){
+        if (fragment.toString().equals("catalog")){
             if (item.getItemId()== R.id.item_delete){
                 ((CatalogFragment)fragment).deleteClick();
             }

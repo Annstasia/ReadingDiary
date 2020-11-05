@@ -62,9 +62,6 @@ import java.util.Map;
 public class EditNoteActivity extends AppCompatActivity implements DeleteDialogFragment.DeleteDialogListener,
         CreateWithoutNoteDialogFragment.CreateWithoutNoteDialogListener,
         SaveDialogFragment.SaveDialogListener{
-// класс отвечает за активность с каталогами
-private String TAG_DARK = "dark_theme";
-        SharedPreferences sharedPreferences;
     EditText pathView;
     EditText titleView;
     EditText authorView;
@@ -102,33 +99,21 @@ private String TAG_DARK = "dark_theme";
     HashMap<String, String> chosenGenres=new HashMap<>();
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        sharedPreferences = this.getSharedPreferences(TAG_DARK, Context.MODE_PRIVATE);
-        boolean dark = sharedPreferences.getBoolean(TAG_DARK, false);
-
-        if (dark){
-            setTheme(R.style.DarkTheme);
-        }
-        else{
-            setTheme(R.style.AppTheme);
-        }
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_edit_note);
         user = FirebaseAuth.getInstance().getCurrentUser().getUid();
         toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         findViews();
-//        toolbar.inflateMenu(R.menu.base_menu);
         Bundle args = getIntent().getExtras();
 
         if (args != null && args.get("id") != null){
             isNoteNew=false;
             id = args.get("id").toString();
             select(id);
-            Log.d("qwerty71", "startNote");
         }
         else if (args != null && args.get("path") != null){
             isNoteNew=true;
-//            id = db.collection("Notes").document(user).collection("userNotes").document().getId();
             id = ""+System.currentTimeMillis();
             path = args.get("path").toString();
             beforeChanging = new String[]{path, "", "", "0.0", "", "", "", "", "", "0"};
@@ -136,7 +121,6 @@ private String TAG_DARK = "dark_theme";
         }
         else{
             isNoteNew=true;
-//            id = db.collection("Notes").document(user).collection("userNotes").document().getId();
             id = ""+System.currentTimeMillis();
             path = "./";
             beforeChanging = new String[]{"./", "", "", "0.0", "", "", "", "", "", "0"};
@@ -223,25 +207,25 @@ private String TAG_DARK = "dark_theme";
 
 
     public void findViews(){
-        pathView = (EditText) findViewById(R.id.editPath);
-        titleView = (EditText) findViewById(R.id.editTitleNoteActivity);
-        authorView = (EditText) findViewById(R.id.editAuthorNoteActivity);
-        ratingView = (RatingBar) findViewById(R.id.editRatingBar);
-        genreView = (TextView) findViewById(R.id.editGenre);
-        placeView = (EditText) findViewById(R.id.editPlace);
-        shortCommentView = (EditText) findViewById(R.id.editShortComment);
-        coverView = (ImageView) findViewById(R.id.editCoverImage);
-        acceptButton = (FloatingActionButton) findViewById(R.id.acceptAddingNote2);
-        cancelButton = (FloatingActionButton) findViewById(R.id.cancelAddingNote2);
+        pathView = findViewById(R.id.editPath);
+        titleView = findViewById(R.id.editTitleNoteActivity);
+        authorView = findViewById(R.id.editAuthorNoteActivity);
+        ratingView = findViewById(R.id.editRatingBar);
+        genreView = findViewById(R.id.editGenre);
+        placeView = findViewById(R.id.editPlace);
+        shortCommentView = findViewById(R.id.editShortComment);
+        coverView = findViewById(R.id.editCoverImage);
+        acceptButton = findViewById(R.id.acceptAddingNote2);
+        cancelButton = findViewById(R.id.cancelAddingNote2);
 
-        dayStart = (EditText) findViewById(R.id.edit_start_day);
-        monthStart = (EditText) findViewById(R.id.edit_start_month);
-        yearStart = (EditText) findViewById(R.id.edit_start_year);
+        dayStart = findViewById(R.id.edit_start_day);
+        monthStart = findViewById(R.id.edit_start_month);
+        yearStart = findViewById(R.id.edit_start_year);
         datePicker(dayStart, monthStart, yearStart);
 
-        dayEnd = (EditText) findViewById(R.id.edit_end_day);
-        monthEnd = (EditText) findViewById(R.id.edit_end_month);
-        yearEnd = (EditText) findViewById(R.id.edit_end_year);
+        dayEnd = findViewById(R.id.edit_end_day);
+        monthEnd = findViewById(R.id.edit_end_month);
+        yearEnd = findViewById(R.id.edit_end_year);
         datePicker(dayEnd, monthEnd, yearEnd);
 
     }
@@ -336,9 +320,9 @@ private String TAG_DARK = "dark_theme";
     }
 
     private void setButtons(){
-        FloatingActionButton accept =  (FloatingActionButton) findViewById(R.id.acceptAddingNote2);
-        FloatingActionButton cancel =  (FloatingActionButton) findViewById(R.id.cancelAddingNote2);
-        Button deleteButton = (Button) findViewById(R.id.deleteNoteButton);
+        FloatingActionButton accept = findViewById(R.id.acceptAddingNote2);
+        FloatingActionButton cancel = findViewById(R.id.cancelAddingNote2);
+        Button deleteButton = findViewById(R.id.deleteNoteButton);
         accept.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -372,7 +356,7 @@ private String TAG_DARK = "dark_theme";
             }
         });
 
-        Button bAddObl = (Button) findViewById(R.id.bAddObl);
+        Button bAddObl = findViewById(R.id.bAddObl);
         bAddObl.setOnClickListener(new View.OnClickListener()
         {
             @Override
@@ -604,26 +588,22 @@ private String TAG_DARK = "dark_theme";
 
     public boolean checkChanges(){
         Log.d("putExtra", ratingView.getRating() +"");
-        if (beforeChanging[0].equals(fixPath(pathView.getText().toString())) &&
-                beforeChanging[1].equals(authorView.getText().toString()) &&
-                beforeChanging[2].equals(titleView.getText().toString()) &&
-                beforeChanging[3].equals(ratingView.getRating()+"")  &&
-                beforeChanging[4].equals(genreView.getText().toString()) &&
-                beforeChanging[5].equals(
+        return !beforeChanging[0].equals(fixPath(pathView.getText().toString())) ||
+                !beforeChanging[1].equals(authorView.getText().toString()) ||
+                !beforeChanging[2].equals(titleView.getText().toString()) ||
+                !beforeChanging[3].equals(ratingView.getRating() + "") ||
+                !beforeChanging[4].equals(genreView.getText().toString()) ||
+                !beforeChanging[5].equals(
                         dayStart.getText().toString() + "." + monthStart.getText().toString() + "." +
                                 yearStart.getText().toString() + " " + dayEnd.getText().toString() +
-                                "." + monthEnd.getText().toString() + "." + yearEnd.getText().toString()) &&
-                beforeChanging[6].equals(placeView.getText().toString()) &&
-                beforeChanging[7].equals(shortCommentView.getText().toString()) &&
-                beforeChanging[8].equals(imagePath))
-        {
-            return false;
-        }
-        return true;
+                                "." + monthEnd.getText().toString() + "." + yearEnd.getText().toString()) ||
+                !beforeChanging[6].equals(placeView.getText().toString()) ||
+                !beforeChanging[7].equals(shortCommentView.getText().toString()) ||
+                !beforeChanging[8].equals(imagePath);
     }
 
     public void savePaths(){
-        final String pathTokens[] = ((String) beforeChanging[0]).split("/");
+        final String[] pathTokens = beforeChanging[0].split("/");
         String prev="";
         for (int i = 0; i < pathTokens.length - 1; i++) {
             if (pathTokens[i].equals("")) {

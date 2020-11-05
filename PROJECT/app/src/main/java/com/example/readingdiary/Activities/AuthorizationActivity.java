@@ -43,8 +43,8 @@ public class AuthorizationActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_authorization);
         auth = FirebaseAuth.getInstance();
-        emailView = (EditText) findViewById(R.id.emailView);
-        passwordView = (EditText) findViewById(R.id.passwordView);
+        emailView = findViewById(R.id.emailView);
+        passwordView = findViewById(R.id.passwordView);
         findViewById(R.id.registrationButton).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -67,7 +67,7 @@ public class AuthorizationActivity extends AppCompatActivity {
             startActivity(intent);
         }
 
-        MaterialTextView forgotPassword = (MaterialTextView) findViewById(R.id.forgotPasswordButton);
+        MaterialTextView forgotPassword = findViewById(R.id.forgotPasswordButton);
         forgotPassword.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -117,7 +117,6 @@ public class AuthorizationActivity extends AppCompatActivity {
     protected void onStart() {
         super.onStart();
         FirebaseUser user = auth.getCurrentUser();
-        updateUI(user);
     }
 
     public boolean checkEmail(String email, EditText emailView){
@@ -139,20 +138,6 @@ public class AuthorizationActivity extends AppCompatActivity {
     }
 
     public boolean checkPassword(String password){
-//        String email = emailView.getText().toString().trim();
-//        String password = passwordView.getText().toString();
-//        if (email.isEmpty()  && password.isEmpty())
-//        {
-//            Toast.makeText(AuthorizationActivity.this,"Введите логин и пароль",Toast.LENGTH_SHORT).show();
-//            return false;
-//        }
-
-//       if (email.isEmpty())
-//        {
-//            Toast.makeText(AuthorizationActivity.this,"Введите логин",Toast.LENGTH_SHORT).show();
-//            return false;
-//        }
-
         if (password.isEmpty())
         {
             Toast.makeText(AuthorizationActivity.this,"Введите пароль",Toast.LENGTH_SHORT).show();
@@ -169,24 +154,8 @@ public class AuthorizationActivity extends AppCompatActivity {
             passwordView.setError("Введите более 5 знаков");
             return false;
         }
-//        if (email.indexOf('@') < 1 || email.indexOf('.') < 1 ||  email.indexOf('@') > email.lastIndexOf('.')){
-//            Toast.makeText(AuthorizationActivity.this,"Неверный формат почты",Toast.LENGTH_SHORT).show();
-//            return false;
-//        }
 
         return true;
-
-//        else
-//        {
-//            if (view.getId() == R.id.btn_ForgPsw)
-//            {
-//                signin(ETemail.getText().toString(), ETpassword.getText().toString());
-//            }
-//            else if (view.getId() == R.id.btn_registration)
-//            {
-//                registration(ETemail.getText().toString(), ETpassword.getText().toString());
-//            }
-//        }
     }
 
     public void registration(){
@@ -200,7 +169,6 @@ public class AuthorizationActivity extends AppCompatActivity {
                             FirebaseUser user = auth.getCurrentUser();
                             user.sendEmailVerification();
                             addUser(user);
-                            updateUI(user);
                             Toast.makeText(AuthorizationActivity.this, "Письмо с подтверждением отправлено вам на почту",
                                     Toast.LENGTH_SHORT).show();
                         }
@@ -214,9 +182,6 @@ public class AuthorizationActivity extends AppCompatActivity {
                                 Toast.makeText(AuthorizationActivity.this, task.getException().getMessage(),
                                         Toast.LENGTH_SHORT).show();
                             }
-
-                            Log.w("firebaseAuthorization", "signInWithEmail:failure", task.getException());
-                            updateUI(null);
                         }
                     }
                 });
@@ -231,10 +196,7 @@ public class AuthorizationActivity extends AppCompatActivity {
                     @Override
                     public void onComplete(@NonNull Task<AuthResult> task) {
                         if (task.isSuccessful()) {
-                            // Sign in success, update UI with the signed-in user's information
-                            Log.d("firebaseAuthorization", "signInWithEmail:success");
                             FirebaseUser user = auth.getCurrentUser();
-                            updateUI(user);
                             if (user.isEmailVerified()){
                                 Toast.makeText(AuthorizationActivity.this, "Авторизация", Toast.LENGTH_SHORT).show();
                                 Intent intent = new Intent(AuthorizationActivity.this, CatalogActivity.class);
@@ -244,34 +206,19 @@ public class AuthorizationActivity extends AppCompatActivity {
                                 Toast.makeText(AuthorizationActivity.this, "Подтвердите свою почту, чтобы продолжить", Toast.LENGTH_SHORT).show();
                             }
                         } else {
-                            // If sign in fails, display a message to the user.
-                            Log.w("firebaseAuthorization", "signInWithEmail:failure", task.getException());
                             Toast.makeText(AuthorizationActivity.this, "Неверный адрес или пароль",
                                     Toast.LENGTH_SHORT).show();
-                            updateUI(null);
-                            // ...
                         }
 
                     }
                 });
     }
 
-    public void updateUI(FirebaseUser user){
 
-    }
 
     public void addUser(FirebaseUser user){
         FirebaseFirestore db = FirebaseFirestore.getInstance();
         Map<String, String> map = new HashMap<>();
-//        map.put("фантастика", false);
-//        map.put("приключения", false);
-//        map.put("детективы", false);
-//        map.put("фэнтези", false);
-//        map.put("наука", false);
-//        map.put("классика", false);
-//        map.put("научно-популярное", false);
-//        db.collection("genres").document(user.getUid()).set(map);
-
         map.put(System.currentTimeMillis()+"a", "фантастика");
         map.put(System.currentTimeMillis()+"b", "приключения");
         map.put(System.currentTimeMillis()+"c", "детективы");
@@ -280,9 +227,5 @@ public class AuthorizationActivity extends AppCompatActivity {
         map.put(System.currentTimeMillis()+"g", "классика");
         map.put(System.currentTimeMillis()+"h", "научно-популярное");
         db.collection("genres").document(user.getUid()).set(map);
-
-
-
-
     }
 }
