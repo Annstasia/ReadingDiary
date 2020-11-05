@@ -8,11 +8,11 @@
     android:theme="@style/Widget.MaterialComponents.CardView"
     android:id="@+id/catalogDirectoryCardView"
     android:layout_margin="5dp"
-    android:background="#999999"
     >
     <RelativeLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content">
+        android:layout_height="wrap_content"
+        android:background="#eeeeee">
         <TextView
             android:id="@+id/pathViewCatalog1"
             android:layout_width="wrap_content"

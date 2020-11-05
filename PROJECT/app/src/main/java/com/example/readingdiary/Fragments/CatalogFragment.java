@@ -268,7 +268,7 @@ public class CatalogFragment extends Fragment {
         toolbar.getMenu().clear();
         toolbar.inflateMenu(R.menu.menu_catalog);
         menuType = 0;
-        counterText.setText("Каталог");
+        counterText.setText("");
         count=0;
         toolbar.setNavigationIcon(R.drawable.ic_navigation_light);
         toolbar.setNavigationOnClickListener(new View.OnClickListener() {
@@ -335,7 +335,7 @@ public class CatalogFragment extends Fragment {
         buttonView = (RecyclerView) root.findViewById(R.id.buttonViewCatalog);  // здесь будут отображаться пройденные поддиректории buttons
 //        toolbar = (Toolbar) root.findViewById(R.id.long_click_toolbar);
         counterText = (TextView) getActivity().findViewById(R.id.counter_text);
-        counterText.setText("Каталог");
+//        counterText.setText("Каталог");
         findText1 = (EditText) getActivity().findViewById(R.id.editTextFind);
     }
 
@@ -379,7 +379,7 @@ public class CatalogFragment extends Fragment {
             public void onItemLongClick(int position) {
                 mAdapter.setActionMode(true);
                 action_mode = true;
-                counterText.setText(count + " элементов выбрано");
+                counterText.setText(count + " выбрано");
                 toolbar.getMenu().clear();
                 toolbar.inflateMenu(R.menu.menu_long_click);
                 toolbar.setNavigationIcon(R.drawable.ic_back_light);
@@ -392,7 +392,7 @@ public class CatalogFragment extends Fragment {
                         toolbar.getMenu().clear();
                         toolbar.inflateMenu(R.menu.menu_catalog);
                         menuType = 0;
-                        counterText.setText("Каталог");
+                        counterText.setText("");
                         count=0;
                         toolbar.setNavigationIcon(R.drawable.ic_navigation_light);
                         toolbar.setNavigationOnClickListener(new View.OnClickListener() {
@@ -412,7 +412,7 @@ public class CatalogFragment extends Fragment {
             @Override
             public void onCheckClick(int position) {
                 count++;
-                counterText.setText(count + " элементов выбрано");
+                counterText.setText(count + " выбрано");
                 Note note = notes.get(position);
                 if (note.getItemType()==1){
                     selectionDirectoriesList.add((Directory) note);
@@ -427,7 +427,7 @@ public class CatalogFragment extends Fragment {
             @Override
             public void onUncheckClick(int position) {
                 count--;
-                counterText.setText(count + " элементов выбрано");
+                counterText.setText(count + " выбрано");
                 Note note = notes.get(position);
                 if (note.getItemType() == 1) {
                     selectionDirectoriesList.remove((Directory) note);
@@ -1187,9 +1187,12 @@ public class CatalogFragment extends Fragment {
     public void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         active++;
+        Log.d("Qwerty544", (data==null) +" " + requestCode + " " + NOTE_REQUEST_CODE);
         if (data != null && requestCode == NOTE_REQUEST_CODE){
+            Log.d("qwerty544", "data not null");
             // если изменился путь до записи, добавилась новая запись, то переходим к этой записи
             if (data.getExtras().get("deleted") != null){
+                Log.d("qwerty544", "deleteResult");
                 String id = data.getExtras().get("id").toString();
                 int index = -1;
                 for (int i = 0; i < notes.size(); i++){
@@ -1206,6 +1209,7 @@ public class CatalogFragment extends Fragment {
             }
 
             else if (data.getExtras().get("path") != null){
+                Log.d("qwerty544", "path not null");
                 if (parent.equals(data.getExtras().get("path").toString().replace("\\", "/"))){
                     changeById(data.getExtras().get("id").toString());
                 }
@@ -1221,7 +1225,13 @@ public class CatalogFragment extends Fragment {
             }
         }
 
-        if (requestCode==CREATE_NOTE_REQUEST_CODE && resultCode == Activity.RESULT_OK){
+
+        if (data != null && data.getExtras() != null && data.getExtras().get("noNote") != null && requestCode==CREATE_NOTE_REQUEST_CODE && resultCode == Activity.RESULT_OK){
+            parent = data.getExtras().get("path").toString();
+            reloadRecyclerView();
+            reloadButtonsView();
+        }
+        if (requestCode==CREATE_NOTE_REQUEST_CODE && resultCode == Activity.RESULT_OK && data != null && data.getExtras() != null && data.getExtras().get("deleted")==null){
             Intent intent = new Intent(getContext(), NoteActivity.class); // вызов активности записи
             intent.putExtra("id", data.getExtras().get("id").toString()); // передаем id активности в бд, чтобы понять какую активность надо показывать
             intent.putExtra("changed", "true");
@@ -1229,11 +1239,7 @@ public class CatalogFragment extends Fragment {
             startActivityForResult(intent, NOTE_REQUEST_CODE);
 
         }
-        else if (data != null && data.getExtras() != null && data.getExtras().get("noNote") != null){
-            parent = data.getExtras().get("path").toString();
-            reloadRecyclerView();
-            reloadButtonsView();
-        }
+
 
     }
 
@@ -1301,6 +1307,8 @@ public class CatalogFragment extends Fragment {
     }
 
     private int levenshteinAlgorithm(String searched, String saved){
+        searched = searched.toLowerCase();
+        saved = saved.toLowerCase();
         if (searched.equals(saved)){
             return -100000;
         }

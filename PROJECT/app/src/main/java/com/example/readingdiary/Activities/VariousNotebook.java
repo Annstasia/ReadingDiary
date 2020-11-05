@@ -6,10 +6,12 @@ import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
+import android.view.MenuItem;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
 
 import com.example.readingdiary.Fragments.SaveDialogFragment;
 import com.example.readingdiary.Fragments.WrongLengthDialogFragment;
@@ -41,11 +43,10 @@ public class VariousNotebook extends AppCompatActivity implements SaveDialogFrag
     public TextInputEditText text;
     private String path;
     private String position;
-    MaterialToolbar toolbar;
+    Toolbar toolbar;
     String user;
     private DocumentReference variousNotePaths;
     private CollectionReference variousNoteStorage;
-    MainActivity mein = new MainActivity();
 
 
 
@@ -61,7 +62,8 @@ public class VariousNotebook extends AppCompatActivity implements SaveDialogFrag
         }
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_coments);
-        toolbar = findViewById(R.id.base_toolbar);
+        toolbar = findViewById(R.id.toolbar);
+
         user = FirebaseAuth.getInstance().getCurrentUser().getUid();
 
         Bundle args = getIntent().getExtras();
@@ -71,8 +73,16 @@ public class VariousNotebook extends AppCompatActivity implements SaveDialogFrag
         variousNotePaths = variousNoteStorage.document(type);
 
         if (type.equals("description")){
-            TextView textView12 = (TextView) findViewById(R.id.textView12);
+            toolbar.setTitle("Описание");
         }
+        else if (type.equals(getResources().getString(R.string.commentDir))){
+            toolbar.setTitle("Отзыв");
+        }
+        else if (type.equals(getResources().getString(R.string.quoteDir))){
+            toolbar.setTitle("Цитата");
+        }
+        setSupportActionBar(toolbar);
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         text = (TextInputEditText) findViewById(R.id.editTextComments);
         if (args.get("path") != null){
             path = args.get("path").toString();
@@ -104,13 +114,13 @@ public class VariousNotebook extends AppCompatActivity implements SaveDialogFrag
     }
 
 
-
     @Override
-    public boolean onCreateOptionsMenu(Menu menu){
-        getMenuInflater().inflate(R.menu.base_menu, menu);
+    public boolean onOptionsItemSelected(@NonNull MenuItem item) {
+        if (item.getItemId() == android.R.id.home){
+            this.onBackPressed();
+        }
         return true;
     }
-
 
     private void openText() throws Exception{
         variousNoteStorage.document(path).get().addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {

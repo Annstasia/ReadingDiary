@@ -35,7 +35,7 @@ public class ChangePasswordFragment extends Fragment {
         root = inflater.inflate(R.layout.fragment_change_password, null);
         Toolbar toolbar = getActivity().findViewById(R.id.toolbar_navigation);
         toolbar.getMenu().clear();
-        ((TextView)toolbar.findViewById(R.id.counter_text)).setText("Сменить пароль");
+//        ((TextView)toolbar.findViewById(R.id.counter_text)).setText("Сменить пароль");
         MaterialButton button = (MaterialButton)root.findViewById(R.id.button_change_password);
         button.setOnClickListener(new View.OnClickListener() {
             @Override

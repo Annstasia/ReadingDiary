@@ -85,7 +85,6 @@ public class VariousShow extends AppCompatActivity
     private String idUser;
     Button addVariousItem;
     boolean editAccess;
-    MainActivity mein = new MainActivity();
     MediaPlayer activeMediaPlayer;
     VariousNotesAudio audioItem;
     private TextView textCurrentTime, textTotalDuration;
@@ -132,7 +131,7 @@ public class VariousShow extends AppCompatActivity
 
 //        counterText.setText(type);
         setSupportActionBar(toolbar);
-
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         setAdapters();
         setButtons();
 
@@ -159,9 +158,9 @@ public class VariousShow extends AppCompatActivity
             viewAdapter.setActionMode(false);
             deleteVariousTextNotes();
             deleteVariousAudioNotes();
-//            viewAdapter.notifyDataSetChanged();
+            viewAdapter.notifyDataSetChanged();
             toolbar.getMenu().clear();
-            getSupportActionBar().setDisplayHomeAsUpEnabled(false);
+//            getSupportActionBar().setDisplayHomeAsUpEnabled(false);
             if (type.equals(getResources().getString(R.string.commentDir))) counterText.setText("Отзыв");
             else if (type.equals(getResources().getString(R.string.descriptionDir))) counterText.setText("Описание");
             else if (type.equals(getResources().getString(R.string.quoteDir))) counterText.setText("Цитаты");
@@ -169,15 +168,21 @@ public class VariousShow extends AppCompatActivity
         }
 
         if (item.getItemId() == android.R.id.home){
-            action_mode=false;
-            viewAdapter.setActionMode(false);
-            viewAdapter.notifyDataSetChanged();
-            toolbar.getMenu().clear();
-            toolbar.inflateMenu(R.menu.base_menu);
-            getSupportActionBar().setDisplayHomeAsUpEnabled(false);
+            if (action_mode == true){
+                action_mode=false;
+                viewAdapter.setActionMode(false);
+                viewAdapter.notifyDataSetChanged();
+                toolbar.getMenu().clear();
+//            toolbar.inflateMenu(R.menu.base_menu);
+//                getSupportActionBar().setDisplayHomeAsUpEnabled(false);
 //            menuType = 0;
-            counterText.setText(title);
-            count=0;
+                counterText.setText(title);
+                count=0;
+            }
+            else{
+                this.onBackPressed();
+            }
+
         }
         return super.onOptionsItemSelected(item);
     }
@@ -185,7 +190,7 @@ public class VariousShow extends AppCompatActivity
     @Override
     public boolean onCreateOptionsMenu(Menu menu)
     {
-        getMenuInflater().inflate(R.menu.base_menu, menu);
+//        getMenuInflater().inflate(R.menu.base_menu, menu);
         return true;
     }
 
@@ -340,7 +345,7 @@ public class VariousShow extends AppCompatActivity
                        public void onItemLongClick(int position) {
                            viewAdapter.setActionMode(true);
                            action_mode = true;
-                           counterText.setText(count + " элементов выбрано");
+                           counterText.setText(count + " выбрано");
                            toolbar.getMenu().clear();
                            toolbar.inflateMenu(R.menu.menu_long_click);
                            viewAdapter.notifyDataSetChanged();
@@ -355,7 +360,7 @@ public class VariousShow extends AppCompatActivity
                                selectedAudioNotes.add((VariousNotesAudio) variousNotes.get(position));
                            }
                            count++;
-                           counterText.setText(count + " элементов выбрано");
+                           counterText.setText(count + " выбрано");
                            // Toast.makeText(getApplicationContext(), selectedNotes.size() + " items selected", Toast.LENGTH_LONG).show();
                        }
 
@@ -367,7 +372,7 @@ public class VariousShow extends AppCompatActivity
                                selectedAudioNotes.remove((VariousNotesAudio) variousNotes.get(position));
                            }
                            count--;
-                           counterText.setText(count + " элементов выбрано");
+                           counterText.setText(count + " выбрано");
                        }
 
                 @Override

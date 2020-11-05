@@ -79,6 +79,7 @@ public class GaleryActivity extends AppCompatActivity {
         toolbar = (MaterialToolbar)findViewById(R.id.long_click_toolbar);
         toolbar.setTitle("");
         setSupportActionBar(toolbar);
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         Bundle args = getIntent().getExtras();
         id = args.get("id").toString();
         if (args.get("owner")==null){
@@ -153,7 +154,7 @@ public class GaleryActivity extends AppCompatActivity {
                                 if (hashMap.get(key)==false){
                                     int index = -1;
                                     for (int i = 0; i < names.size(); i++){
-                                        if (names.get(i) > l){
+                                        if (names.get(i) < l){
                                             index = i;
                                             break;
                                         }
@@ -177,7 +178,7 @@ public class GaleryActivity extends AppCompatActivity {
                                                    // Toast.makeText(getApplicationContext(), "uri ", Toast.LENGTH_LONG).show();
                                                     int index = -1;
                                                     for (int i = 0; i < names.size(); i++){
-                                                        if (names.get(i) > l){
+                                                        if (names.get(i) < l){
                                                             index = i;
                                                             break;
                                                         }
@@ -266,7 +267,7 @@ public class GaleryActivity extends AppCompatActivity {
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu){
-        getMenuInflater().inflate(R.menu.base_menu, menu);
+//        getMenuInflater().inflate(R.menu.base_menu, menu);
         return true;
     }
 
@@ -278,10 +279,13 @@ public class GaleryActivity extends AppCompatActivity {
                 adapter.setActionMode(false);
                 adapter.notifyDataSetChanged();
                 toolbar.getMenu().clear();
-                toolbar.inflateMenu(R.menu.base_menu);
-                getSupportActionBar().setDisplayHomeAsUpEnabled(false);
+//                toolbar.inflateMenu(R.menu.base_menu);
+//                getSupportActionBar().setDisplayHomeAsUpEnabled(false);
                 counterText.setText("Галерея");
                 count=0;
+            }
+            else{
+                this.onBackPressed();
             }
         }
         if (item.getItemId()== R.id.item_delete)
@@ -291,7 +295,7 @@ public class GaleryActivity extends AppCompatActivity {
             deleteSelectedImages();
             adapter.notifyDataSetChanged();
             toolbar.getMenu().clear();
-            getSupportActionBar().setDisplayHomeAsUpEnabled(false);
+//            getSupportActionBar().setDisplayHomeAsUpEnabled(false);
             counterText.setText("Галерея");
             count=0;
         }
@@ -328,7 +332,7 @@ public class GaleryActivity extends AppCompatActivity {
         int pos = names.size();
         int n = names.size();
         for (int i = 0; i < n; i++){
-            if (names.get(i) > time){
+            if (names.get(i) < time){
                 pos = i;
                 break;
             }

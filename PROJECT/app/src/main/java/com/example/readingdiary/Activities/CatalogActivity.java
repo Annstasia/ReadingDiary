@@ -88,7 +88,6 @@ public class CatalogActivity extends AppCompatActivity implements SortDialogFrag
     private String TAG_DARK = "dark_theme";
     SharedPreferences sharedPreferences;
     Button online;
-    MainActivity mein = new MainActivity();
     int toolbarHeight=0;
     private FirebaseFirestore db = FirebaseFirestore.getInstance();
     private String user = "user0";
@@ -125,7 +124,6 @@ public class CatalogActivity extends AppCompatActivity implements SortDialogFrag
 //        toolbar.inflateMenu(R.menu.menu_catalog);
 //        toolbar.inflateMenu(R.menu.activity_navigation_drawer);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-        getSupportActionBar().setDisplayShowHomeEnabled(true);
         drawerLayout = findViewById(R.id.drawer_layout);
         NavigationView navigationView = findViewById(R.id.nav_view);
         // Passing each menu ID as a set of Ids because each
@@ -242,17 +240,6 @@ public class CatalogActivity extends AppCompatActivity implements SortDialogFrag
         if (fragment.toString()=="catalog"){
             if (item.getItemId()== R.id.item_delete){
                 ((CatalogFragment)fragment).deleteClick();
-//                action_mode=false;
-//                mAdapter.setActionMode(false);
-////            deleteSelectedRealNote();
-////            deleteSelectedDirectories();
-//                mAdapter.notifyDataSetChanged();
-//                toolbar.getMenu().clear();
-//                toolbar.inflateMenu(R.menu.menu_catalog);
-//                toolbar.inflateMenu(R.menu.base_menu);
-//                menuType = 0;
-//                counterText.setText("Каталог");
-//                count=0;
             }
             if (item.getItemId() == R.id.item_search){
                 ((CatalogFragment)fragment).searchCLick1();
@@ -305,32 +292,32 @@ public class CatalogActivity extends AppCompatActivity implements SortDialogFrag
 
         }
 
-        if (item.getItemId() == android.R.id.home){
-            if (menuType==0){
-//                finish();
-            }
-            else if (menuType == 1){
-                action_mode=false;
-                mAdapter.setActionMode(false);
-                mAdapter.notifyDataSetChanged();
-                toolbar.getMenu().clear();
-                toolbar.inflateMenu(R.menu.menu_catalog);
-                toolbar.inflateMenu(R.menu.base_menu);
-                getSupportActionBar().setDisplayHomeAsUpEnabled(false);
-                menuType = 0;
-                counterText.setText("Каталог");
-                count=0;
-            }
-            else if (menuType==2){
-                findText1.clearComposingText();
-                counterText.setVisibility(View.VISIBLE);
-                findText1.setVisibility(View.GONE);
-                toolbar.getMenu().clear();
-                toolbar.inflateMenu(R.menu.menu_catalog);
-                toolbar.inflateMenu(R.menu.base_menu);
-                menuType = 0;
-            }
-        }
+//        if (item.getItemId() == android.R.id.home){
+//            if (menuType==0){
+////                finish();
+//            }
+//            else if (menuType == 1){
+//                action_mode=false;
+//                mAdapter.setActionMode(false);
+//                mAdapter.notifyDataSetChanged();
+//                toolbar.getMenu().clear();
+//                toolbar.inflateMenu(R.menu.menu_catalog);
+////                toolbar.inflateMenu(R.menu.base_menu);
+//                getSupportActionBar().setDisplayHomeAsUpEnabled(false);
+//                menuType = 0;
+//                counterText.setText("Каталог");
+//                count=0;
+//            }
+//            else if (menuType==2){
+//                findText1.clearComposingText();
+//                counterText.setVisibility(View.VISIBLE);
+//                findText1.setVisibility(View.GONE);
+//                toolbar.getMenu().clear();
+//                toolbar.inflateMenu(R.menu.menu_catalog);
+////                toolbar.inflateMenu(R.menu.base_menu);
+//                menuType = 0;
+//            }
+//        }
         return super.onOptionsItemSelected(item);
     }
 

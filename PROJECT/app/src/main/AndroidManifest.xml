@@ -23,26 +23,23 @@
             android:screenOrientation="portrait" />
         <activity
             android:name=".Activities.EditNoteActivity"
-            android:windowSoftInputMode="adjustPan" />
-        <activity android:name=".Activities.GaleryFullViewActivity" />
-        <activity android:name=".Activities.NoteActivity" />
+            android:windowSoftInputMode="adjustPan"  android:label=""
+            android:screenOrientation="portrait"/>
+        <activity android:name=".Activities.GaleryFullViewActivity"
+            android:screenOrientation="portrait"/>
+        <activity android:name=".Activities.NoteActivity" android:label="" android:screenOrientation="portrait" />
         <activity
             android:name=".Activities.CatalogActivity"
             android:label=""
             android:screenOrientation="portrait" />
         <activity
-            android:name=".Activities.MainActivity"
-            android:screenOrientation="portrait">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
-        </activity>
-        <activity
             android:name=".Activities.GaleryActivity"
             android:screenOrientation="portrait" />
-        <activity android:name=".Activities.AuthorizationActivity" />
+        <activity android:name=".Activities.AuthorizationActivity" android:screenOrientation="portrait">            <intent-filter>
+            <action android:name="android.intent.action.MAIN" />
+
+            <category android:name="android.intent.category.LAUNCHER" />
+        </intent-filter></activity>
     </application>
 
 </manifest>

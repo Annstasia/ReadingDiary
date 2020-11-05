@@ -6,15 +6,23 @@
     android:layout_height="match_parent"
     android:orientation="vertical"
     tools:context=".Activities.GaleryFullViewActivity">
-    <include
-        android:id="@+id/toolbar_full_galery"
-        layout="@layout/base_toolbar">
-    </include>
+    <com.google.android.material.appbar.AppBarLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:theme="@style/AppTheme.AppBarOverlay"
+        android:id="@+id/appBarGalery">
+        <androidx.appcompat.widget.Toolbar
+            android:id="@+id/toolbar"
+            android:layout_width="match_parent"
+            android:layout_height="?attr/actionBarSize"
+            android:background="?attr/colorPrimary"
+            app:popupTheme="@style/AppTheme.PopupOverlay" />
 
+    </com.google.android.material.appbar.AppBarLayout>
     <androidx.recyclerview.widget.RecyclerView
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_below="@id/toolbar_full_galery"
+        android:layout_below="@id/appBarGalery"
         android:id="@+id/galery_full_recycle_view"
         />
 
@@ -22,7 +30,7 @@
         android:id="@+id/full_view_button_layout"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_below="@id/toolbar_full_galery"
+        android:layout_below="@id/appBarGalery"
         android:alpha="0.5"
         android:orientation="horizontal"
         android:visibility="invisible">

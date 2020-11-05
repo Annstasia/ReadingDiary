@@ -117,7 +117,7 @@ private String TAG_DARK = "dark_theme";
         toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         findViews();
-        toolbar.inflateMenu(R.menu.base_menu);
+//        toolbar.inflateMenu(R.menu.base_menu);
         Bundle args = getIntent().getExtras();
 
         if (args != null && args.get("id") != null){
@@ -151,7 +151,7 @@ private String TAG_DARK = "dark_theme";
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu){
-        getMenuInflater().inflate(R.menu.base_menu, menu);
+//        getMenuInflater().inflate(R.menu.base_menu, menu);
         return true;
     }
 
@@ -175,6 +175,7 @@ private String TAG_DARK = "dark_theme";
         Intent returnIntent = new Intent();
         returnIntent.putExtra("deleted", "true");
         returnIntent.putExtra("id", id);
+        Log.d("qwerty544", "deleteEdit");
         setResult(RESULT_OK, returnIntent);
         finish();
     }

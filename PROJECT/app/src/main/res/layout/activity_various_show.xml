@@ -4,7 +4,8 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".Activities.VariousShow">
+    tools:context=".Activities.VariousShow"
+    android:background="#eeeeee">
 
     <include
         android:id="@+id/appbarVariousShow"

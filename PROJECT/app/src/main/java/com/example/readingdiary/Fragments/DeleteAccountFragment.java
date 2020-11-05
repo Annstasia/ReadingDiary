@@ -9,6 +9,7 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.appcompat.widget.Toolbar;
 import androidx.fragment.app.Fragment;
 
 import com.example.readingdiary.Activities.AuthorizationActivity;
@@ -29,6 +30,7 @@ public class DeleteAccountFragment extends Fragment {
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         final View root = inflater.inflate(R.layout.fragment_delete_account, null);
+        ((Toolbar)getActivity().findViewById(R.id.toolbar_navigation)).getMenu().clear();
         ((MaterialButton)root.findViewById(R.id.button_delete_account)).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {

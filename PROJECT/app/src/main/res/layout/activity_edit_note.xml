@@ -41,7 +41,8 @@
                 android:layout_height="wrap_content"
                 android:layout_margin="8dp"
                 android:layout_marginBottom="1dp"
-                android:text="Название папки" />
+                android:labelFor="@id/editPath"
+                android:text="Путь (разделитель /)" />
 
             <EditText
                 android:id="@+id/editPath"
@@ -52,7 +53,7 @@
                 android:focusedByDefault="false"
                 android:layout_margin="8dp"
                 android:layout_marginTop="0dp"
-                android:hint="Необязательно"
+                android:hint="Каталог 1/подкаталог"
                 android:textColorHint="@color/grey_66"                        />
 
             <TextView

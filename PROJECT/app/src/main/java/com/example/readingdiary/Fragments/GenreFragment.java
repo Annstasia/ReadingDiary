@@ -63,7 +63,7 @@ public class GenreFragment extends Fragment {
                 }
             }
         });
-        ((TextView)getActivity().findViewById(R.id.counter_text)).setText("Жанры");
+//        ((TextView)getActivity().findViewById(R.id.counter_text)).setText("Жанры");
         ((Toolbar)getActivity().findViewById(R.id.toolbar_navigation)).getMenu().clear();
         FloatingActionButton addGenreButton = root.findViewById(R.id.add_genre_button);
         addGenreButton.setOnClickListener(new View.OnClickListener() {

@@ -7,13 +7,14 @@
         android:orientation="vertical"
         tools:context=".Activities.CatalogActivity"
     android:theme="@style/AppTheme"
+    android:background="#eeeeee"
         >
 
         <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/buttonViewCatalog"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-            android:background="#ffffff"
+            android:background="@color/colorPrimaryLight"
 
         />
 

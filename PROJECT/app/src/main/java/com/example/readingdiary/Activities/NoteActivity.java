@@ -27,6 +27,7 @@ import androidx.fragment.app.FragmentTransaction;
 
 import com.example.readingdiary.R;
 import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.material.appbar.MaterialToolbar;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.EventListener;
@@ -62,26 +63,17 @@ public class NoteActivity extends AppCompatActivity{
     private final int EDIT_REQUEST_CODE = 123;
     private final int GALERY_REQUEST_CODE = 124;
     private final int COMENTS_REQUEST_CODE = 125;
-    Toolbar toolbar;
+    MaterialToolbar toolbar;
     ImageButton bUpload;
     private String user = "user0";
     private String currentUser;
     private FirebaseFirestore db = FirebaseFirestore.getInstance();
     private boolean editAccess;
-    MainActivity mein = new MainActivity();
     private boolean exists=true;
 
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        sharedPreferences = this.getSharedPreferences(TAG_DARK, Context.MODE_PRIVATE);
-        boolean dark = sharedPreferences.getBoolean(TAG_DARK, false);
-        if (dark){
-            setTheme(R.style.DarkTheme);
-        }
-        else{
-            setTheme(R.style.AppTheme);
-        }
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_note);
 //        user = FirebaseAuth.getInstance().getCurrentUser().getUid();
@@ -90,7 +82,12 @@ public class NoteActivity extends AppCompatActivity{
         ratingView.setEnabled(false);
 
         toolbar = findViewById(R.id.toolbar);
+        toolbar.setTitle("Дневник читателя");
         setSupportActionBar(toolbar);
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+
+
+
 
         Bundle args = getIntent().getExtras();
         id = args.get("id").toString();
@@ -114,11 +111,9 @@ public class NoteActivity extends AppCompatActivity{
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu){
-        // Inflate the menu; this adds items to the action bar if it is present.
         if (editAccess){
             getMenuInflater().inflate(R.menu.menu_note, menu);
         }
-        getMenuInflater().inflate(R.menu.base_menu, menu);
 
         return true;
     }
@@ -126,22 +121,23 @@ public class NoteActivity extends AppCompatActivity{
 
     @Override
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
-        if (item.getItemId()==R.id.item_settings) {
-            int location[] = new int[2];
-            toolbar.getLocationInWindow(location);
-            int y = getResources().getDisplayMetrics().heightPixels;
-            int x = getResources().getDisplayMetrics().widthPixels;
-
-            FragmentManager manager = getSupportFragmentManager();
-            FragmentTransaction transaction = manager.beginTransaction();
-            }
-//        int id = item.getItemId();
-        int it = item.getItemId();
-        if (it == R.id.edit_note) {
+//        if (item.getItemId()==R.id.item_settings) {
+//            int location[] = new int[2];
+//            toolbar.getLocationInWindow(location);
+//            int y = getResources().getDisplayMetrics().heightPixels;
+//            int x = getResources().getDisplayMetrics().widthPixels;
+//
+//            FragmentManager manager = getSupportFragmentManager();
+//            FragmentTransaction transaction = manager.beginTransaction();
+//            }
+        if (item.getItemId() == R.id.edit_note) {
             Intent intent = new Intent(NoteActivity.this, EditNoteActivity.class);
             intent.putExtra("id", id);
             startActivityForResult(intent, EDIT_REQUEST_CODE);
             return super.onOptionsItemSelected(item);
+        }
+        if (item.getItemId() == android.R.id.home){
+            this.onBackPressed();
         }
         return true;
     }
@@ -205,10 +201,12 @@ public class NoteActivity extends AppCompatActivity{
         this.authorView.setText(author);
         if (author.equals("")){
             this.authorView.setVisibility(View.GONE);
+            findViewById(R.id.authorNoteActivityLabel).setVisibility(View.GONE);
         }
         this.titleView.setText(title);
         if (title.equals("")){
             this.titleView.setVisibility(View.GONE);
+            findViewById(R.id.titleNoteActivityLabel).setVisibility(View.GONE);
         }
         if (rating != null){
             this.ratingView.setRating(Float.parseFloat(rating));
@@ -235,14 +233,17 @@ public class NoteActivity extends AppCompatActivity{
         this.genreView.setText(genresString);
         if (genresString.equals("")){
             this.genreView.setVisibility(View.GONE);
+            findViewById(R.id.genreLabel).setVisibility(View.GONE);
         }
         this.timeView.setText(time);
-        if (time.equals("")){
+        if (time.equals("") || time.equals(" ")){
             this.timeView.setVisibility(View.GONE);
+            findViewById(R.id.timeLabel).setVisibility(View.GONE);
         }
         this.placeView.setText(place);
         if (place.equals("")){
             this.placeView.setVisibility(View.GONE);
+            findViewById(R.id.placeLabel).setVisibility(View.GONE);
         }
         this.shortCommentView.setText(shortComment);
         if (shortComment.equals("")){
@@ -288,22 +289,6 @@ public class NoteActivity extends AppCompatActivity{
             }
         });
 
-        ImageButton bUpload = (ImageButton) findViewById(R.id.bUpload); // переход в галерею
-        if (editAccess){
-            bUpload.setOnClickListener(new View.OnClickListener()
-            {
-                @Override
-                public void onClick(View v)
-                {
-                    //загрузка записи в сеть
-                    Toast.makeText(NoteActivity.this,"Запись опубликована \n(допиши добавление в бд NoteActivity стр 207)",Toast.LENGTH_SHORT).show();
-                }
-            });
-        }
-        else{
-            bUpload.setVisibility(View.GONE);
-            findViewById(R.id.textView11).setVisibility(View.GONE);
-        }
 
         Button coments = (Button) findViewById(R.id.comentsButton);
         coments.setOnClickListener(new View.OnClickListener() {

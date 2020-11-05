@@ -1,24 +1,17 @@
 package com.example.readingdiary.Fragments;
 
-import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.os.Bundle;
-import android.widget.EditText;
-import android.widget.RelativeLayout;
-import android.widget.Switch;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.DialogFragment;
 
-import com.example.readingdiary.Activities.EditNoteActivity;
-import com.example.readingdiary.Activities.MainActivity;
 import com.example.readingdiary.R;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
-import com.google.android.material.switchmaterial.SwitchMaterial;
 
 public class SaveDialogFragment extends DialogFragment {
     SaveDialogListener listener;

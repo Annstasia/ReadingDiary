@@ -8,7 +8,7 @@
     <fragment
         android:id="@+id/nav_genres"
         android:name="com.example.readingdiary.Fragments.GenreFragment"
-        android:label="Жанр"
+        android:label="Жанры"
         tools:layout="@layout/fragment_genres">
     </fragment>
     <fragment

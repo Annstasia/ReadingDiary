@@ -9,6 +9,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.util.Log;
 import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.LinearLayout;
@@ -16,6 +17,7 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
 import androidx.recyclerview.widget.DefaultItemAnimator;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.PagerSnapHelper;
@@ -65,22 +67,15 @@ public class GaleryFullViewActivity extends AppCompatActivity implements DeleteD
     private StorageReference imageStorage;
     private DocumentReference imagePathsDoc;
     boolean editAccess;
+    LinearLayoutManager layoutManager;
 
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        sharedPreferences = this.getSharedPreferences(TAG_DARK, Context.MODE_PRIVATE);
-        boolean dark = sharedPreferences.getBoolean(TAG_DARK, false);
-        if (dark){
-            setTheme(R.style.DarkTheme);
-        }
-        else{
-            setTheme(R.style.AppTheme);
-        }
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_galery_full_view);
 
-        toolbar = (MaterialToolbar)findViewById(R.id.base_toolbar);
+//        toolbar = (MaterialToolbar)findViewById(R.id.base_toolbar);
         setSupportActionBar(toolbar);
         // открываем и сохраняем в список изображения для данной записи
         Bundle args = getIntent().getExtras();
@@ -95,7 +90,6 @@ public class GaleryFullViewActivity extends AppCompatActivity implements DeleteD
         }
         imagePathsDoc = FirebaseFirestore.getInstance().collection("Common").document(user).collection(id).document("Images");
         imageStorage = FirebaseStorage.getInstance().getReference(user).child(id).child("Images");
-//        position = Integer.parseInt(args.get("position").toString());
         positionName = Long.parseLong(args.get("position").toString());
         position = 0;
         images = new ArrayList<>();
@@ -105,47 +99,71 @@ public class GaleryFullViewActivity extends AppCompatActivity implements DeleteD
         galeryFullView = (RecyclerView) findViewById(R.id.galery_full_recycle_view);
         final PagerSnapHelper pagerSnapHelper = new PagerSnapHelper();
         pagerSnapHelper.attachToRecyclerView(galeryFullView);
+        Toolbar toolbar = findViewById(R.id.toolbar);
+        toolbar.setTitle("Галерея");
+        setSupportActionBar(toolbar);
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+
         // добавляем адаптер
         adapter = new GaleryFullViewAdapter(images, getApplicationContext());
-        final LinearLayoutManager layoutManager = new LinearLayoutManager(this, RecyclerView.HORIZONTAL, false);
+        layoutManager = new LinearLayoutManager(this, RecyclerView.HORIZONTAL, false);
+
         RecyclerView.ItemAnimator itemAnimator = new DefaultItemAnimator();
         galeryFullView.setAdapter(adapter);
         galeryFullView.setLayoutManager(layoutManager);
         galeryFullView.setItemAnimator(itemAnimator);
-//        scrollToPosition(position);
-//        galeryFullView.scrollToPosition(position);
-//        galeryFullView.post(new Runnable() {
-//            @Override
-//            public void run() {
-//                View view = layoutManager.findViewByPosition(position);
-//                Log.d("qwerty786876", (view==null) + "");
-//                if (view == null) {
-////                Log.e(WingPickerView.class.getSimpleName(), "Cant find target View for initial Snap");
-//                    return;
-//                }
-//
-//                int[] snapDistance = pagerSnapHelper.calculateDistanceToFinalSnap(layoutManager, view);
-//                if (snapDistance[0] != 0 || snapDistance[1] != 0) {
-//                    galeryFullView.scrollBy(snapDistance[0], snapDistance[1]);
-//                }
-//                Log.d("qwerty786876", snapDistance[0] + " " + snapDistance[1]);
-//            }
-//        });
-//        galeryFullView.post(()->{
-//            View view = layoutManager.findViewByPosition(position);
-//            if (view == null) {
-////                Log.e(WingPickerView.class.getSimpleName(), "Cant find target View for initial Snap");
-//                return;
-//            }
-//
-//            int[] snapDistance = pagerSnapHelper.calculateDistanceToFinalSnap(layoutManager, view);
-//            if (snapDistance[0] != 0 || snapDistance[1] != 0) {
-//                galeryFullView.scrollBy(snapDistance[0], snapDistance[1]);
-//            }
-//        });
-
         final LinearLayout buttonsLayout = (LinearLayout) findViewById(R.id.full_view_button_layout);
-        galeryShapshotListener();
+        imagePathsDoc.get().addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
+            @Override
+            public void onSuccess(DocumentSnapshot documentSnapshot) {
+                final HashMap<String, Boolean> hashMap = (HashMap) documentSnapshot.getData();
+                if (hashMap != null){
+                    Log.d("qwerty24324", "hi from galery " + "hashMap");
+                    if (!names.contains(positionName) && hashMap.containsKey(positionName+"")){
+                        Log.d("qwerty3232", names.toString() + " " + positionName + " " + names.contains(positionName));
+//                            long l = positionName;
+                        int index=names.size();
+                        for (int i = 0; i < names.size(); i++){
+                            if (names.get(i) > positionName){
+                                index = i;
+                                break;
+                            }
+                        }
+                        final int finalIndex = index;
+                        if (hashMap.get(positionName+"")==false){
+                            Log.d("qwerty3232", "hashMap.get(positionName+\"\")==false");
+                            names.add(index, positionName);
+                            images.add(index, new ImageClass(BitmapFactory.decodeResource(getApplicationContext().getResources(), R.drawable.no_image)));
+                            adapter.notifyItemInserted(index);
+                            position = index;
+                            galeryFullView.scrollToPosition(position);
+                            updateImages(hashMap);
+                            galeryShapshotListener();
+
+                        }
+                        else{
+                            Log.d("qwerty3232", "hashMap.get(positionName+\"\")==true");
+                            imageStorage.child(positionName+"").getDownloadUrl().
+                                    addOnSuccessListener(new OnSuccessListener<Uri>() {
+                                        @Override
+                                        public void onSuccess(Uri uri) {
+                                            names.add(finalIndex, positionName);
+                                            images.add(finalIndex, new ImageClass(uri));
+                                            adapter.notifyItemInserted(images.size()-1);
+                                            position = finalIndex;
+                                            galeryFullView.scrollToPosition(finalIndex);
+                                            Log.d("qwerty24324", "hi from falery " + finalIndex);
+                                            updateImages(hashMap);
+                                            galeryShapshotListener();
+                                        }
+                                    });
+                        }
+
+
+                    }
+            }
+        }});
+
 
         Log.d("qwerty4557", position+"");
 
@@ -165,13 +183,16 @@ public class GaleryFullViewActivity extends AppCompatActivity implements DeleteD
                 if (editAccess){
                     buttonsLayout.setVisibility(View.VISIBLE);
                     position = pos;
-
+                    Log.d("qwerty3232", names.toString());
                     // через 8 секунд меню пропадает
                     uiHandler.postDelayed(makeLayoutGone, 8000);
+
                 }
 
             }
         });
+
+
 
 
         // кнопка удаления. При нажатии изображение удаляется
@@ -193,44 +214,46 @@ public class GaleryFullViewActivity extends AppCompatActivity implements DeleteD
         });
     }
 
-    private void foo(LinearLayoutManager layoutManager, PagerSnapHelper pagerSnapHelper){
-        View view = layoutManager.findViewByPosition(position);
-        if (view == null) {
-//                Log.e(WingPickerView.class.getSimpleName(), "Cant find target View for initial Snap");
-            return;
-        }
+//    private void foo(LinearLayoutManager layoutManager, PagerSnapHelper pagerSnapHelper){
+//        View view = layoutManager.findViewByPosition(position);
+//        if (view == null) {
+//            return;
+//        }
+//
+//        int[] snapDistance = pagerSnapHelper.calculateDistanceToFinalSnap(layoutManager, view);
+//        if (snapDistance[0] != 0 || snapDistance[1] != 0) {
+//            galeryFullView.scrollBy(snapDistance[0], snapDistance[1]);
+//        }
+//    }
+//
+//    private void scrollToPosition(final int position){
+//        galeryFullView.scrollToPosition(position);
+//        RecyclerView.ViewHolder viewHolder = galeryFullView.findViewHolderForLayoutPosition(position);
+//        if (viewHolder != null){
+//            galeryFullView.scrollToPosition(position);
+//        }
+//        else{
+//            galeryFullView.addOnScrollListener(new RecyclerView.OnScrollListener() {
+//                @Override
+//                public void onScrolled(@NonNull RecyclerView recyclerView, int dx, int dy) {
+//                    super.onScrolled(recyclerView, dx, dy);
+//                    galeryFullView.removeOnScrollListener(this);
+//                    if (dx == 0){
+//                        scrollToPosition(position);
+//                    }
+//                }
+//            });
+//            galeryFullView.scrollToPosition(position);
+//        }
+//
 
-        int[] snapDistance = pagerSnapHelper.calculateDistanceToFinalSnap(layoutManager, view);
-        if (snapDistance[0] != 0 || snapDistance[1] != 0) {
-            galeryFullView.scrollBy(snapDistance[0], snapDistance[1]);
-        }
-    }
 
-    private void scrollToPosition(final int position){
-        galeryFullView.scrollToPosition(position);
-        RecyclerView.ViewHolder viewHolder = galeryFullView.findViewHolderForLayoutPosition(position);
-        if (viewHolder != null){
-            galeryFullView.scrollToPosition(position);
-        }
-        else{
-            galeryFullView.addOnScrollListener(new RecyclerView.OnScrollListener() {
-                @Override
-                public void onScrolled(@NonNull RecyclerView recyclerView, int dx, int dy) {
-                    super.onScrolled(recyclerView, dx, dy);
-                    galeryFullView.removeOnScrollListener(this);
-                    if (dx == 0){
-                        scrollToPosition(position);
-                    }
-                }
-            });
-            galeryFullView.scrollToPosition(position);
-        }
-
-    }
+//    }
 
     @Override
     public void onDeleteClicked()
     {
+        position = layoutManager.findFirstVisibleItemPosition();
         String toDel = ""+names.get(position);
         names.remove(position);
         images.remove(position);
@@ -245,23 +268,25 @@ public class GaleryFullViewActivity extends AppCompatActivity implements DeleteD
     }
     @Override
     public  void onSetCover() {
+        position = layoutManager.findFirstVisibleItemPosition();
         db.collection("Notes").document(user).collection("userNotes").document(id).
                 update("imagePath", names.get(position));
     }
 
 
-
-
-
     @Override
-    public boolean onCreateOptionsMenu(Menu menu){
-        getMenuInflater().inflate(R.menu.base_menu, menu);
+    public boolean onOptionsItemSelected(@NonNull MenuItem item) {
+        if (item.getItemId() == android.R.id.home){
+            this.onBackPressed();
+        }
         return true;
     }
 
-
     public void updateImages(HashMap<String, Boolean> hashMap){
         for (String key : hashMap.keySet()){
+            if (Long.parseLong(key) == positionName){
+                continue;
+            }
             final Long l = Long.parseLong(key);
             if (names.contains(l) && hashMap.get(key) == true && images.get(names.indexOf(l)).getType()==0){
                 imageStorage.child(key).getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
@@ -275,9 +300,8 @@ public class GaleryFullViewActivity extends AppCompatActivity implements DeleteD
             else if (!names.contains(l)){
                 int index0 = names.size();
                 for (int i = 0; i < names.size(); i++){
-                    if (names.get(i) > l){
+                    if (names.get(i) < l){
                         index0 = i;
-                        Log.d("qwerty3248632", names.get(i) + " " + l + " " + positionName);
                         break;
                     }
                 }
@@ -286,14 +310,11 @@ public class GaleryFullViewActivity extends AppCompatActivity implements DeleteD
                 final int finalIndex0 = index0;
                 adapter.notifyItemInserted(index0);
                 galeryFullView.scrollToPosition(names.indexOf(positionName));
-                Log.d("qwerty2312", names.size() + " hash " + hashMap.size());
-
                 if (hashMap.get(key)){
                     imageStorage.child(key).getDownloadUrl().
                             addOnSuccessListener(new OnSuccessListener<Uri>() {
                                 @Override
                                 public void onSuccess(Uri uri) {
-//                                    names.add(finalIndex0, l);
                                     images.set(names.indexOf(l), new ImageClass(uri));
                                     adapter.notifyItemChanged(names.indexOf(l));
                                 }
@@ -308,7 +329,6 @@ public class GaleryFullViewActivity extends AppCompatActivity implements DeleteD
         imagePathsDoc.addSnapshotListener(new EventListener<DocumentSnapshot>() {
             @Override
             public void onEvent(@Nullable DocumentSnapshot documentSnapshot, @Nullable FirebaseFirestoreException e) {
-                Log.d("qwerty31", "HI");
                 if (e != null){
                     Toast.makeText(getApplicationContext(), e.getMessage(), Toast.LENGTH_LONG).show();
                     return;
@@ -316,10 +336,7 @@ public class GaleryFullViewActivity extends AppCompatActivity implements DeleteD
                 else{
                     final HashMap<String, Boolean> hashMap = (HashMap) documentSnapshot.getData();
                     if (hashMap != null){
-                        Log.d("qwerty24324", "hi from galery " + "hashMap");
                         if (!names.contains(positionName) && hashMap.containsKey(positionName+"")){
-                            Log.d("qwerty24324", "hi from galery " + "contains");
-//                            long l = positionName;
                             int index=names.size();
                             for (int i = 0; i < names.size(); i++){
                                 if (names.get(i) > positionName){
@@ -346,7 +363,6 @@ public class GaleryFullViewActivity extends AppCompatActivity implements DeleteD
                                                 adapter.notifyItemInserted(images.size()-1);
                                                 position = finalIndex;
                                                 galeryFullView.scrollToPosition(finalIndex);
-                                                Log.d("qwerty24324", "hi from falery " + finalIndex);
                                                 updateImages(hashMap);
                                             }
                                         });
@@ -355,44 +371,6 @@ public class GaleryFullViewActivity extends AppCompatActivity implements DeleteD
                         else{
                             updateImages(hashMap);
                         }
-//                        for (String key : hashMap.keySet()){
-//                            final Long l = Long.parseLong(key);
-//                            if (names.contains(l) && hashMap.get(key) == true && images.get(names.indexOf(l)).getType()==0){
-//                                imageStorage.child(key).getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
-//                                    @Override
-//                                    public void onSuccess(Uri uri) {
-//                                        images.set(names.indexOf(l), new ImageClass(uri));
-//                                        adapter.notifyItemChanged(names.indexOf(l));
-//                                    }
-//                                });
-//                            }
-//                            else if (!names.contains(l)){
-//                                int index0 = names.size();
-//                                for (int i = 0; i < names.size(); i++){
-//                                    if (names.get(i) > l){
-//                                        index0 = i;
-//                                        break;
-//                                    }
-//                                }
-//                                final int finalIndex0 = index0;
-//                                if (hashMap.get(key)==false){
-//                                    names.add(index0, l);
-//                                    images.add(index0, new ImageClass(BitmapFactory.decodeResource(getApplicationContext().getResources(), R.drawable.no_image)));
-//                                    adapter.notifyItemInserted(index0);
-//                                }
-//                                else{
-//                                    imageStorage.child(key).getDownloadUrl().
-//                                            addOnSuccessListener(new OnSuccessListener<Uri>() {
-//                                                @Override
-//                                                public void onSuccess(Uri uri) {
-//                                                        names.add(finalIndex0, l);
-//                                                        images.add(finalIndex0, new ImageClass(uri));
-//                                                        adapter.notifyItemInserted(finalIndex0);
-//                                                }
-//                                            });
-//                                }
-//                            }
-//                        }
                     }
 
                 }
@@ -415,7 +393,6 @@ public class GaleryFullViewActivity extends AppCompatActivity implements DeleteD
 
     private void setResultChanged(){
         // создание возвращаемого интента
-        Log.d("DELETEIMAGE1", "resultChanged");
         Intent returnIntent = new Intent();
         returnIntent.putExtra("changed", changed);
         setResult(RESULT_OK, returnIntent);

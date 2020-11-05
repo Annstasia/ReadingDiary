@@ -12,19 +12,20 @@
     <com.google.android.material.appbar.AppBarLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:theme="@style/AppTheme.AppBarOverlay"
         android:id="@+id/appBarEdit1">
 
-        <androidx.appcompat.widget.Toolbar
+        <com.google.android.material.appbar.MaterialToolbar
             android:id="@+id/toolbar"
             android:layout_width="match_parent"
             android:layout_height="?attr/actionBarSize"
             android:background="?attr/colorPrimary"
-            app:popupTheme="@style/AppTheme.PopupOverlay" />
+            android:theme="@style/ToolbarColoredHome"
+            />
 
     </com.google.android.material.appbar.AppBarLayout>
 
     <ScrollView
+        style="@style/Widget.MaterialComponents.TextView"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_below="@+id/appBarEdit1">
@@ -43,110 +44,114 @@
                 android:foregroundGravity="right" />
 
             <TextView
+                android:id="@+id/titleNoteActivityLabel"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginHorizontal="5pt"
+                android:layout_marginTop="15dp"
+                android:labelFor="@+id/titleNoteActivity"
+                android:text="Название" />
+            <TextView
                 android:id="@+id/titleNoteActivity"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:layout_marginHorizontal="5pt"
                 android:ems="10"
-                android:textSize="10pt"
                 android:textColor="@color/colorText"
-                android:layout_margin="5pt"/>
+                android:textSize="10pt" />
 
-
+            <TextView
+                android:id="@+id/authorNoteActivityLabel"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginHorizontal="5pt"
+                android:layout_marginTop="15dp"
+                android:labelFor="@+id/authorNoteActivity"
+                android:text="Автор" />
             <TextView
                 android:id="@+id/authorNoteActivity"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:layout_marginHorizontal="5pt"
                 android:ems="10"
-                android:textSize="10pt"
                 android:textColor="@color/colorText"
-                android:layout_margin="5pt"/>
-
-
-
+                android:textSize="10pt" />
 
 
             <RatingBar
                 android:id="@+id/ratingBar"
+                style="@style/RatingBar"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_margin="8dp"
-                android:numStars="5"
-                style="@style/RatingBar"/>
+                android:numStars="5" />
 
-
-
-
-
+            <TextView
+                android:id="@+id/genreLabel"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginHorizontal="5pt"
+                android:layout_marginTop="15dp"
+                android:labelFor="@+id/genre"
+                android:text="Жанр" />
             <TextView
                 android:id="@+id/genre"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:layout_marginHorizontal="5pt"
                 android:ems="10"
-                android:textSize="10pt"
                 android:textColor="@color/colorText"
-                android:layout_margin="5pt"/>
+                android:textSize="10pt" />
 
-
-
+            <TextView
+                android:id="@+id/timeLabel"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginHorizontal="5pt"
+                android:layout_marginTop="15dp"
+                android:labelFor="@+id/time"
+                android:text="Период прочтения" />
             <TextView
                 android:id="@+id/time"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:layout_marginHorizontal="5pt"
                 android:ems="10"
-                android:textSize="10pt"
                 android:textColor="@color/colorText"
-                android:layout_margin="5pt"/>
+                android:textSize="10pt" />
 
-
-
+            <TextView
+                android:id="@+id/placeLabel"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginHorizontal="5pt"
+                android:layout_marginTop="15dp"
+                android:labelFor="@+id/place"
+                android:text="Место прочтения" />
             <TextView
                 android:id="@+id/place"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:layout_marginHorizontal="5pt"
                 android:ems="10"
-                android:textSize="10pt"
                 android:textColor="@color/colorText"
-                android:layout_margin="5pt"/>
+                android:textSize="10pt" />
 
-<androidx.cardview.widget.CardView
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:layout_marginVertical="10pt"
-    android:layout_marginHorizontal="5pt">            <TextView
-                android:id="@+id/shortComment"
+            <androidx.cardview.widget.CardView
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:ems="10"
-                android:textSize="10pt"
-    android:layout_margin="5pt"
-                android:textColor="@color/colorText" />
-</androidx.cardview.widget.CardView>
+                android:layout_height="match_parent"
+                android:layout_marginHorizontal="5pt"
+                android:layout_marginVertical="10pt">
 
-
-            <TextView
-                android:id="@+id/textView11"
-                android:layout_width="110dp"
-                android:layout_height="wrap_content"
-                android:layout_gravity="right"
-                android:layout_marginTop="20dp"
-                android:text="Опубликовать  "
-                android:textSize="16dp"
-                android:visibility="invisible"
-                app:autoSizeTextType="uniform" />
-
-            <ImageButton
-                android:id="@+id/bUpload"
-                android:layout_width="55dp"
-                android:layout_height="55dp"
-                android:layout_gravity="right"
-                android:layout_marginTop="10dp"
-                android:background="#3F51B5"
-                android:insetLeft="4dp"
-                android:insetTop="6dp"
-                android:insetRight="4dp"
-                android:insetBottom="6dp"
-                android:visibility="invisible"
-                app:srcCompat="@android:drawable/ic_menu_upload" />
+                <TextView
+                    android:id="@+id/shortComment"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_margin="5pt"
+                    android:ems="10"
+                    android:textColor="@color/colorText"
+                    android:textSize="10pt" />
+            </androidx.cardview.widget.CardView>
 
 
         </LinearLayout>

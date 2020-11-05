@@ -11,6 +11,7 @@
         android:background="@color/colorPrimary"
         android:minHeight="?attr/actionBarSize"
         android:id="@+id/long_click_toolbar"
+        android:theme="@style/ToolbarColoredHome"
 
         >
         <RelativeLayout
