@@ -57,6 +57,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.TreeSet;
 
 public class CatalogFragment extends Fragment {
     public interface OnCatalogFragmentListener{
@@ -91,12 +92,6 @@ public class CatalogFragment extends Fragment {
     int sortType = 0;
     ArrayList<RealNote> selectionRealNotesList = new ArrayList<>();
     ArrayList<Directory> selectionDirectoriesList = new ArrayList<>();
-//    String[] choices = new String[]{"По названиям по возрастанию",
-//            "По названиям по убыванию",
-//            "По автору по возрастанию",
-//            "По автору по убыванию",
-//            "По рейтингу по возрастанию",
-//            "По рейтингу по убыванию"};
     ArrayList<Note> notFilteredNotes;
     private String TAG_DARK = "dark_theme";
     SharedPreferences sharedPreferences;
@@ -118,7 +113,6 @@ public class CatalogFragment extends Fragment {
 
     public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container, Bundle savedInstanceState) {
-//        catalogViewModel = ViewModelProviders.of(this).get(CatalogViewModel.class);
         root = inflater.inflate(R.layout.activity_catalog, container, false);
         if (FirebaseAuth.getInstance().getCurrentUser()==null){
             user=null;
@@ -130,18 +124,7 @@ public class CatalogFragment extends Fragment {
             notes = new ArrayList<Note>(); // список того, что будет отображаться в каталоге.
             buttons = new ArrayList<String>(); // Список пройденный каталогов до текущего
             findViews();
-//        counterText.setText("Каталог");
             buttons.add(parent);
-//        db.collection("genres").document(user).get().addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
-//            @Override
-//            public void onSuccess(DocumentSnapshot documentSnapshot) {
-//                if (documentSnapshot != null && documentSnapshot.getData() != null){
-//                    genres = (HashMap)documentSnapshot.getData();
-//                    selectAll();
-//                }
-//            }
-//        });
-////
 
             db.collection("genres").document(user).addSnapshotListener(new EventListener<DocumentSnapshot>() {
                 @Override
@@ -159,7 +142,6 @@ public class CatalogFragment extends Fragment {
                 }
             });
 
-//        selectAll(); // чтение данных из бд
             setAdapters();
             // Кнопка добавление новой активности
             FloatingActionButton addNote = root.findViewById(R.id.addNote);
@@ -169,20 +151,13 @@ public class CatalogFragment extends Fragment {
                 {
                     Intent intent = new Intent(getContext(), EditNoteActivity.class);
                     intent.putExtra("path", parent);
-                    Log.d("qwerty67374", "addNote " + parent);
                     startActivityForResult(intent, CREATE_NOTE_REQUEST_CODE);
-                    Log.d("qwerty9898982", "clickAdd");
-//                onCatalogFragmentListener.addNote(parent);
                 }
             });
             onCatalogFragmentListener.changeFragment(this);
             toolbar = getActivity().findViewById(R.id.toolbar_navigation);
-//        toolbar.getMenu().clear();
             toolbar.getMenu().clear();
             toolbar.inflateMenu(R.menu.menu_catalog);
-//        getActivity().getActionBar().setDisplayHomeAsUpEnabled(true);
-//        toolbar.inflateMenu(R.menu.menu_catalog);
-//        Log.d("qwerty")
 
         }
 
@@ -200,18 +175,14 @@ public class CatalogFragment extends Fragment {
     }
 
     public void filterClick(){
-//        while (notes.contains(null)){
-//
-//        }
         if (notes.contains(null)){
             filterClicked = true;
             return;
         }
         ArrayList<String> authors = new ArrayList<>();
         for (Note note: notes) {
-            if (note.getItemType()==0){
+            if (note.getItemType()==0 && !authors.contains(((RealNote)note).getAuthor())){
                 authors.add(((RealNote) note).getAuthor());
-//                    genres.add(((RealNote) note).getGenre());
             }
         }
         ArrayList<String> genresList = new ArrayList<>();
@@ -219,7 +190,6 @@ public class CatalogFragment extends Fragment {
             genresList.add(ob.toString());
         }
         Collections.sort(authors);
-//        Collections.sort(genresList);
         if (noFilter){
             checkedAuthors = new ArrayList<>(authors);
             checkedGenres = new ArrayList<>(genresList);
@@ -227,41 +197,12 @@ public class CatalogFragment extends Fragment {
             checkedGenres.add("Не указан");
 
         }
-//        onCatalogFragmentListener.filterClick(authors, genres, new ArrayList<String>(genres.keySet()), checkedAuthors, checkedGenres);
         FilterDialogFragment filterDialogFragment = new FilterDialogFragment(authors, genresList, new ArrayList<String>(genres.keySet()), checkedAuthors, checkedGenres, showCatalog);
         FragmentManager manager = getActivity().getSupportFragmentManager();
         FragmentTransaction transaction = manager.beginTransaction();
         filterDialogFragment.show(transaction, "dialog");
     }
 
-
-//        db.collection("genres").document(user).get().addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
-//            @Override
-//            public void onSuccess(DocumentSnapshot documentSnapshot) {
-//                if (documentSnapshot != null && documentSnapshot.getData() != null){
-//                    TreeSet<String> genres =  new TreeSet<>();
-//                    genres.addAll(documentSnapshot.getData().keySet());
-//                    TreeSet<String> authors = new TreeSet<>();
-//                    for (Note note: notes) {
-//                        if (note.getItemType()==0){
-//                            authors.add(((RealNote) note).getAuthor());
-////                    genres.add(((RealNote) note).getGenre());
-//                        }
-//                    }
-//                    if (noFilter){
-//                        checkedAuthors = new ArrayList<>(authors);
-//                        checkedGenres = new ArrayList<>(genres);
-//                    }
-//                        onCatalogFragmentListener.filterClick(authors, genres, checkedAuthors, checkedGenres);
-//                        FilterDialogFragment filterDialogFragment = new FilterDialogFragment(authors, genres, checkedAuthors, checkedGenres);
-//                        FragmentManager manager = getActivity().getSupportFragmentManager();
-//                        FragmentTransaction transaction = manager.beginTransaction();
-//                        filterDialogFragment.show(transaction, "dialog");
-//                }
-//            }
-//        });
-
-//    }
 
     public void deleteClick(){
         action_mode=false;
@@ -284,7 +225,6 @@ public class CatalogFragment extends Fragment {
     }
 
     public void searchCLick1(){
-        Log.d("qwerty123456", "search");
         counterText.setVisibility(View.GONE);
         findText1.setVisibility(View.VISIBLE);
         toolbar.getMenu().clear();
@@ -314,7 +254,6 @@ public class CatalogFragment extends Fragment {
         if (!findText1.getText().toString().equals("")){
             notes.clear();
             searchInDocuments(findText1.getText().toString());
-//            selectTitle(findText1.getText().toString());
             mAdapter.notifyDataSetChanged();
             findText1.clearComposingText();
 
@@ -337,9 +276,7 @@ public class CatalogFragment extends Fragment {
     private void findViews(){
         recyclerView = root.findViewById(R.id.recyclerViewCatalog);  // здесь будут отображаться каталоги и файлы notes
         buttonView = root.findViewById(R.id.buttonViewCatalog);  // здесь будут отображаться пройденные поддиректории buttons
-//        toolbar = (Toolbar) root.findViewById(R.id.long_click_toolbar);
         counterText = getActivity().findViewById(R.id.counter_text);
-//        counterText.setText("Каталог");
         findText1 = getActivity().findViewById(R.id.editTextFind);
     }
 
@@ -361,10 +298,8 @@ public class CatalogFragment extends Fragment {
                 int type = notes.get(position).getItemType();
                 if (type == 0){
                     Intent intent = new Intent(getContext(), NoteActivity.class);
-                    // чтобы понять какую запись нужно отобразить в NoteActivity, запихиваем в intent id записи из бд
                     intent.putExtra("id", notes.get(position).getID());
                     startActivityForResult(intent, NOTE_REQUEST_CODE);
-//                    onCatalogFragmentListener.openNote(((RealNote)notes.get(position)).getID());
                 }
                 if (type == 1){
                     active++;
@@ -409,7 +344,6 @@ public class CatalogFragment extends Fragment {
                 });
                 menuType=1;
                 mAdapter.notifyDataSetChanged();
-//                getSupportActionBar().setDisplayHomeAsUpEnabled(true);
             }
 
 
@@ -494,7 +428,6 @@ public class CatalogFragment extends Fragment {
                                                 if (active!=old_active){
                                                     break;
                                                 }
-//                                                final HashMap<String, Object> map = (HashMap<String, Object>) documentSnapshot.getData();
                                                 int index = names.size();
                                                 for (int i = 0; i < index; i++){
                                                     if (Long.parseLong(documentSnapshot.getId()) > names.get(i)){
@@ -510,7 +443,6 @@ public class CatalogFragment extends Fragment {
                                             }
 
                                         }
-//                                        mAdapter.notifyDataSetChanged();
                                     }
                                 })
                                 .addOnFailureListener(new OnFailureListener() {
@@ -529,132 +461,6 @@ public class CatalogFragment extends Fragment {
                 });
     }
 
-
-    private void startSort() {
-        if (sortType == 0){
-            comp = "title";
-            order = 1;
-        }
-        if (sortType == 1){
-            comp = "title";
-            order = -1;
-        }
-        if (sortType == 2){
-            comp = "author";
-            order = 1;
-        }
-        if (sortType == 3){
-            comp = "author";
-            order = -1;
-        }
-        if (sortType == 4){
-            comp = "rating";
-            order = 1;
-        }
-        if (sortType == 5){
-            comp = "rating";
-            order = -1;
-        }
-        Log.d("qwerty121", startPos + " " + comp +  " " + order);
-        quickSort(startPos, notes.size() - 1);
-        mAdapter.notifyDataSetChanged();
-
-
-    }
-
-    private void quickSort(int from, int to) {
-        if (from < to) {
-            int divideIndex;
-            if (!comp.equals("rating")){
-                divideIndex = partitionString(from, to);
-            }
-            else{
-                divideIndex = partitionDouble(from, to);
-            }
-
-            quickSort(from, divideIndex - 1);
-            quickSort(divideIndex, to);
-        }
-    }
-    private int partitionString(int from, int to)
-    {
-        int rightIndex = to;
-        int leftIndex = from;
-
-        String pivot = getComparable((RealNote) notes.get(from + (to - from) / 2));
-        while (leftIndex <= rightIndex)
-        {
-
-            while (order * (getComparable((RealNote) notes.get(leftIndex)).compareTo(pivot)) < 0)
-            {
-                leftIndex++;
-            }
-
-            while (order * (getComparable((RealNote) notes.get(rightIndex)).compareTo(pivot)) > 0)
-            {
-                rightIndex--;
-            }
-
-            if (leftIndex <= rightIndex)
-            {
-                swap(rightIndex, leftIndex);
-                leftIndex++;
-                rightIndex--;
-            }
-        }
-        return leftIndex;
-    }
-
-    private int partitionDouble(int from, int to){
-        int rightIndex = to;
-        int leftIndex = from;
-
-        Double pivot = getComparableDouble((RealNote) notes.get(from + (to - from) / 2));
-        while (leftIndex <= rightIndex)
-        {
-
-            while (order * (getComparableDouble((RealNote) notes.get(leftIndex)).compareTo(pivot)) < 0)
-            {
-                leftIndex++;
-            }
-
-            while (order * (getComparableDouble((RealNote) notes.get(rightIndex)).compareTo(pivot)) > 0)
-            {
-                rightIndex--;
-            }
-
-            if (leftIndex <= rightIndex)
-            {
-                swap(rightIndex, leftIndex);
-                leftIndex++;
-                rightIndex--;
-            }
-        }
-        return leftIndex;
-    }
-
-
-    private String getComparable(RealNote realNote){
-        if (comp.equals("title")){
-            return realNote.getTitle();
-        }
-        if (comp.equals("author")){
-            return realNote.getAuthor();
-        }
-
-        return "";
-    }
-
-    private void swap(int index1, int index2)
-    {
-        Note tmp  = notes.get(index1);
-        notes.set(index1, notes.get(index2));
-        notes.set(index2, tmp);
-    }
-
-    private Double getComparableDouble(RealNote realNote){
-        return realNote.getRating();
-    }
 
 
     private void reloadButtonsView(){
@@ -717,7 +523,6 @@ public class CatalogFragment extends Fragment {
                         if (map==null) return;
                         HashMap<String, Object> genreMap = new HashMap<>();
                         if (map.get("genre")!= null){
-                            Log.d("qwerty5676", id + " genre != null");
                             genreMap = (HashMap)map.get("genre");
                             boolean changes = false;
                             ArrayList<String> arrayList = new ArrayList<>(genreMap.keySet());
@@ -1054,128 +859,6 @@ public class CatalogFragment extends Fragment {
     }
 
 
-    //    @Override
-//    public boolean onOptionsItemSelected(@NonNull MenuItem item) {
-////        if (item.getItemId()==R.id.item_settings){
-////            int location[] = new int[2];
-////            toolbar.getLocationInWindow(location);
-////            int y = getResources().getDisplayMetrics().heightPixels;
-////            int x = getResources().getDisplayMetrics().widthPixels;
-////            SettingsDialogFragment settingsDialogFragment = new SettingsDialogFragment(y, x, sharedPreferences.getBoolean(TAG_DARK, false));
-////            FragmentManager manager = getSupportFragmentManager();
-////            FragmentTransaction transaction = manager.beginTransaction();
-////            settingsDialogFragment.show(transaction, "dialog");
-////        }
-//        if (item.getItemId()== R.id.item_delete){
-//            action_mode=false;
-//            mAdapter.setActionMode(false);
-//            deleteSelectedRealNote();
-//            deleteSelectedDirectories();
-//            mAdapter.notifyDataSetChanged();
-//            toolbar.getMenu().clear();
-//            toolbar.inflateMenu(R.menu.menu_catalog);
-//            toolbar.inflateMenu(R.menu.base_menu);
-//            getSupportActionBar().setDisplayHomeAsUpEnabled(false);
-//            menuType = 0;
-//            counterText.setText("Каталог");
-//            count=0;
-//        }
-//        if (item.getItemId() == R.id.item_search){
-//            counterText.setVisibility(View.GONE);
-//            findText1.setVisibility(View.VISIBLE);
-//            toolbar.getMenu().clear();
-//            toolbar.inflateMenu(R.menu.menu_search);
-//            getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-//            getSupportActionBar().setDisplayShowHomeEnabled(true);
-//            menuType = 2;
-//
-//        }
-//        if (item.getItemId() == R.id.item_search1){
-//            if (!findText1.getText().toString().equals("")){
-//                notes.clear();
-//                selectTitle(findText1.getText().toString());
-//                mAdapter.notifyDataSetChanged();
-//                findText1.clearComposingText();
-//            }
-//            counterText.setVisibility(View.VISIBLE);
-//            findText1.setVisibility(View.GONE);
-//            toolbar.getMenu().clear();
-//            toolbar.inflateMenu(R.menu.menu_catalog);
-//            toolbar.inflateMenu(R.menu.base_menu);
-//            menuType = 0;
-//        }
-//
-//        if (item.getItemId() == R.id.item_sort){
-//            onCatalogFragmentListener.sortClick();
-//        }
-////            SortDialogFragment sortDialogFragment = new SortDialogFragment(choices, sortType);
-////            FragmentManager manager = getSupportFragmentManager();
-////            FragmentTransaction transaction = manager.beginTransaction();
-////            sortDialogFragment.show(transaction, "dialog");
-////        }
-//
-//        if (item.getItemId()==R.id.item_filter){
-//            db.collection("genres").document(user).get().addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
-//                @Override
-//                public void onSuccess(DocumentSnapshot documentSnapshot) {
-//                    if (documentSnapshot != null && documentSnapshot.getData() != null){
-//                        TreeSet<String> genres =  new TreeSet<>();
-//                        genres.addAll(documentSnapshot.getData().keySet());
-//                        TreeSet<String> authors = new TreeSet<>();
-//                        for (Note note: notes) {
-//                            if (note.getItemType()==0){
-//                                authors.add(((RealNote) note).getAuthor());
-////                    genres.add(((RealNote) note).getGenre());
-//                            }
-//                        }
-//                        if (noFilter){
-//                            checkedAuthors = new ArrayList<>(authors);
-//                            checkedGenres = new ArrayList<>(genres);
-//                        }
-//                        onCatalogFragmentListener.filterClick(authors, genres, checkedAuthors, checkedGenres);
-////                        FilterDialogFragment filterDialogFragment = new FilterDialogFragment(authors, genres, checkedAuthors, checkedGenres);
-////                        FragmentManager manager = getSupportFragmentManager();
-////                        FragmentTransaction transaction = manager.beginTransaction();
-////                        filterDialogFragment.show(transaction, "dialog");
-//                    }
-//                }
-//            });
-//
-//
-//        }
-//
-//        if (item.getItemId() == android.R.id.home){
-//            if (menuType==0){
-////                finish();
-//            }
-//            else if (menuType == 1){
-//                action_mode=false;
-//                mAdapter.setActionMode(false);
-//                mAdapter.notifyDataSetChanged();
-//                toolbar.getMenu().clear();
-//                toolbar.inflateMenu(R.menu.menu_catalog);
-//                toolbar.inflateMenu(R.menu.base_menu);
-//                getSupportActionBar().setDisplayHomeAsUpEnabled(false);
-//                menuType = 0;
-//                counterText.setText("Каталог");
-//                count=0;
-//            }
-//            else if (menuType==2){
-//                findText1.clearComposingText();
-//                counterText.setVisibility(View.VISIBLE);
-//                findText1.setVisibility(View.GONE);
-//                toolbar.getMenu().clear();
-//                toolbar.inflateMenu(R.menu.menu_catalog);
-//                toolbar.inflateMenu(R.menu.base_menu);
-//                menuType = 0;
-//            }
-//        }
-//        return super.onOptionsItemSelected(item);
-//    }
-
-
-
-
     public void deleteSelectedRealNote(){
         for (int i = 0; i < selectionRealNotesList.size(); i++){
             String id = selectionRealNotesList.get(i).getID();
@@ -1191,12 +874,9 @@ public class CatalogFragment extends Fragment {
     public void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         active++;
-        Log.d("Qwerty544", (data==null) +" " + requestCode + " " + NOTE_REQUEST_CODE);
         if (data != null && requestCode == NOTE_REQUEST_CODE){
-            Log.d("qwerty544", "data not null");
             // если изменился путь до записи, добавилась новая запись, то переходим к этой записи
             if (data.getExtras().get("deleted") != null){
-                Log.d("qwerty544", "deleteResult");
                 String id = data.getExtras().get("id").toString();
                 int index = -1;
                 for (int i = 0; i < notes.size(); i++){
@@ -1257,12 +937,6 @@ public class CatalogFragment extends Fragment {
 
 
 
-//    class NoteItem{
-//        public NoteItem() {
-//
-//        }
-//    }
-
     private void searchInDocuments(final String searched){
         class NoteItem implements Comparable<NoteItem>{
             String id;
@@ -1293,14 +967,11 @@ public class CatalogFragment extends Fragment {
                         if (noteItem.difference <= searched.length()) {
                             notesID.add(noteItem.id);
                             notes.add(null);
-
-//                            generateNote(noteItem.id, -1);
                         }
                         else {
                             break;
                         }
                     }
-//                    notes = new ArrayList<>(notesID.size());
                     for (int i = 0; i <notesID.size(); i++){
                         generateNote(notesID.get(i), i, true);
                     }
@@ -1345,7 +1016,6 @@ public class CatalogFragment extends Fragment {
                 if (s[i-1]!=t[j-1]){
                     change++;
                 }
-//                Log.d("qwerty5554433", searched + " " + saved + " " + current.length + " " + n + " " + m + " " + previous.length + " " + i + " " + );
                 current[j] = Math.min(Math.min(current[j - 1] + 1, previous[j] + 1), change);
             }
         }
@@ -1353,8 +1023,4 @@ public class CatalogFragment extends Fragment {
     }
 
 
-//    @Override
-//    public void onAttach(@NonNull Context context) {
-//        onCatalogFragmentListener = (OnCatalogFragmentListener) context;
-//    }
 }

@@ -137,7 +137,8 @@ public class GenreFragment extends Fragment {
             @Override
             public void onDelete(int position) {
                 db.collection("genres").document(user).update(genresID.get(genres.indexOf(sortedGenres.get(position))), FieldValue.delete());
-                genres.remove(position);
+                genres.remove(sortedGenres.get(position));
+                sortedGenres.remove(position);
                 adapter.notifyItemRemoved(position);
             }
         });

@@ -91,13 +91,13 @@ public class ChooseGenreFragment extends DialogFragment {
         }
 
         addGenreButton = new Button(getContext());
+        addGenreButton.setText("+Добавить");
         addGenreButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 addGenreButtonPressed();
             }
         });
-        addGenreButton.setText("text");
         linearLayout.addView(addGenreButton);
         builder.setView(scrollView);
         return builder.create();
